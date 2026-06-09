@@ -1,0 +1,118 @@
+/* =============================================
+   Admin Form - Shared Form Styles
+   ============================================= */
+
+.form-container .form-group {
+    margin-bottom: 18px;
+}
+
+.form-container .form-label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-container .form-control {
+    padding: 11px 14px;
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+.form-container .form-control:focus {
+    background-color: var(--color-white);
+}
+
+.form-container .form-control.is-invalid {
+    background-color: #fff5f5;
+}
+
+/* Drag & Drop Authors */
+.selected-authors-zone {
+    min-height: 60px;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: all 0.2s ease;
+    background: var(--color-surface);
+}
+.selected-authors-zone.drop-active {
+    border-color: var(--color-accent);
+    background: #fffbeb;
+}
+.drop-placeholder {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    width: 100%;
+    text-align: center;
+    padding: 16px;
+}
+
+/* Author Chips */
+.available-authors-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.author-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: var(--weight-medium);
+    cursor: grab;
+    transition: all 0.2s ease;
+    background: var(--color-white);
+    color: var(--color-text);
+    user-select: none;
+}
+.author-chip:hover {
+    border-color: var(--color-accent);
+    background: #fffbeb;
+}
+.author-chip.selected {
+    opacity: 0.35;
+    pointer-events: none;
+}
+.author-chip.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+}
+
+/* Selected Author Chip */
+.selected-author-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #fffbeb;
+    border: 1.5px solid var(--color-accent);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: var(--weight-medium);
+    color: var(--color-accent-dark);
+    animation: popIn 0.2s ease;
+}
+.selected-author-chip .remove-author {
+    cursor: pointer;
+    color: var(--color-danger);
+    font-size: 16px;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+.selected-author-chip .remove-author:hover {
+    transform: scale(1.2);
+}
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}

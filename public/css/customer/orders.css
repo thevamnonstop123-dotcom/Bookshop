@@ -1,0 +1,204 @@
+/* =============================================
+   My Orders Page
+   ============================================= */
+
+.orders-page {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+
+.orders-page h1 {
+    font-size: 26px;
+    font-weight: var(--weight-bold);
+    margin-bottom: 28px;
+    color: var(--color-text);
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.order-card {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    padding: 22px 24px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border-light);
+    transition: var(--transition-smooth);
+}
+
+.order-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.order-number {
+    font-weight: var(--weight-semibold);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.order-date {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.order-card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.order-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.order-total {
+    font-size: var(--font-size-lg);
+    font-weight: var(--weight-bold);
+    color: var(--color-accent-dark);
+}
+
+.order-items-count {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.order-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--weight-semibold);
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-processing {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-shipped {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.status-delivered {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Order Detail */
+.order-detail-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.order-detail-card {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border-light);
+    margin-bottom: 20px;
+}
+
+.order-detail-card h3 {
+    font-size: var(--font-size-md);
+    font-weight: var(--weight-semibold);
+    margin-bottom: 14px;
+    color: var(--color-text);
+}
+
+.order-detail-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 6px;
+    font-size: var(--font-size-sm);
+}
+
+.order-detail-label {
+    color: var(--color-text-muted);
+    min-width: 100px;
+}
+
+.order-detail-value {
+    color: var(--color-text);
+    font-weight: var(--weight-medium);
+}
+
+/* Empty State */
+.orders-empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--color-text-muted);
+}
+
+.orders-empty i {
+    font-size: 56px;
+    display: block;
+    margin-bottom: 20px;
+    opacity: 0.3;
+}
+
+.orders-empty h3 {
+    font-size: var(--font-size-xl);
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+/* Pagination */
+.orders-page .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 32px;
+}
+
+.orders-page .pagination a,
+.orders-page .pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.orders-page .pagination a:hover,
+.orders-page .pagination .active {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
+}

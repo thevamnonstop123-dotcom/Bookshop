@@ -1,0 +1,70 @@
+/* =============================================
+   Admin Table - Shared Table Styles
+   ============================================= */
+
+.table-container {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border: 1px solid var(--color-border-light);
+}
+
+.table-header {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.table-header h2 {
+    font-size: var(--font-size-md);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table thead th {
+    text-align: left;
+    padding: 12px 20px;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: var(--weight-semibold);
+}
+
+table tbody td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--color-border-light);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+table tbody tr:hover {
+    background-color: var(--color-surface);
+}
+
+table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .table-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+}
