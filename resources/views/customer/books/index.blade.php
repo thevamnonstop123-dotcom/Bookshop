@@ -22,7 +22,7 @@
                             <a href="{{ route('books.index', array_merge(request()->except('category'), ['category' => ''])) }}"
                                class="{{ empty(request('category')) ? 'active' : '' }}">
                                 All Categories
-                                <span class="count">{{ \App\Models\Book::where('status','active')->count() }}</span>
+                                <span class="count">{{ $books->total() }}</span>
                             </a>
                         </li>
                         @foreach ($categories as $cat)

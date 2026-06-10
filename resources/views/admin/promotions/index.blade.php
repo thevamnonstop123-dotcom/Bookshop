@@ -33,7 +33,7 @@
                 <textarea name="message" class="form-control" rows="6" placeholder="Write your promotion message here..." required></textarea>
             </div>
             <button type="submit" class="btn btn-accent">
-                <i class="fas fa-paper-plane"></i> Send to {{ \App\Models\Customer::where('status','active')->count() }} Customers
+                <i class="fas fa-paper-plane"></i> Send to {{ $activeCustomersCount ?? \App\Models\Customer::where('status','active')->count() }} Customers
             </button>
         </form>
     </div>

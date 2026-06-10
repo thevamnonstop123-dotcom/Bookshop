@@ -9,7 +9,7 @@
 @section('content')
 
     {{-- HERO BANNER --}}
-    @php $banners = \App\Models\Banner::where('status','active')->whereDate('start_date','<=',now())->whereDate('end_date','>=',now())->orderBy('display_order')->get(); @endphp
+    
     @if($banners->count() > 0)
         <div class="hero-slider">
             @foreach($banners as $banner)
@@ -65,9 +65,9 @@
     @endif
 
     {{-- SOCIAL PROOF --}}
-    @php $totalBooks = \App\Models\Book::where('status','active')->count(); @endphp
-    @php $totalCustomers = \App\Models\Customer::count(); @endphp
-    @php $totalOrders = \App\Models\Order::count(); @endphp
+    
+    
+    
     <div class="social-strip">
         <div class="container">
             <div class="stats">
@@ -92,7 +92,7 @@
     </div>
 
     {{-- CATEGORIES --}}
-    @php $categories = \App\Models\Category::where('status','active')->get(); @endphp
+    
     @if($categories->count() > 0)
         <section class="section">
             <div class="container">
@@ -114,7 +114,7 @@
     @endif
 
     {{-- NEW ARRIVALS --}}
-    @php $newBooks = \App\Models\Book::with('authors')->where('status','active')->latest()->limit(5)->get(); @endphp
+    
     @if($newBooks->count() > 0)
         <section class="section section-alt">
             <div class="container">
@@ -161,7 +161,7 @@
     @endif
 
     {{-- BEST SELLERS --}}
-    @php $bestSellers = \App\Models\Book::with('authors')->where('status','active')->inRandomOrder()->limit(5)->get(); @endphp
+    
     @if($bestSellers->count() > 0)
         <section class="section">
             <div class="container">

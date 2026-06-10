@@ -90,7 +90,7 @@
                 </div>
                 <div class="footer-col">
                     <h4>Categories</h4>
-                    @foreach (\App\Models\Category::where('status', 'active')->limit(5)->get() as $cat)
+                    @foreach ($layoutCategories ?? \App\Models\Category::where('status', 'active')->limit(5)->get() as $cat)
                         <a href="#">{{ $cat->name }}</a>
                     @endforeach
                 </div>

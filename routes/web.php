@@ -8,6 +8,7 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\ForgotPasswordController;
 use App\Http\Controllers\Customer\EbookController;
+use App\Http\Controllers\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,7 +35,7 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name
 // Authenticated routes
 Route::middleware('auth:customer')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/', function () { return view('customer.home'); })->name('customer.home');
+    Route::get('/', [HomeController::class, 'index'])->name('customer.home');
 });
 
 // Public book routes (accessible to all)

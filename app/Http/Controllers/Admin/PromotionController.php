@@ -21,8 +21,9 @@ class PromotionController extends Controller
     public function index()
     {
         $promotions = $this->promotionService->getAll();
+        $activeCustomersCount = \App\Models\Customer::where('status','active')->count();
 
-        return view('admin.promotions.index', compact('promotions'));
+        return view('admin.promotions.index', compact('promotions', 'activeCustomersCount'));
     }
 
     /**
