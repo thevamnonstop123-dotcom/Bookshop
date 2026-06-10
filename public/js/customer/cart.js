@@ -10,208 +10,214 @@ const Cart = {
     countEl: null,
 
     init() {
-        this.drawer = document.getElementById('cartDrawer');
-        this.overlay = document.getElementById('cartOverlay');
-        this.itemsContainer = document.getElementById('cartItems');
-        this.totalEl = document.getElementById('cartTotal');
-        this.countEl = document.getElementById('cartCount');
+        this.drawer = document.getElementById("cartDrawer");
+        this.overlay = document.getElementById("cartOverlay");
+        this.itemsContainer = document.getElementById("cartItems");
+        this.totalEl = document.getElementById("cartTotal");
+        this.countEl = document.getElementById("cartCount");
 
-        // Load existing cart data
         this.loadCart();
 
-        // Event delegation for Add to Cart buttons
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.btn-add-cart');
+        document.addEventListener("click", (e) => {
+            const btn = e.target.closest(".btn-add-cart");
             if (btn) {
                 e.preventDefault();
                 this.addItem(btn);
             }
-
-            // Cart drawer qty up
-            const qtyUp = e.target.closest('.cart-qty-up');
+            const qtyUp = e.target.closest(".cart-qty-up");
             if (qtyUp) {
                 e.preventDefault();
-                const itemId = qtyUp.dataset.itemId;
-                const qty = parseInt(qtyUp.dataset.qty) + 1;
-                this.updateQty(itemId, qty);
+                this.updateQty(
+                    qtyUp.dataset.itemId,
+                    parseInt(qtyUp.dataset.qty) + 1,
+                );
             }
-
-            // Cart drawer qty down
-            const qtyDown = e.target.closest('.cart-qty-down');
+            const qtyDown = e.target.closest(".cart-qty-down");
             if (qtyDown) {
                 e.preventDefault();
-                const itemId = qtyDown.dataset.itemId;
-                const qty = parseInt(qtyDown.dataset.qty) - 1;
-                this.updateQty(itemId, qty);
+                this.updateQty(
+                    qtyDown.dataset.itemId,
+                    parseInt(qtyDown.dataset.qty) - 1,
+                );
             }
-
-            // Cart drawer remove
-            const removeBtn = e.target.closest('.cart-item-remove');
+            const removeBtn = e.target.closest(".cart-item-remove");
             if (removeBtn) {
                 e.preventDefault();
-                const itemId = removeBtn.dataset.itemId;
-                this.removeItem(itemId);
+                this.removeItem(removeBtn.dataset.itemId);
             }
         });
 
-        // Close cart
-        document.getElementById('cartClose')?.addEventListener('click', () => this.close());
-        this.overlay?.addEventListener('click', () => this.close());
+        document
+            .getElementById("cartClose")
+            ?.addEventListener("click", () => this.close());
+        this.overlay?.addEventListener("click", () => this.close());
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") this.close();
+        });
 
-        // Close on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') this.close();
+        // Defensive: intercept clicks inside drawer to prevent accidental form submits/navigation
+        this.drawer?.addEventListener('click', (e) => {
+            const up = e.target.closest('.cart-qty-up');
+            const down = e.target.closest('.cart-qty-down');
+            const removeBtn = e.target.closest('.cart-item-remove');
+            if (up || down || removeBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
         });
     },
 
     open() {
-        if (this.drawer) this.drawer.classList.add('open');
-        if (this.overlay) this.overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
+        if (this.drawer) this.drawer.classList.add("open");
+        if (this.overlay) this.overlay.classList.add("open");
+        document.body.style.overflow = "hidden";
     },
 
     close() {
-        if (this.drawer) this.drawer.classList.remove('open');
-        if (this.overlay) this.overlay.classList.remove('open');
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
+        if (this.drawer) this.drawer.classList.remove("open");
+        if (this.overlay) this.overlay.classList.remove("open");
+        document.body.style.overflow = "";
     },
 
     toggle() {
-        if (this.drawer && this.drawer.classList.contains('open')) {
-            this.close();
-        } else {
-            this.open();
-        }
+        this.drawer?.classList.contains("open") ? this.close() : this.open();
     },
 
     async addItem(btn) {
         const bookId = btn.dataset.bookId;
-        const qtyInput = document.getElementById('quantity');
+        const qtyInput = document.getElementById("quantity");
         const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
-
         try {
-            App.loading(true);
-            const response = await App.ajax.post('/cart/add', {
-                book_id: bookId,
-                quantity: quantity,
+            const resp = await fetch("/cart/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'meta[name="csrf-token"]',
+                    ).content,
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({ book_id: bookId, quantity }),
             });
-
-            App.toast('Added to cart!', 'success');
-            this.updateCartUI(response.cart);
+            const data = await resp.json();
+            this.updateCartUI(data.cart);
             this.open();
-        } catch (error) {
-            console.error('Add to cart error:', error);
-        } finally {
-            App.loading(false);
+        } catch (e) {
+            console.error(e);
         }
     },
 
-    async updateQty(cartItemId, quantity) {
+    async updateQty(itemId, quantity) {
         if (quantity < 1) return;
-
         try {
-            const response = await App.ajax.put(`/cart/update/${cartItemId}`, {
-                quantity: quantity,
+            const resp = await fetch(`/cart/update/${itemId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'meta[name="csrf-token"]',
+                    ).content,
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({ quantity }),
             });
-            this.updateCartUI(response.cart);
-        } catch (error) {
-            console.error('Update quantity error:', error);
-        }
+            const data = await resp.json();
+            this.updateCartUI(data.cart);
+        } catch (e) {}
     },
 
-    async removeItem(cartItemId) {
+    async removeItem(itemId) {
         try {
-            const response = await App.ajax.delete(`/cart/remove/${cartItemId}`);
-            this.updateCartUI(response.cart);
-            App.toast('Item removed.', 'warning');
-        } catch (error) {
-            console.error('Remove item error:', error);
-        }
+            const resp = await fetch(`/cart/remove/${itemId}`, {
+                method: "DELETE",
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'meta[name="csrf-token"]',
+                    ).content,
+                    Accept: "application/json",
+                },
+            });
+            const data = await resp.json();
+            this.updateCartUI(data.cart);
+        } catch (e) {}
     },
 
     async loadCart() {
-        if (!this.itemsContainer) {
-            this.itemsContainer = document.getElementById('cartItems');
-            this.totalEl = document.getElementById('cartTotal');
-            this.countEl = document.getElementById('cartCount');
-        }
         try {
-            const response = await App.ajax.get('/cart/data');
-            if (response && response.cart) {
-                this.updateCartUI(response.cart);
-            }
-        } catch (error) {
-            // Cart is empty or not logged in
-        }
+            const resp = await fetch("/cart/data", {
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector(
+                        'meta[name="csrf-token"]',
+                    ).content,
+                    Accept: "application/json",
+                },
+            });
+            const data = await resp.json();
+            this.updateCartUI(data.cart);
+        } catch (e) {}
     },
 
     updateCartUI(cart) {
-        document.querySelectorAll('#cartCount').forEach(el => {
-            el.textContent = `(${cart.total_items})`;
+        document.querySelectorAll("#cartCount").forEach((el) => {
+            el.textContent = "(" + cart.total_items + ")";
         });
-
         if (this.itemsContainer) {
             if (cart.items.length === 0) {
-                this.itemsContainer.innerHTML = `
-                    <div class="cart-empty">
-                        <div class="empty-icon">
-                            <i class="fas fa-shopping-bag"></i>
-                        </div>
-                        <h4>Your cart is empty</h4>
-                        <p>Discover great books and add them here!</p>
-                    </div>`;
+                this.itemsContainer.innerHTML =
+                    '<div class="cart-empty"><div class="empty-icon"><i class="fas fa-shopping-bag"></i></div><h4>Your cart is empty</h4><p>Discover great books and add them here!</p></div>';
             } else {
-                this.itemsContainer.innerHTML = cart.items.map(item => `
-                    <div class="cart-item">
-                        <img src="${item.image}" alt="${item.title}" class="cart-item-image">
-                        <div class="cart-item-info">
-                            <div class="cart-item-title">${item.title}</div>
-                            <div class="cart-item-price">${App.formatCurrency(item.price)}</div>
-                            <div class="cart-item-actions">
-                                <div class="cart-qty">
-                                    <button class="cart-qty-down" data-item-id="${item.id}" data-qty="${item.quantity}">−</button>
-                                    <span>${item.quantity}</span>
-                                    <button class="cart-qty-up" data-item-id="${item.id}" data-qty="${item.quantity}">+</button>
-                                </div>
-                                <button class="cart-item-remove" data-item-id="${item.id}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+                this.itemsContainer.innerHTML = cart.items
+                    .map(
+                        (item) =>
+                            '<div class="cart-item"><img src="' +
+                            item.image +
+                            '" alt="' +
+                            item.title +
+                            '" class="cart-item-image"><div class="cart-item-info"><div class="cart-item-title">' +
+                            item.title +
+                            '</div><div class="cart-item-price">' +
+                            this.formatCurrency(item.price) +
+                            '</div><div class="cart-item-actions"><div class="cart-qty"><button type="button" class="cart-qty-down" data-item-id="' + item.id + '" data-qty="' + item.quantity + '">−</button><span>' +
+                            item.quantity +
+                            '</span><button type="button" class="cart-qty-up" data-item-id="' +
+                            item.id +
+                            '" data-qty="' +
+                            item.quantity +
+                            '">+</button></div><button type="button" class="cart-item-remove" data-item-id="' +
+                            item.id +
+                            '"><i class="fas fa-trash"></i></button></div></div></div>',
+                    )
+                    .join("");
             }
         }
-
-        if (this.totalEl) {
-            this.totalEl.textContent = App.formatCurrency(cart.total);
-        }
-
+        if (this.totalEl)
+            this.totalEl.textContent = this.formatCurrency(cart.total);
         this.updateShippingBar(cart.total);
     },
 
     updateShippingBar(total) {
         const threshold = 50000;
-        const bar = document.getElementById('shippingBar');
-        const text = document.getElementById('shippingText');
-        const progress = document.getElementById('shippingProgress');
-        
-        if (!bar || !text || !progress) return;
-
+        const text = document.getElementById("shippingText");
+        const progress = document.getElementById("shippingProgress");
+        if (!text || !progress) return;
         if (total >= threshold) {
-            text.innerHTML = '<i class="fas fa-check-circle"></i> <strong>Congratulations!</strong> You get FREE shipping!';
-            progress.style.width = '100%';
-            bar.style.background = 'linear-gradient(135deg, #d1fae5, #a7f3d0)';
+            text.innerHTML =
+                '<i class="fas fa-check-circle"></i> <strong>Congratulations!</strong> You get FREE shipping!';
+            progress.style.width = "100%";
         } else {
             const remaining = threshold - total;
             const pct = (total / threshold) * 100;
-            text.innerHTML = 'Add <strong>' + App.formatCurrency(remaining) + '</strong> more for free shipping!';
-            progress.style.width = pct + '%';
-            bar.style.background = 'linear-gradient(135deg, #ecfdf5, #d1fae5)';
+            text.innerHTML =
+                "Add <strong>" +
+                this.formatCurrency(remaining) +
+                "</strong> more for free shipping!";
+            progress.style.width = pct + "%";
         }
-    }
+    },
+
+    formatCurrency(amount) {
+        return new Intl.NumberFormat("en-MM").format(amount) + " MMK";
+    },
 };
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => Cart.init());
+document.addEventListener("DOMContentLoaded", () => Cart.init());

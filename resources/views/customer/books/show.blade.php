@@ -11,7 +11,6 @@
 <div class="book-detail-page">
     <div class="container">
 
-        {{-- Breadcrumb --}}
         <div class="book-breadcrumb">
             <a href="{{ route('customer.home') }}">Home</a>
             <span>/</span>
@@ -22,23 +21,25 @@
 
         <div class="book-detail-layout">
 
-            {{-- Cover --}}
             <div class="book-detail-cover">
                 <img src="{{ $book->image && $book->image !== 'default.png' ? asset('storage/'.$book->image) : 'https://placehold.co/600x800/1e293b/f59e0b?text='.urlencode($book->title) }}"
                      alt="{{ $book->title }}">
             </div>
 
-            {{-- Info --}}
             <div class="book-detail-info">
 
-                <span class="book-detail-category">{{ $book->category?->name }}</span>
+                <span class="book-detail-category">
+                    {{ $book->category?->name }}
+                    @if($book->isEbook())
+                        <span style="background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:20px;font-size:11px;margin-left:8px;">📱 E-Book</span>
+                    @endif
+                </span>
                 <h1>{{ $book->title }}</h1>
 
                 <div class="book-detail-authors">
                     By <span>{{ $book->authors->pluck('name')->join(', ') }}</span>
                 </div>
 
-                {{-- Meta Grid --}}
                 <div class="book-meta-grid">
                     <div class="book-meta-item">
                         <div class="book-meta-label">ISBN</div>
@@ -53,29 +54,30 @@
                         <div class="book-meta-value">{{ $book->published_date->format('d M Y') }}</div>
                     </div>
                     <div class="book-meta-item">
-                        <div class="book-meta-label">Category</div>
-                        <div class="book-meta-value">{{ $book->category?->name }}</div>
+                        <div class="book-meta-label">Type</div>
+                        <div class="book-meta-value">{{ $book->isEbook() ? 'E-Book' : 'Physical' }}</div>
                     </div>
                 </div>
 
-                {{-- Price Section --}}
                 <div class="book-detail-price-section">
                     <div class="book-detail-price-row">
                         @if($book->isOnSale())
                             <span class="book-detail-original">{{ number_format($book->price) }} MMK</span>
                             <span class="book-detail-price" style="color:#ef4444;">{{ number_format($book->sale_price) }} MMK</span>
-                            <span class="book-detail-save">
-                                <i class="fas fa-tag"></i> Save {{ $book->discountPercentage() }}%
-                            </span>
+                            <span class="book-detail-save"><i class="fas fa-tag"></i> Save {{ $book->discountPercentage() }}%</span>
                         @else
                             <span class="book-detail-price">{{ number_format($book->price) }} MMK</span>
                         @endif
                     </div>
 
-                    @if($book->isInStock())
+                    @if($book->isEbook())
+                        <span class="stock-badge in-stock">
+                            <i class="fas fa-infinity"></i> Instant Access — Read Anytime
+                        </span>
+                    @elseif($book->isInStock())
                         @if($book->stock_quantity <= 5)
                             <span class="stock-badge low-stock">
-                                <i class="fas fa-clock"></i> Only {{ $book->stock_quantity }} left in stock
+                                <i class="fas fa-clock"></i> Only {{ $book->stock_quantity }} left
                             </span>
                         @else
                             <span class="stock-badge in-stock">
@@ -89,14 +91,15 @@
                     @endif
                 </div>
 
-                {{-- Actions --}}
-                @if($book->isInStock())
+                @if($book->isEbook() || $book->isInStock())
                     <div class="book-detail-actions">
-                        <div class="quantity-selector">
-                            <button type="button" onclick="changeQty(-1)">−</button>
-                            <input type="number" id="quantity" value="1" min="1" max="{{ $book->stock_quantity }}" readonly>
-                            <button type="button" onclick="changeQty(1)">+</button>
-                        </div>
+                        @if(!$book->isEbook())
+                            <div class="quantity-selector">
+                                <button type="button" onclick="changeQty(-1)">−</button>
+                                <input type="number" id="quantity" value="1" min="1" max="{{ $book->stock_quantity }}" readonly>
+                                <button type="button" onclick="changeQty(1)">+</button>
+                            </div>
+                        @endif
                         <button class="btn btn-accent btn-add-cart" data-book-id="{{ $book->id }}">
                             <i class="fas fa-shopping-cart"></i> Add to Cart
                         </button>
@@ -107,12 +110,11 @@
                 @else
                     <div class="book-detail-actions">
                         <button class="btn btn-outline" disabled style="flex:1;padding:14px 28px;font-size:15px;">
-                            <i class="fas fa-ban"></i> Out of Stock — Notify Me
+                            <i class="fas fa-ban"></i> Out of Stock
                         </button>
                     </div>
                 @endif
 
-                {{-- Description --}}
                 @if($book->description)
                     <div class="book-detail-description">
                         <h3>About This Book</h3>
@@ -123,7 +125,6 @@
             </div>
         </div>
 
-        {{-- Related Books --}}
         @if($relatedBooks->count() > 0)
             <div class="related-section">
                 <div class="section-header">
@@ -154,6 +155,7 @@
 
 @push('scripts')
 <script src="{{ asset('js/customer/cart.js') }}"></script>
+@if(!$book->isEbook())
 <script>
     function changeQty(amount) {
         const input = document.getElementById('quantity');
@@ -164,4 +166,5 @@
         input.value = value;
     }
 </script>
+@endif
 @endpush

@@ -18,7 +18,7 @@ class CheckoutController extends Controller
     /**
      * Show checkout page.
      */
-    public function index()
+        public function index()
     {
         $customer = auth('customer')->user();
         $cart = \App\Models\Cart::with('items.book')->where('customer_id', $customer->id)->first();
@@ -29,22 +29,26 @@ class CheckoutController extends Controller
                 ->with('error', 'Your cart is empty.');
         }
 
-        $total = $cart->items->sum(function($item) {
+        // Filter out items with deleted books
+        $validItems = $cart->items->filter(function($item) {
+            return $item->book !== null;
+        });
+
+        if ($validItems->isEmpty()) {
+            return redirect()->route('books.index')
+                ->with('error', 'Your cart is empty.');
+        }
+
+        $total = $validItems->sum(function($item) {
             $price = $item->book->isOnSale() ? $item->book->sale_price : $item->book->price;
             return $price * $item->quantity;
         });
 
-        return view('customer.checkout', compact('cart', 'addresses', 'total'));
+        return view('customer.checkout.index', compact('cart', 'addresses', 'total'));
     }
 
     /**
      * Process checkout and redirect to Stripe.
-     */
-        /**
-     * Process checkout and redirect to Stripe.
-     */
-        /**
-     * Process checkout.
      */
     public function process(Request $request)
     {
@@ -83,7 +87,7 @@ class CheckoutController extends Controller
             // For KPay, Wave, COD — process directly
             $order = $this->checkoutService->processDirectPayment($customerId, $addressId, $paymentMethod);
 
-            return view('customer.checkout-success', compact('order'));
+            return view('customer.checkout.success', compact('order'));
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -102,7 +106,7 @@ class CheckoutController extends Controller
         try {
             $order = $this->checkoutService->processSuccessfulPayment($sessionId);
 
-            return view('customer.checkout-success', compact('order'));
+            return view('customer.checkout.success', compact('order'));
         } catch (\Exception $e) {
             return redirect()->route('customer.home')
                 ->with('error', 'Something went wrong. Please contact support.');
@@ -114,6 +118,6 @@ class CheckoutController extends Controller
      */
     public function cancel()
     {
-        return view('customer.checkout-cancel');
+        return view('customer.checkout.cancel');
     }
 }

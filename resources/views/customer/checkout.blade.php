@@ -202,22 +202,24 @@
                     <div class="checkout-card">
                         <h3><i class="fas fa-receipt"></i> Order Summary</h3>
 
-                        @foreach ($cart->items as $item)
-                            <div class="summary-item">
-                                <img src="{{ $item->book->image ? asset('storage/' . $item->book->image) : 'https://placehold.co/50x68/e2e8f0/64748b?text=Book' }}"
-                                     alt="{{ $item->book->title }}">
-                                <div class="summary-item-info">
-                                    <div class="summary-item-title">{{ $item->book->title }}</div>
-                                    <div class="summary-item-qty">Qty: {{ $item->quantity }}</div>
-                                </div>
-                                <div class="summary-item-price">
-                                    @php
-                                        $itemPrice = $item->book->isOnSale() ? $item->book->sale_price : $item->book->price;
-                                    @endphp
-                                    {{ number_format($itemPrice * $item->quantity) }} MMK
-                                </div>
-                            </div>
-                        @endforeach
+                            @foreach ($cart->items as $item)
+                                @if($item->book)
+                                    <div class="summary-item">
+                                        <img src="{{ $item->book->image ? asset('storage/' . $item->book->image) : 'https://placehold.co/50x68/e2e8f0/64748b?text=Book' }}"
+                                            alt="{{ $item->book->title }}">
+                                        <div class="summary-item-info">
+                                            <div class="summary-item-title">{{ $item->book->title }}</div>
+                                            <div class="summary-item-qty">Qty: {{ $item->quantity }}</div>
+                                        </div>
+                                        <div class="summary-item-price">
+                                            @php
+                                                $itemPrice = $item->book->isOnSale() ? $item->book->sale_price : $item->book->price;
+                                            @endphp
+                                            {{ number_format($itemPrice * $item->quantity) }} MMK
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
 
                         <div class="summary-total">
                             <span>Total</span>

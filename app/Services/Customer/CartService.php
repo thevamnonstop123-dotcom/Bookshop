@@ -73,6 +73,9 @@ class CartService
     /**
      * Get cart with items for JSON response.
      */
+        /**
+     * Get cart with items for JSON response.
+     */
     public function getCart(int $customerId): array
     {
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
@@ -85,7 +88,9 @@ class CartService
             ];
         }
 
-        $items = $cart->items->map(function ($item) {
+        $items = $cart->items->filter(function ($item) {
+            return $item->book !== null;
+        })->map(function ($item) {
             return [
                 'id'       => $item->id,
                 'title'    => $item->book->title,
@@ -95,13 +100,16 @@ class CartService
             ];
         });
 
+        $total = $items->sum(function ($item) use ($cart) {
+            $cartItem = $cart->items->where('id', $item['id'])->first();
+            $price = $cartItem->book->isOnSale() ? $cartItem->book->sale_price : $cartItem->book->price;
+            return $price * $item['quantity'];
+        });
+
         return [
-            'items'       => $items,
-            'total'       => $cart->items->sum(function($i) {
-                $price = $i->book->isOnSale() ? $i->book->sale_price : $i->book->price;
-                return $price * $i->quantity;
-            }),
-            'total_items' => $cart->items->sum('quantity'),
+            'items'       => $items->values(),
+            'total'       => $total,
+            'total_items' => $items->sum('quantity'),
         ];
     }
 }

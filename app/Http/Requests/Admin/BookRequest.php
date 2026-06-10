@@ -14,7 +14,6 @@ class BookRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        // Auto-generate slug from title
         if ($this->title) {
             $this->merge([
                 'slug' => Str::slug($this->title),
@@ -32,11 +31,13 @@ class BookRequest extends FormRequest
             'slug'           => 'required|string|max:255|unique:books,slug,' . $bookId,
             'isbn'           => 'required|string|max:50|unique:books,isbn,' . $bookId,
             'price'          => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
             'language'       => 'required|string|max:50',
             'published_date' => 'required|date',
             'description'    => 'nullable|string|max:5000',
             'status'         => 'required|in:active,inactive',
+            'is_ebook'       => 'boolean',
+            'ebook_file'     => 'nullable|file|mimes:pdf|max:20480',
             'author_ids'     => 'required|array|min:1',
             'author_ids.*'   => 'exists:authors,id',
             'sale_price'     => 'nullable|numeric|min:0|lt:price',
@@ -44,9 +45,10 @@ class BookRequest extends FormRequest
             'sale_ends_at'   => 'nullable|date|after_or_equal:sale_starts_at',
         ];
 
-        // Image: required on create, optional on update
         if ($this->isMethod('post')) {
-            $rules['image'] = 'required|image|mimes:jpg,jpeg,png|max:2048';
+            $rules['image'] = $this->has('is_ebook') && $this->is_ebook
+                ? 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+                : 'required|image|mimes:jpg,jpeg,png|max:2048';
         } else {
             $rules['image'] = 'nullable|image|mimes:jpg,jpeg,png|max:2048';
         }
@@ -57,12 +59,13 @@ class BookRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.min'         => 'Book title must be at least 3 characters.',
-            'price.min'         => 'Price cannot be negative.',
-            'stock_quantity.min'=> 'Stock cannot be negative.',
+            'title.min'          => 'Book title must be at least 3 characters.',
+            'price.min'          => 'Price cannot be negative.',
+            'stock_quantity.min' => 'Stock cannot be negative.',
             'author_ids.required'=> 'Please select at least one author.',
-            'image.max'         => 'Book cover must be less than 2MB.',
-            'image.mimes'       => 'Only .jpg, .jpeg, and .png files are allowed.',
+            'image.max'          => 'Book cover must be less than 2MB.',
+            'image.mimes'        => 'Only .jpg, .jpeg, and .png files are allowed.',
+            'ebook_file.max'     => 'PDF file must be less than 20MB.',
         ];
     }
 }

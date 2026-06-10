@@ -53,6 +53,7 @@
                             </div>
                             <a href="{{ route('customer.profile') }}"><i class="fas fa-user-edit"></i> My Profile</a>
                             <a href="{{ route('customer.orders.index') }}"><i class="fas fa-shopping-bag"></i> My Orders</a>
+                            <a href="{{ route('customer.ebooks.library') }}"><i class="fas fa-tablet-alt"></i> My Library</a>
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -122,6 +123,7 @@
 
     {{-- Scripts --}}
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/customer/cart.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

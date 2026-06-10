@@ -74,10 +74,11 @@
                            value="{{ old('price') }}" placeholder="0.00" step="0.01" min="0" required>
                     @error('price') <span class="invalid-feedback">{{ $message }}</span> @enderror
                 </div>
-                <div class="form-group" style="flex: 1;">
+                <div class="form-group" style="flex: 1;" id="stockField">
                     <label for="stock_quantity" class="form-label">Stock Quantity</label>
                     <input type="number" id="stock_quantity" name="stock_quantity" class="form-control @error('stock_quantity') is-invalid @enderror"
-                           value="{{ old('stock_quantity', 0) }}" min="0" required>
+                           value="{{ old('stock_quantity', 0) }}" min="0">
+                    <small style="color: var(--color-text-muted); font-size: 12px;">Not needed for e-books</small>
                     @error('stock_quantity') <span class="invalid-feedback">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -95,6 +96,30 @@
                         <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                     @error('status') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            {{-- Book Type --}}
+            <div class="d-flex gap-20">
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Book Type</label>
+                    <div style="display: flex; gap: 20px; padding-top: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="is_ebook" value="1" {{ old('is_ebook') ? 'checked' : '' }}
+                                   onchange="toggleEbookFields(this)">
+                            <span>This is an E-Book 📱</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {{-- E-Book PDF Upload --}}
+            <div id="ebookFields" style="display: {{ old('is_ebook') ? 'block' : 'none' }};">
+                <div class="form-group">
+                    <label for="ebook_file" class="form-label">E-Book PDF File</label>
+                    <input type="file" id="ebook_file" name="ebook_file" class="form-control @error('ebook_file') is-invalid @enderror" accept=".pdf">
+                    <small style="color: var(--color-text-muted); font-size: 12px;">Upload PDF file. Max 20MB.</small>
+                    @error('ebook_file') <span class="invalid-feedback">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -131,7 +156,7 @@
                 @error('description') <span class="invalid-feedback">{{ $message }}</span> @enderror
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="imageField">
                 <label for="image" class="form-label">Book Cover</label>
                 <input type="file" id="image" name="image" class="form-control @error('image') is-invalid @enderror"
                        accept=".jpg,.jpeg,.png" required onchange="previewImage(event)">
@@ -157,6 +182,28 @@
         const img = document.getElementById('imagePreview');
         img.src = URL.createObjectURL(event.target.files[0]);
         img.style.display = 'block';
+    }
+
+    function toggleEbookFields(checkbox) {
+        const ebookFields = document.getElementById('ebookFields');
+        const stockField = document.getElementById('stockField');
+        const imageField = document.getElementById('imageField');
+        const imageInput = document.getElementById('image');
+        
+        if (checkbox.checked) {
+            ebookFields.style.display = 'block';
+            stockField.style.opacity = '0.4';
+            stockField.querySelector('input').value = '9999';
+            stockField.querySelector('input').removeAttribute('required');
+            imageInput.removeAttribute('required');
+            imageField.querySelector('small').textContent = 'Optional for e-books. Max 2MB.';
+        } else {
+            ebookFields.style.display = 'none';
+            stockField.style.opacity = '1';
+            stockField.querySelector('input').value = '0';
+            imageInput.setAttribute('required', 'required');
+            imageField.querySelector('small').textContent = 'Max 2MB. JPG, JPEG, PNG only.';
+        }
     }
 
     let selectedAuthors = @json(old('author_ids', []));

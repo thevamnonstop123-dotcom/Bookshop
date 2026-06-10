@@ -22,6 +22,8 @@ class Book extends Model
         'description',
         'image',
         'status',
+        'is_ebook',
+        'ebook_file',
         'created_by',
         'updated_by',
         'category_id', 'title', 'slug', 'isbn', 'price', 'sale_price',
@@ -36,6 +38,7 @@ class Book extends Model
     'published_date' => 'date',
     'sale_starts_at' => 'datetime',
     'sale_ends_at' => 'datetime',
+    'is_ebook' => 'boolean',
 ];
 
 // Add this helper method
@@ -140,5 +143,13 @@ public function discountPercentage(): int
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+     /**
+     * Check if book is an e-book.
+     */
+    public function isEbook(): bool
+    {
+        return (bool) $this->is_ebook;
     }
 }

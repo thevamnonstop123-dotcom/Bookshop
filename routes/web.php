@@ -7,6 +7,7 @@ use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\ForgotPasswordController;
+use App\Http\Controllers\Customer\EbookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +69,11 @@ Route::middleware('auth:customer')->group(function () {
     Route::delete('/profile/address/{addressId}', [ProfileController::class, 'deleteAddress'])->name('customer.address.delete');
     Route::patch('/profile/address/{addressId}/default', [ProfileController::class, 'setDefaultAddress'])->name('customer.address.default');
     Route::get('/cart/data', [App\Http\Controllers\Customer\CartController::class, 'getData'])->name('cart.data');
+
+    // E-Books
+    Route::get('/my-library', [EbookController::class, 'library'])->name('customer.ebooks.library');
+    Route::get('/ebooks/{book}/read', [EbookController::class, 'read'])->name('customer.ebooks.read');
+    Route::get('/ebooks/{book}/download', [EbookController::class, 'download'])->name('customer.ebooks.download');
 
 });
 

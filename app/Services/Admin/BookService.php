@@ -21,22 +21,28 @@ class BookService
     /**
      * Store a new book.
      */
+        /**
+     * Store a new book.
+     */
     public function create(array $data): Book
     {
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
             $data['image'] = $this->uploadImage($data['image']);
         }
 
+        // Handle ebook file upload (no $book exists yet, just store)
+        if (isset($data['ebook_file']) && $data['ebook_file'] instanceof UploadedFile) {
+            $data['ebook_file'] = $data['ebook_file']->store('ebooks', 'public');
+        }
+
         $data['created_by'] = auth('staff')->id();
         $data['updated_by'] = auth('staff')->id();
 
-        // Separate author_ids from book data
         $authorIds = $data['author_ids'] ?? [];
         unset($data['author_ids']);
 
         $book = Book::create($data);
 
-        // Attach authors (many-to-many)
         if (!empty($authorIds)) {
             $book->authors()->sync($authorIds);
         }
@@ -54,6 +60,13 @@ class BookService
                 Storage::disk('public')->delete($book->image);
             }
             $data['image'] = $this->uploadImage($data['image']);
+        }
+
+        if (isset($data['ebook_file']) && $data['ebook_file'] instanceof UploadedFile) {
+            if ($book->ebook_file ?? false) {
+                Storage::disk('public')->delete($book->ebook_file);
+            }
+            $data['ebook_file'] = $data['ebook_file']->store('ebooks', 'public');
         }
 
         $data['updated_by'] = auth('staff')->id();

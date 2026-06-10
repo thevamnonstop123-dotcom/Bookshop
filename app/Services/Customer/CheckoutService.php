@@ -13,10 +13,21 @@ use Stripe\Checkout\Session;
 class CheckoutService
 {
     /**
+     * Get valid cart items (with existing books only).
+     */
+    private function getValidItems(Cart $cart)
+    {
+        return $cart->items->filter(function ($item) {
+            return $item->book !== null;
+        });
+    }
+
+    /**
      * Get the effective price of a book (sale price if on sale).
      */
     private function getBookPrice($book): float
     {
+        if (!$book) return 0;
         return $book->isOnSale() ? $book->sale_price : $book->price;
     }
 
@@ -28,35 +39,29 @@ class CheckoutService
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
+        if (!$cart) throw new \Exception('Your cart is empty.');
 
-        if (!$cart || $cart->items->isEmpty()) {
-            throw new \Exception('Your cart is empty.');
-        }
+        $validItems = $this->getValidItems($cart);
+        if ($validItems->isEmpty()) throw new \Exception('Your cart is empty.');
 
         $address = \App\Models\CustomerAddress::where('id', $addressId)
-            ->where('customer_id', $customerId)
-            ->first();
-
-        if (!$address) {
-            throw new \Exception('Invalid shipping address.');
-        }
+            ->where('customer_id', $customerId)->first();
+        if (!$address) throw new \Exception('Invalid shipping address.');
 
         $lineItems = [];
-        foreach ($cart->items as $item) {
+        foreach ($validItems as $item) {
             $price = $this->getBookPrice($item->book);
             $lineItems[] = [
                 'price_data' => [
                     'currency'     => 'mmk',
-                    'product_data' => [
-                        'name' => $item->book->title,
-                    ],
+                    'product_data' => ['name' => $item->book->title],
                     'unit_amount'  => (int)($price * 100),
                 ],
                 'quantity'   => $item->quantity,
             ];
         }
 
-        $session = Session::create([
+        return Session::create([
             'payment_method_types' => ['card'],
             'line_items'           => $lineItems,
             'mode'                 => 'payment',
@@ -67,31 +72,25 @@ class CheckoutService
                 'address_id'  => $addressId,
             ],
         ]);
-
-        return $session;
     }
 
     /**
-     * Process successful payment and create order.
+     * Process successful Stripe payment.
      */
     public function processSuccessfulPayment(string $sessionId): Order
     {
         Stripe::setApiKey(config('services.stripe.secret'));
-
         $session = Session::retrieve($sessionId);
         $metadata = $session->metadata;
-
         $customerId = $metadata->customer_id;
         $addressId = $metadata->address_id;
 
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
         $address = \App\Models\CustomerAddress::find($addressId);
+        if (!$cart) throw new \Exception('Cart is empty.');
 
-        if (!$cart || $cart->items->isEmpty()) {
-            throw new \Exception('Cart is empty.');
-        }
-
-        $totalAmount = $cart->items->sum(fn($item) => $this->getBookPrice($item->book) * $item->quantity);
+        $validItems = $this->getValidItems($cart);
+        $totalAmount = $validItems->sum(fn($item) => $this->getBookPrice($item->book) * $item->quantity);
 
         $order = Order::create([
             'customer_id'  => $customerId,
@@ -100,7 +99,7 @@ class CheckoutService
             'status'       => 'pending',
         ]);
 
-        foreach ($cart->items as $cartItem) {
+        foreach ($validItems as $cartItem) {
             $price = $this->getBookPrice($cartItem->book);
             OrderItem::create([
                 'order_id' => $order->id,
@@ -112,10 +111,10 @@ class CheckoutService
         }
 
         OrderShippingAddress::create([
-            'order_id'       => $order->id,
-            'receiver_name'  => $address->receiver_name,
-            'phone_number'   => $address->phone_number,
-            'address_line'   => $address->address_line,
+            'order_id'      => $order->id,
+            'receiver_name' => $address->receiver_name,
+            'phone_number'  => $address->phone_number,
+            'address_line'  => $address->address_line,
         ]);
 
         Payment::create([
@@ -128,23 +127,20 @@ class CheckoutService
         ]);
 
         $cart->items()->delete();
-
         return $order;
     }
 
     /**
-     * Process payment directly (for KPay, Wave, COD).
+     * Process direct payment (KPay, Wave, COD).
      */
     public function processDirectPayment(int $customerId, int $addressId, string $paymentMethod): Order
     {
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
         $address = \App\Models\CustomerAddress::find($addressId);
+        if (!$cart) throw new \Exception('Cart is empty.');
 
-        if (!$cart || $cart->items->isEmpty()) {
-            throw new \Exception('Cart is empty.');
-        }
-
-        $totalAmount = $cart->items->sum(fn($item) => $this->getBookPrice($item->book) * $item->quantity);
+        $validItems = $this->getValidItems($cart);
+        $totalAmount = $validItems->sum(fn($item) => $this->getBookPrice($item->book) * $item->quantity);
 
         $order = Order::create([
             'customer_id'  => $customerId,
@@ -153,7 +149,7 @@ class CheckoutService
             'status'       => 'pending',
         ]);
 
-        foreach ($cart->items as $cartItem) {
+        foreach ($validItems as $cartItem) {
             $price = $this->getBookPrice($cartItem->book);
             OrderItem::create([
                 'order_id' => $order->id,
@@ -161,14 +157,16 @@ class CheckoutService
                 'quantity' => $cartItem->quantity,
                 'price'    => $price,
             ]);
-            $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
+            if (!$cartItem->book->is_ebook) {
+                $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
+            }
         }
 
         OrderShippingAddress::create([
-            'order_id'       => $order->id,
-            'receiver_name'  => $address->receiver_name,
-            'phone_number'   => $address->phone_number,
-            'address_line'   => $address->address_line,
+            'order_id'      => $order->id,
+            'receiver_name' => $address->receiver_name,
+            'phone_number'  => $address->phone_number,
+            'address_line'  => $address->address_line,
         ]);
 
         Payment::create([
@@ -180,7 +178,6 @@ class CheckoutService
         ]);
 
         $cart->items()->delete();
-
         return $order;
     }
 }
