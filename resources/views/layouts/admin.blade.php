@@ -203,5 +203,10 @@
             document.getElementById('sidebarOverlay').classList.remove('show');
         }
     </script>
+        {{-- AI Assistant --}}
+    @include('admin.ai-assistant')
+
+    <link rel="stylesheet" href="{{ asset('css/admin/ai-assistant.css') }}">
+    <script src="{{ asset('js/admin/ai-assistant.js') }}"></script>
 </body>
 </html>
