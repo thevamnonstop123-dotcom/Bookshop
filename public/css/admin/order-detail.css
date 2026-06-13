@@ -1,0 +1,352 @@
+/* =============================================
+   ORDER DETAIL & FILTER TABS — Premium
+   ============================================= */
+
+/* ---------- FILTER TABS ---------- */
+.order-filter-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.order-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    background: #FFFFFF;
+    color: #475569;
+    border: 1.5px solid #E2E8F0;
+}
+
+.order-filter-tab i {
+    font-size: 12px;
+    color: #94A3B8;
+}
+
+.order-filter-tab:hover {
+    border-color: #10B981;
+    color: #10B981;
+    background: #F0FDF4;
+}
+
+.order-filter-tab:hover i {
+    color: #10B981;
+}
+
+.order-filter-tab-active {
+    background: #0F172A;
+    color: #FFFFFF;
+    border-color: #0F172A;
+    font-weight: 600;
+}
+
+.order-filter-tab-active i {
+    color: #10B981;
+}
+
+.order-filter-count {
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.08);
+    padding: 2px 8px;
+    border-radius: 100px;
+    min-width: 22px;
+    text-align: center;
+}
+
+.order-filter-tab-active .order-filter-count {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ---------- ORDER DETAIL GRID ---------- */
+.order-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+/* ---------- CARD ---------- */
+.order-detail-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid #E2E8F0;
+    overflow: hidden;
+}
+
+.order-detail-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.order-detail-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.order-detail-icon-info {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+.order-detail-icon-customer {
+    background: #ECFDF5;
+    color: #10B981;
+}
+
+.order-detail-icon-shipping {
+    background: #FFFBEB;
+    color: #F59E0B;
+}
+
+.order-detail-icon-payment {
+    background: #F3E8FF;
+    color: #7C3AED;
+}
+
+.order-detail-icon-items {
+    background: #F1F5F9;
+    color: #475569;
+}
+
+.order-detail-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0F172A;
+    letter-spacing: -0.2px;
+    margin-bottom: 2px;
+}
+
+.order-detail-card-subtitle {
+    font-size: 12px;
+    color: #94A3B8;
+    font-weight: 500;
+}
+
+/* ---------- BODY ---------- */
+.order-detail-body {
+    padding: 16px 24px;
+}
+
+.order-detail-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #F8FAFC;
+    gap: 16px;
+}
+
+.order-detail-row:last-child {
+    border-bottom: none;
+}
+
+.order-detail-label {
+    font-size: 13px;
+    color: #64748B;
+    font-weight: 500;
+    min-width: 110px;
+    flex-shrink: 0;
+}
+
+.order-detail-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0F172A;
+}
+
+.order-detail-total {
+    font-size: 20px;
+    font-weight: 800;
+    color: #10B981;
+    letter-spacing: -0.3px;
+}
+
+.order-detail-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2563EB;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.order-detail-link:hover {
+    color: #1D4ED8;
+    text-decoration: underline;
+}
+
+.order-detail-mono {
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+}
+
+/* ---------- STATUS ACTIONS ---------- */
+.order-detail-actions {
+    padding: 16px 24px;
+    border-top: 1px solid #F1F5F9;
+    background: #F8FAFC;
+}
+
+.order-detail-actions-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.order-detail-actions-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.order-status-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #E2E8F0;
+    background: #FFFFFF;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.order-status-btn i {
+    font-size: 11px;
+}
+
+.order-status-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.order-status-btn-current {
+    background: #0F172A !important;
+    color: #FFFFFF !important;
+    border-color: #0F172A !important;
+}
+
+.order-status-btn-pending:hover:not(:disabled) {
+    border-color: #F59E0B;
+    color: #F59E0B;
+    background: #FFFBEB;
+}
+
+.order-status-btn-processing:hover:not(:disabled) {
+    border-color: #2563EB;
+    color: #2563EB;
+    background: #EFF6FF;
+}
+
+.order-status-btn-shipped:hover:not(:disabled) {
+    border-color: #7C3AED;
+    color: #7C3AED;
+    background: #F3E8FF;
+}
+
+.order-status-btn-delivered:hover:not(:disabled) {
+    border-color: #10B981;
+    color: #10B981;
+    background: #ECFDF5;
+}
+
+.order-status-btn-cancelled:hover:not(:disabled) {
+    border-color: #EF4444;
+    color: #EF4444;
+    background: #FEF2F2;
+}
+
+/* ---------- TABLE ADDITIONS ---------- */
+.order-table-link {
+    font-weight: 700;
+    color: #0F172A;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.order-table-link:hover {
+    color: #10B981;
+}
+
+.order-items-total-label {
+    text-align: right;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0F172A;
+    padding: 16px 16px 0 !important;
+}
+
+.order-items-total-amount {
+    font-size: 18px;
+    font-weight: 800;
+    color: #10B981;
+    padding: 16px 16px 0 !important;
+}
+
+.admin-badge-lg {
+    padding: 7px 14px;
+    font-size: 12px;
+}
+
+.admin-table-price-bold {
+    font-weight: 700;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .order-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .order-detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .order-detail-label {
+        min-width: auto;
+    }
+
+    .order-detail-actions-btns {
+        flex-direction: column;
+    }
+
+    .order-status-btn {
+        justify-content: center;
+    }
+
+    .order-filter-tabs {
+        gap: 6px;
+    }
+
+    .order-filter-tab {
+        padding: 7px 12px;
+        font-size: 12px;
+    }
+}

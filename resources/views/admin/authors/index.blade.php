@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Authors - Bookshop Admin')
+@section('title', 'Authors — Bookshop Admin')
 @section('page_title', 'Author Management')
 
 @push('styles')
@@ -10,74 +10,90 @@
 @section('content')
 
     @if (session('success'))
-        <div class="alert alert-success" style="margin-bottom: 20px;">
+        <div class="admin-alert admin-alert-success">
             <i class="fas fa-circle-check"></i> {{ session('success') }}
         </div>
     @endif
 
-    <div class="table-container">
-        <div class="table-header">
-            <h2>All Authors</h2>
-            <a href="{{ route('admin.authors.create') }}" class="btn btn-accent btn-sm">
+    <div class="admin-table-card">
+        <div class="admin-table-header">
+            <div class="admin-table-header-left">
+                <h2 class="admin-table-title">All Authors</h2>
+                <span class="admin-table-count">{{ $authors->count() }} {{ Str::plural('author', $authors->count()) }}</span>
+            </div>
+            <a href="{{ route('admin.authors.create') }}" class="admin-btn admin-btn-primary">
                 <i class="fas fa-plus"></i> Add Author
             </a>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Bio</th>
-                    <th>Books</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($authors as $author)
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            <img src="{{ $author->image ? asset('storage/' . $author->image) : 'https://ui-avatars.com/api/?name=' . urlencode($author->name) . '&background=f59e0b&color=fff&size=40' }}"
-                                 alt="{{ $author->name }}"
-                                 style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
-                        </td>
-                        <td class="font-semibold">{{ $author->name }}</td>
-                        <td>{{ Str::limit($author->bio, 60) ?: '—' }}</td>
-                        <td>{{ $author->books_count }}</td>
-                        <td>
-                            <span class="badge {{ $author->status === 'active' ? 'badge-success' : 'badge-danger' }}">
-                                {{ ucfirst($author->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="d-flex gap-5">
-                                <a href="{{ route('admin.authors.edit', $author) }}" class="btn btn-outline btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('admin.authors.destroy', $author) }}" method="POST"
-                                      onsubmit="return confirm('Delete this author?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+                        <th style="width: 60px;">#</th>
+                        <th style="width: 60px;">Photo</th>
+                        <th>Name</th>
+                        <th>Biography</th>
+                        <th style="width: 80px;">Books</th>
+                        <th style="width: 100px;">Status</th>
+                        <th style="width: 120px;">Actions</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
-                            <i class="fas fa-feather-alt" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
-                            No authors found. <a href="{{ route('admin.authors.create') }}">Add your first author</a>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($authors as $author)
+                        <tr>
+                            <td class="admin-table-index">{{ $loop->iteration }}</td>
+                            <td>
+                                <img src="{{ $author->image ? asset('storage/' . $author->image) : 'https://ui-avatars.com/api/?name=' . urlencode($author->name) . '&background=10B981&color=fff&size=40' }}"
+                                     alt="{{ $author->name }}"
+                                     class="admin-table-avatar"
+                                     loading="lazy">
+                            </td>
+                            <td class="admin-table-name">{{ $author->name }}</td>
+                            <td class="admin-table-bio">{{ Str::limit($author->bio, 80) ?: '—' }}</td>
+                            <td class="admin-table-number">{{ $author->books_count }}</td>
+                            <td>
+                                <span class="admin-badge admin-badge-{{ $author->status === 'active' ? 'success' : 'danger' }}">
+                                    <i class="fas fa-{{ $author->status === 'active' ? 'circle-check' : 'circle-xmark' }}"></i>
+                                    {{ ucfirst($author->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <a href="{{ route('admin.authors.edit', $author) }}" class="admin-action-btn admin-action-edit" title="Edit">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </a>
+                                    <form action="{{ route('admin.authors.destroy', $author) }}" method="POST"
+                                          onsubmit="return confirm('Delete this author? This cannot be undone.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="admin-action-btn admin-action-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7">
+                                <div class="admin-table-empty">
+                                    <div class="admin-table-empty-icon">
+                                        <i class="fas fa-feather"></i>
+                                    </div>
+                                    <h4>No authors found</h4>
+                                    <p>Get started by adding your first author.</p>
+                                    <a href="{{ route('admin.authors.create') }}" class="admin-btn admin-btn-primary">
+                                        <i class="fas fa-plus"></i> Add Author
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
 @endsection

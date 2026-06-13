@@ -1,6 +1,7 @@
-/* =============================================
-   Cart Drawer - Optimized (No Full Rebuild)
-   ============================================= */
+/**
+ * Bookshop Cart Drawer — Premium Interactions
+ * Open/close, item management, shipping calculation, animations
+ */
 
 const Cart = {
     drawer: null,
@@ -8,23 +9,34 @@ const Cart = {
     itemsContainer: null,
     totalEl: null,
     countEl: null,
+    shippingText: null,
+    shippingProgress: null,
+    cartDrawerCount: null,
+    emptyState: null,
+    footer: null,
 
     init() {
         this.drawer = document.getElementById('cartDrawer');
         this.overlay = document.getElementById('cartOverlay');
-        this.itemsContainer = document.getElementById('cartItems');
-        this.totalEl = document.getElementById('cartTotal');
+        this.itemsContainer = document.getElementById('cartItemsList');
+        this.totalEl = document.getElementById('cartDrawerTotal');
         this.countEl = document.getElementById('cartCount');
+        this.shippingText = document.getElementById('shippingMessage');
+        this.shippingProgress = document.getElementById('shippingProgressFill');
+        this.cartDrawerCount = document.getElementById('cartDrawerCount');
+        this.footer = document.getElementById('cartDrawerFooter');
 
         this.loadCart();
 
-        // Event delegation for ALL cart actions
+        // Event delegation for all cart actions
         document.addEventListener('click', (e) => {
             // Add to cart
             const addBtn = e.target.closest('.btn-add-cart');
             if (addBtn) {
                 e.preventDefault();
-                this.addItem(addBtn.dataset.bookId);
+                const qtyInput = document.getElementById('quantity');
+                const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+                this.addItem(addBtn.dataset.bookId, quantity);
                 return;
             }
 
@@ -44,7 +56,11 @@ const Cart = {
                 e.preventDefault();
                 const itemId = qtyDown.dataset.itemId;
                 const newQty = parseInt(qtyDown.dataset.qty) - 1;
-                this.updateQty(itemId, newQty);
+                if (newQty < 1) {
+                    this.removeItem(itemId);
+                } else {
+                    this.updateQty(itemId, newQty);
+                }
                 return;
             }
 
@@ -57,44 +73,57 @@ const Cart = {
             }
         });
 
-        document.getElementById('cartClose')?.addEventListener('click', () => this.close());
+        // Close cart
+        document.getElementById('cartDrawerClose')?.addEventListener('click', () => this.close());
+        document.getElementById('cartContinueShopping')?.addEventListener('click', () => this.close());
         this.overlay?.addEventListener('click', () => this.close());
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.close(); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') this.close();
+        });
     },
 
     open() {
-        if (this.drawer) this.drawer.classList.add('open');
-        if (this.overlay) this.overlay.classList.add('open');
+        if (this.drawer) {
+            this.drawer.classList.add('open');
+            this.drawer.setAttribute('aria-hidden', 'false');
+        }
+        if (this.overlay) this.overlay.classList.add('show');
         document.body.style.overflow = 'hidden';
     },
 
     close() {
-        if (this.drawer) this.drawer.classList.remove('open');
-        if (this.overlay) this.overlay.classList.remove('open');
+        if (this.drawer) {
+            this.drawer.classList.remove('open');
+            this.drawer.setAttribute('aria-hidden', 'true');
+        }
+        if (this.overlay) this.overlay.classList.remove('show');
         document.body.style.overflow = '';
     },
 
     toggle() {
-        this.drawer?.classList.contains('open') ? this.close() : this.open();
+        if (this.drawer?.classList.contains('open')) {
+            this.close();
+        } else {
+            this.open();
+        }
     },
 
-    async addItem(bookId) {
-        const qtyInput = document.getElementById('quantity');
-        const quantity = qtyInput ? parseInt(qtyInput.value) : 1;
+        async addItem(bookId, quantity = 1) {
         try {
             const resp = await fetch('/cart/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
                 },
-                body: JSON.stringify({ book_id: bookId, quantity })
+                body: JSON.stringify({ book_id: bookId, quantity }),
             });
             const data = await resp.json();
             this.updateCartUI(data.cart, 'add');
-            this.open();
-        } catch(e) { console.error(e); }
+        } catch (err) {
+            console.error('Add to cart error:', err);
+        }
     },
 
     async updateQty(itemId, quantity) {
@@ -105,13 +134,15 @@ const Cart = {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
                 },
-                body: JSON.stringify({ quantity })
+                body: JSON.stringify({ quantity }),
             });
             const data = await resp.json();
             this.updateCartUI(data.cart, 'update');
-        } catch(e) {}
+        } catch (err) {
+            console.error('Update qty error:', err);
+        }
     },
 
     async removeItem(itemId) {
@@ -120,12 +151,14 @@ const Cart = {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
+                    'Accept': 'application/json',
+                },
             });
             const data = await resp.json();
             this.updateCartUI(data.cart, 'remove');
-        } catch(e) {}
+        } catch (err) {
+            console.error('Remove item error:', err);
+        }
     },
 
     async loadCart() {
@@ -133,75 +166,77 @@ const Cart = {
             const resp = await fetch('/cart/data', {
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
+                    'Accept': 'application/json',
+                },
             });
             const data = await resp.json();
             this.updateCartUI(data.cart, 'full');
-        } catch(e) {}
+        } catch (err) {
+            console.error('Load cart error:', err);
+        }
     },
 
-    /**
-     * Smart update — only rebuilds when necessary.
-     * @param {Object} cart - Cart data from server
-     * @param {string} action - 'add' | 'update' | 'remove' | 'full'
-     */
     updateCartUI(cart, action = 'full') {
-        // Update count badges (always)
-        document.querySelectorAll('#cartCount').forEach(el => {
-            el.textContent = '(' + cart.total_items + ')';
-        });
+        const count = cart.total_items || 0;
 
-        // Update total (always)
+        // Update count badges
+        document.querySelectorAll('#cartCount').forEach(el => {
+            el.textContent = count;
+        });
+        if (this.cartDrawerCount) {
+            this.cartDrawerCount.textContent = count + ' item' + (count !== 1 ? 's' : '');
+        }
+
+        // Update total
         if (this.totalEl) {
             this.totalEl.textContent = this.formatCurrency(cart.total);
         }
 
-        // Update shipping bar (always)
+        // Update shipping bar
         this.updateShippingBar(cart.total);
+
+        // Show/hide footer
+        if (this.footer) {
+            this.footer.style.display = count > 0 ? '' : 'none';
+        }
 
         if (!this.itemsContainer) return;
 
-        // For add/remove/full — rebuild the items list
+        // Rebuild for add/remove/full
         if (action === 'add' || action === 'remove' || action === 'full') {
-            this.renderItems(cart.items);
+            this.renderItems(cart.items || []);
         }
 
-        // For update — only update quantities in-place
+        // Update in-place for quantity changes
         if (action === 'update') {
-            cart.items.forEach(item => {
+            (cart.items || []).forEach(item => {
                 const itemEl = this.itemsContainer.querySelector('.cart-item[data-item-id="' + item.id + '"]');
-                if (itemEl) {
-                    // Update qty display
-                    const qtySpan = itemEl.querySelector('.cart-qty span');
-                    if (qtySpan) qtySpan.textContent = item.quantity;
+                if (!itemEl) return;
 
-                    // Update data-qty attributes on buttons
-                    const downBtn = itemEl.querySelector('.cart-qty-down');
-                    const upBtn = itemEl.querySelector('.cart-qty-up');
-                    if (downBtn) downBtn.dataset.qty = item.quantity;
-                    if (upBtn) upBtn.dataset.qty = item.quantity;
+                const qtySpan = itemEl.querySelector('.cart-qty span');
+                if (qtySpan) qtySpan.textContent = item.quantity;
 
-                    // Update item subtotal
-                    const priceEl = itemEl.querySelector('.cart-item-price');
-                    if (priceEl) {
-                        priceEl.textContent = this.formatCurrency(item.price * item.quantity);
-                    }
+                const downBtn = itemEl.querySelector('.cart-qty-down');
+                const upBtn = itemEl.querySelector('.cart-qty-up');
+                if (downBtn) downBtn.dataset.qty = item.quantity;
+                if (upBtn) upBtn.dataset.qty = item.quantity;
+
+                const priceEl = itemEl.querySelector('.cart-item-price');
+                if (priceEl) {
+                    priceEl.textContent = this.formatCurrency(item.price * item.quantity);
                 }
             });
         }
     },
 
-    /**
-     * Render all cart items (full rebuild).
-     */
     renderItems(items) {
-        if (items.length === 0) {
+        if (!items || items.length === 0) {
             this.itemsContainer.innerHTML = `
-                <div class="cart-empty">
-                    <div class="empty-icon"><i class="fas fa-shopping-bag"></i></div>
+                <div class="cart-empty-state">
+                    <div class="cart-empty-icon"><i class="fas fa-shopping-bag"></i></div>
                     <h4>Your cart is empty</h4>
-                    <p>Discover great books and add them here!</p>
+                    <p>Looks like you have not added any books yet.</p>
+                    <a href="/books" class="cart-empty-btn"><i class="fas fa-book-open"></i> Browse Books</a>
                 </div>`;
         } else {
             this.itemsContainer.innerHTML = items.map(item => `
@@ -228,23 +263,22 @@ const Cart = {
 
     updateShippingBar(total) {
         const threshold = 50000;
-        const text = document.getElementById('shippingText');
-        const progress = document.getElementById('shippingProgress');
-        if (!text || !progress) return;
+        if (!this.shippingText || !this.shippingProgress) return;
+
         if (total >= threshold) {
-            text.innerHTML = '<i class="fas fa-check-circle"></i> <strong>Congratulations!</strong> You get FREE shipping!';
-            progress.style.width = '100%';
+            this.shippingText.innerHTML = '<i class="fas fa-check-circle"></i> <strong>Congratulations!</strong> You get FREE shipping!';
+            this.shippingProgress.style.width = '100%';
         } else {
             const remaining = threshold - total;
             const pct = (total / threshold) * 100;
-            text.innerHTML = 'Add <strong>' + this.formatCurrency(remaining) + '</strong> more for free shipping!';
-            progress.style.width = pct + '%';
+            this.shippingText.innerHTML = 'Add <strong>' + this.formatCurrency(remaining) + '</strong> more for free shipping!';
+            this.shippingProgress.style.width = pct + '%';
         }
     },
 
     formatCurrency(amount) {
-        return new Intl.NumberFormat('en-MM').format(amount) + ' MMK';
-    }
+        return Number(amount).toLocaleString('en-US') + ' MMK';
+    },
 };
 
 document.addEventListener('DOMContentLoaded', () => Cart.init());

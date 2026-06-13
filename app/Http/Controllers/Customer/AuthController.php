@@ -16,7 +16,7 @@ class AuthController extends Controller
      */
     public function showLoginForm()
     {
-        return view('customer.auth.login');
+        return redirect('/?login=open');
     }
 
     /**
@@ -33,9 +33,9 @@ class AuthController extends Controller
                 ->with('success', 'Welcome back!');
         }
 
-        return back()
-            ->withErrors(['email' => 'Invalid credentials. Please try again.'])
-            ->withInput($request->except('password'));
+        return redirect('/?login=open&error=1')
+        ->withErrors(['email' => 'Invalid credentials. Please try again.'])
+        ->withInput($request->except('password'));
     }
 
     /**

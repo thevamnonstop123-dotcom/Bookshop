@@ -1,0 +1,322 @@
+/* =============================================
+   AUTHOR DRAG & DROP — Premium Selection
+   ============================================= */
+
+.author-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Drop Zone */
+.author-dropzone {
+    min-height: 60px;
+    border: 2px dashed #E2E8F0;
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: all 0.25s ease;
+    background: #F8FAFC;
+}
+
+.author-dropzone-active {
+    border-color: #10B981;
+    background: #F0FDF4;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
+}
+
+.author-dropzone-placeholder {
+    color: #94A3B8;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Selected Author Chip */
+.selected-author-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #10B981;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 600;
+    animation: chipIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes chipIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.selected-author-remove {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+    font-size: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    padding: 0;
+}
+
+.selected-author-remove:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Author Grid */
+.author-grid-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.author-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Author Chip */
+.author-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: grab;
+    transition: all 0.25s ease;
+    font-family: inherit;
+    user-select: none;
+}
+
+.author-chip i {
+    font-size: 11px;
+    color: #94A3B8;
+}
+
+.author-chip:hover {
+    border-color: #10B981;
+    color: #10B981;
+    background: #F0FDF4;
+}
+
+.author-chip:hover i {
+    color: #10B981;
+}
+
+.author-chip-selected {
+    border-color: #10B981 !important;
+    background: #ECFDF5 !important;
+    color: #059669 !important;
+    font-weight: 600;
+    cursor: default;
+    opacity: 0.6;
+}
+
+.author-chip-selected i {
+    color: #059669 !important;
+}
+
+.author-chip-dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    border-style: dashed;
+}
+
+/* =============================================
+   FORM TOGGLE SWITCH
+   ============================================= */
+.admin-form-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1.5px solid #E2E8F0;
+    background: #F8FAFC;
+    transition: all 0.25s ease;
+}
+
+.admin-form-toggle:hover {
+    border-color: #CBD5E1;
+}
+
+.admin-form-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.admin-form-toggle-switch {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background: #CBD5E1;
+    position: relative;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+}
+
+.admin-form-toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+}
+
+.admin-form-toggle input:checked + .admin-form-toggle-switch {
+    background: #10B981;
+}
+
+.admin-form-toggle input:checked + .admin-form-toggle-switch::after {
+    transform: translateX(20px);
+}
+
+.admin-form-toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* File Upload */
+.admin-form-file-upload {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 2px dashed #E2E8F0;
+    border-radius: 12px;
+    background: #F8FAFC;
+    flex-wrap: wrap;
+}
+
+.admin-form-file-icon {
+    font-size: 28px;
+    color: #EF4444;
+    flex-shrink: 0;
+}
+
+.admin-form-file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-form-file-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0F172A;
+    display: block;
+}
+
+.admin-form-file-hint {
+    font-size: 11px;
+    color: #94A3B8;
+}
+
+.admin-form-file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.admin-form-file-btn:hover {
+    background: #1E293B;
+}
+
+/* Description Actions */
+.admin-form-description-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+/* Loading */
+.admin-form-loading {
+    display: none;
+    font-size: 12px;
+    color: #64748B;
+    font-weight: 500;
+}
+
+/* AI Bulk Actions */
+.ai-bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+/* Button Size Variant */
+.admin-btn-sm {
+    padding: 7px 14px;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+/* Form Hint */
+.admin-form-hint {
+    font-size: 11px;
+    color: #94A3B8;
+    margin-top: 2px;
+}
+
+/* Book Cover Image Sizes */
+.admin-form-image-preview-book {
+    width: 100px;
+    height: 130px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.admin-form-image-placeholder-book {
+    width: 100px;
+    height: 130px;
+    border-radius: 8px;
+}

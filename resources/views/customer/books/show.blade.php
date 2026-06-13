@@ -1,6 +1,6 @@
 @extends('layouts.customer')
 
-@section('title', $book->title . ' - Bookshop')
+@section('title', $book->title . ' — Bookshop')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/customer/book-detail.css') }}">
@@ -11,141 +11,195 @@
 <div class="book-detail-page">
     <div class="container">
 
-        <div class="book-breadcrumb">
-            <a href="{{ route('customer.home') }}">Home</a>
-            <span>/</span>
+        {{-- Breadcrumb --}}
+        <nav class="detail-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ route('customer.home') }}"><i class="fas fa-home"></i> Home</a>
+            <i class="fas fa-chevron-right"></i>
             <a href="{{ route('books.index') }}">Books</a>
-            <span>/</span>
+            @if($book->category)
+                <i class="fas fa-chevron-right"></i>
+                <a href="{{ route('books.index', ['category' => $book->category->id]) }}">{{ $book->category->name }}</a>
+            @endif
+            <i class="fas fa-chevron-right"></i>
             <span>{{ $book->title }}</span>
-        </div>
+        </nav>
 
-        <div class="book-detail-layout">
+        {{-- Main Detail --}}
+        <div class="detail-layout">
 
-            <div class="book-detail-cover">
-                <img src="{{ $book->image && $book->image !== 'default.png' ? asset('storage/'.$book->image) : 'https://placehold.co/600x800/1e293b/f59e0b?text='.urlencode($book->title) }}"
-                     alt="{{ $book->title }}">
+            {{-- Cover --}}
+            <div class="detail-cover">
+                <div class="detail-cover-frame">
+                    @if($book->isOnSale())
+                        <span class="detail-cover-badge">-{{ $book->discountPercentage() }}%</span>
+                    @endif
+                    <img src="{{ $book->image && $book->image !== 'default.png' ? asset('storage/'.$book->image) : 'https://placehold.co/600x800/0F172A/FFFFFF?text='.urlencode($book->title) }}"
+                         alt="{{ $book->title }}"
+                         class="detail-cover-img">
+                </div>
+                @if($book->isEbook())
+                    <div class="detail-cover-format">
+                        <i class="fas fa-tablet-screen-button"></i> E-Book Edition
+                    </div>
+                @endif
             </div>
 
-            <div class="book-detail-info">
+            {{-- Info --}}
+            <div class="detail-info">
 
-                <span class="book-detail-category">
-                    {{ $book->category?->name }}
-                    @if($book->isEbook())
-                        <span style="background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:20px;font-size:11px;margin-left:8px;">📱 E-Book</span>
-                    @endif
-                </span>
-                <h1>{{ $book->title }}</h1>
+                {{-- Category & Format --}}
+                <div class="detail-meta-top">
+                    <span class="detail-category-tag">{{ $book->category?->name ?? 'Uncategorized' }}</span>
+                    <div class="detail-format-inline">
+                        @php
+                            $hasPhysical = $book->isInStock();
+                            $hasEbook = $book->isEbook();
+                        @endphp
 
-                <div class="book-detail-authors">
-                    By <span>{{ $book->authors->pluck('name')->join(', ') }}</span>
-                </div>
-
-                <div class="book-meta-grid">
-                    <div class="book-meta-item">
-                        <div class="book-meta-label">ISBN</div>
-                        <div class="book-meta-value">{{ $book->isbn }}</div>
-                    </div>
-                    <div class="book-meta-item">
-                        <div class="book-meta-label">Language</div>
-                        <div class="book-meta-value">{{ $book->language }}</div>
-                    </div>
-                    <div class="book-meta-item">
-                        <div class="book-meta-label">Published</div>
-                        <div class="book-meta-value">{{ $book->published_date->format('d M Y') }}</div>
-                    </div>
-                    <div class="book-meta-item">
-                        <div class="book-meta-label">Type</div>
-                        <div class="book-meta-value">{{ $book->isEbook() ? 'E-Book' : 'Physical' }}</div>
-                    </div>
-                </div>
-
-                <div class="book-detail-price-section">
-                    <div class="book-detail-price-row">
-                        @if($book->isOnSale())
-                            <span class="book-detail-original">{{ number_format($book->price) }} MMK</span>
-                            <span class="book-detail-price" style="color:#ef4444;">{{ number_format($book->sale_price) }} MMK</span>
-                            <span class="book-detail-save"><i class="fas fa-tag"></i> Save {{ $book->discountPercentage() }}%</span>
+                        {{-- If both available, show a switcher for UI-only format selection --}}
+                        @if($hasPhysical && $hasEbook)
+                            <div class="detail-format-switch" data-book-id="{{ $book->id }}">
+                                <button class="format-option active" data-format="physical"><i class="fas fa-book"></i> Physical</button>
+                                <button class="format-option" data-format="ebook"><i class="fas fa-tablet-screen-button"></i> E‑Book</button>
+                            </div>
+                        @elseif($hasEbook)
+                            <span class="detail-format-tag detail-format-ebook">
+                                <i class="fas fa-bolt"></i> E-Book
+                            </span>
                         @else
-                            <span class="book-detail-price">{{ number_format($book->price) }} MMK</span>
+                            <span class="detail-format-tag detail-format-physical">
+                                <i class="fas fa-book"></i> Physical
+                            </span>
                         @endif
-                    </div>
 
+                    </div>
+                </div>
+
+                {{-- Title --}}
+                <h1 class="detail-title">{{ $book->title }}</h1>
+
+                {{-- Authors --}}
+                <div class="detail-authors">
+                    <span>By</span>
+                    <span class="detail-authors-list">{{ $book->authors->pluck('name')->join(', ') }}</span>
+                </div>
+
+                {{-- Meta Grid --}}
+                <div class="detail-meta-grid">
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-label">ISBN</span>
+                        <span class="detail-meta-value">{{ $book->isbn }}</span>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-label">Language</span>
+                        <span class="detail-meta-value">{{ $book->language }}</span>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-label">Published</span>
+                        <span class="detail-meta-value">{{ $book->published_date->format('d M Y') }}</span>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-label">Format</span>
+                        <span class="detail-meta-value">{{ $book->isEbook() ? 'E-Book (Instant)' : 'Paperback' }}</span>
+                    </div>
+                </div>
+
+                {{-- Price Section --}}
+                <div class="detail-price-section">
+                    @if($book->isOnSale())
+                        <div class="detail-price-row">
+                            <span class="detail-price-original">{{ number_format($book->price) }} MMK</span>
+                            <span class="detail-price-sale">{{ number_format($book->sale_price) }} MMK</span>
+                            <span class="detail-price-save">
+                                <i class="fas fa-tag"></i> Save {{ $book->discountPercentage() }}%
+                            </span>
+                        </div>
+                    @else
+                        <div class="detail-price-row">
+                            <span class="detail-price-current">{{ number_format($book->price) }} MMK</span>
+                        </div>
+                    @endif
+
+                    {{-- Stock Status --}}
                     @if($book->isEbook())
-                        <span class="stock-badge in-stock">
-                            <i class="fas fa-infinity"></i> Instant Access — Read Anytime
-                        </span>
+                        <div class="detail-stock detail-stock-ebook">
+                            <i class="fas fa-infinity"></i> Instant access — read anytime
+                        </div>
                     @elseif($book->isInStock())
                         @if($book->stock_quantity <= 5)
-                            <span class="stock-badge low-stock">
-                                <i class="fas fa-clock"></i> Only {{ $book->stock_quantity }} left
-                            </span>
+                            <div class="detail-stock detail-stock-low">
+                                <i class="fas fa-exclamation-triangle"></i> Only {{ $book->stock_quantity }} left in stock
+                            </div>
                         @else
-                            <span class="stock-badge in-stock">
-                                <i class="fas fa-check-circle"></i> In Stock ({{ $book->stock_quantity }} available)
-                            </span>
+                            <div class="detail-stock detail-stock-in">
+                                <i class="fas fa-check-circle"></i> In stock ({{ $book->stock_quantity }} available)
+                            </div>
                         @endif
                     @else
-                        <span class="stock-badge out-of-stock">
-                            <i class="fas fa-times-circle"></i> Out of Stock
-                        </span>
+                        <div class="detail-stock detail-stock-out">
+                            <i class="fas fa-times-circle"></i> Out of stock
+                        </div>
                     @endif
                 </div>
 
+                {{-- Actions --}}
                 @if($book->isEbook() || $book->isInStock())
-                    <div class="book-detail-actions">
+                    <div class="detail-actions">
                         @if(!$book->isEbook())
-                            <div class="quantity-selector">
-                                <button type="button" onclick="changeQty(-1)">−</button>
-                                <input type="number" id="quantity" value="1" min="1" max="{{ $book->stock_quantity }}" readonly>
-                                <button type="button" onclick="changeQty(1)">+</button>
+                            <div class="detail-qty" id="quantitySelector">
+                                <button type="button" class="detail-qty-btn" onclick="changeQuantity(-1)" aria-label="Decrease quantity">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" id="quantity" class="detail-qty-input" value="1"
+                                       min="1" max="{{ $book->stock_quantity }}" readonly>
+                                <button type="button" class="detail-qty-btn" onclick="changeQuantity(1)" aria-label="Increase quantity">
+                                    <i class="fas fa-plus"></i>
+                                </button>
                             </div>
                         @endif
-                        <button class="btn btn-accent btn-add-cart" data-book-id="{{ $book->id }}">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        <button class="detail-action-btn detail-action-cart btn-add-cart" data-book-id="{{ $book->id }}">
+                            <i class="fas fa-shopping-bag"></i> Add to Cart
                         </button>
-                        <button class="btn btn-primary btn-buy-now" onclick="document.querySelector('.btn-add-cart').click(); setTimeout(() => window.location='{{ route('checkout.index') }}', 500);">
+                        <button class="detail-action-btn detail-action-buy" id="buyNowBtn">
                             <i class="fas fa-bolt"></i> Buy Now
                         </button>
                     </div>
                 @else
-                    <div class="book-detail-actions">
-                        <button class="btn btn-outline" disabled style="flex:1;padding:14px 28px;font-size:15px;">
+                    <div class="detail-actions">
+                        <button class="detail-action-btn detail-action-disabled" disabled>
                             <i class="fas fa-ban"></i> Out of Stock
                         </button>
                     </div>
                 @endif
 
+                {{-- Description --}}
                 @if($book->description)
-                    <div class="book-detail-description">
-                        <h3>About This Book</h3>
-                        <p>{{ $book->description }}</p>
+                    <div class="detail-description">
+                        <h3 class="detail-description-heading">About This Book</h3>
+                        <div class="detail-description-body">
+                            <p>{{ $book->description }}</p>
+                        </div>
                     </div>
                 @endif
 
             </div>
         </div>
 
+        {{-- Related Books --}}
         @if($relatedBooks->count() > 0)
-            <div class="related-section">
-                <div class="section-header">
+            <section class="detail-related">
+                <div class="detail-related-header">
                     <h2>You May Also Like</h2>
+                    <a href="{{ route('books.index') }}" class="detail-related-all">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
-                <div class="related-grid">
+                <div class="detail-related-grid">
                     @foreach($relatedBooks as $related)
-                        <div class="book-card">
-                            <a href="{{ route('books.show', $related->slug) }}">
-                                <img src="{{ $related->image && $related->image !== 'default.png' ? asset('storage/'.$related->image) : 'https://placehold.co/400x560/1e293b/f59e0b?text='.urlencode($related->title) }}"
-                                     alt="{{ $related->title }}" class="book-cover">
-                            </a>
-                            <div class="book-info">
-                                <div class="book-title">{{ $related->title }}</div>
-                                <div class="book-author">{{ $related->authors->first()->name ?? 'Unknown' }}</div>
-                                <div class="book-price">{{ number_format($related->price) }} MMK</div>
-                            </div>
-                        </div>
+                        @include('components.customer.book-card', ['book' => $related])
                     @endforeach
                 </div>
-            </div>
+            </section>
         @endif
 
     </div>
@@ -154,17 +208,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/customer/cart.js') }}"></script>
-@if(!$book->isEbook())
-<script>
-    function changeQty(amount) {
-        const input = document.getElementById('quantity');
-        let value = parseInt(input.value) + amount;
-        const max = {{ $book->stock_quantity }};
-        if (value < 1) value = 1;
-        if (value > max) value = max;
-        input.value = value;
-    }
-</script>
-@endif
+    <script src="{{ asset('js/customer/book-detail.js') }}"></script>
 @endpush

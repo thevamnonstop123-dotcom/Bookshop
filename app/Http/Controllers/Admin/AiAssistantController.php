@@ -25,7 +25,7 @@ class AiAssistantController extends Controller
         $reply = $this->assistantService->chat($request->message);
 
         return response()->json([
-            'reply' => $reply,
+            'response' => $reply,
             'time' => now()->format('H:i'),
         ]);
     }

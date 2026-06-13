@@ -1,18 +1,35 @@
 @extends('layouts.customer')
 
-@section('title', 'Payment Cancelled - Bookshop')
+@section('title', 'Payment Cancelled — Bookshop')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/customer/checkout.css') }}">
+@endpush
 
 @section('content')
-<div style="min-height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 40px;">
-    <div>
-        <div style="width: 80px; height: 80px; background: #fef2f2; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 40px; color: #ef4444; margin-bottom: 24px;">
-            <i class="fas fa-times-circle"></i>
+
+<div class="cancel-page">
+    <div class="cancel-container">
+
+        <div class="cancel-card">
+            <div class="cancel-icon">
+                <i class="fas fa-xmark"></i>
+            </div>
+
+            <h1 class="cancel-title">Payment Cancelled</h1>
+            <p class="cancel-message">Your payment was not processed. No charges have been made — you can try again whenever you are ready.</p>
+
+            <div class="cancel-actions">
+                <a href="{{ route('checkout.index') }}" class="cancel-btn cancel-btn-primary">
+                    <i class="fas fa-rotate-left"></i> Try Again
+                </a>
+                <a href="{{ route('books.index') }}" class="cancel-btn cancel-btn-ghost">
+                    <i class="fas fa-book-open"></i> Browse Books
+                </a>
+            </div>
         </div>
-        <h1 style="font-size: 28px; color: var(--color-text); margin-bottom: 8px;">Payment Cancelled</h1>
-        <p style="color: var(--color-text-muted);">Your payment was not processed. You can try again.</p>
-        <div style="margin-top: 28px;">
-            <a href="{{ route('checkout.index') }}" class="btn btn-primary">Try Again</a>
-        </div>
+
     </div>
 </div>
+
 @endsection

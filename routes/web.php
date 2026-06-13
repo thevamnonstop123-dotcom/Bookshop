@@ -35,8 +35,16 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name
 // Authenticated routes
 Route::middleware('auth:customer')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/', [HomeController::class, 'index'])->name('customer.home');
 });
+
+// Public home (moved out of auth middleware so unauthenticated visitors can see it)
+Route::get('/', [HomeController::class, 'index'])->name('customer.home');
+
+// Social Login routes (safe, UI uses Route::has to show buttons)
+Route::get('/login/google', [App\Http\Controllers\Customer\SocialiteController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('/login/google/callback', [App\Http\Controllers\Customer\SocialiteController::class, 'handleGoogleCallback']);
+Route::get('/login/facebook', [App\Http\Controllers\Customer\SocialiteController::class, 'redirectToFacebook'])->name('login.facebook');
+Route::get('/login/facebook/callback', [App\Http\Controllers\Customer\SocialiteController::class, 'handleFacebookCallback']);
 
 // Public book routes (accessible to all)
 Route::get('/books', [BookController::class, 'index'])->name('books.index');

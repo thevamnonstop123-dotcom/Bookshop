@@ -96,6 +96,10 @@
     /* Layout */
     --sidebar-width: 250px;
     --topbar-height: 64px;
+
+    --color-secondary: #2563EB;
+    --color-accent: #10B981;
+    --color-accent-dark: #059669;
 }
 
 /* =============================================
@@ -522,59 +526,153 @@ select.form-control {
 
 
 /* =============================================
-   FOOTER
+   SITE FOOTER — Premium
    ============================================= */
-.customer-footer {
-    background-color: var(--color-primary);
-    color: #cbd5e1;
-    padding: 48px 0 24px;
+.site-footer {
+    background: #0F172A;
+    color: #CBD5E1;
+    padding: 64px 0 0;
 }
 
-.footer-grid {
+.site-footer-grid {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 32px;
+    gap: 48px;
+    padding-bottom: 48px;
 }
 
-.footer-col h4 {
-    color: var(--color-white);
-    font-weight: var(--weight-semibold);
+.site-footer-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
     margin-bottom: 16px;
-    font-size: var(--font-size-sm);
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFFFFF;
+}
+
+.site-footer-logo span {
+    color: #10B981;
+}
+
+.site-footer-logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #10B981, #059669);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #FFFFFF;
+}
+
+.site-footer-description {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #94A3B8;
+    margin-bottom: 20px;
+    max-width: 320px;
+}
+
+.site-footer-social {
+    display: flex;
+    gap: 10px;
+}
+
+.site-footer-social a {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    text-decoration: none;
+}
+
+.site-footer-social a:hover {
+    background: #10B981;
+    color: #FFFFFF;
+}
+
+.site-footer-heading {
+    font-size: 12px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1.2px;
+    color: #FFFFFF;
+    margin-bottom: 20px;
 }
 
-.footer-col p,
-.footer-col a {
-    font-size: var(--font-size-sm);
-    color: #94a3b8;
-    display: block;
-    margin-bottom: 8px;
-    transition: var(--transition-fast);
+.site-footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.footer-col a:hover {
-    color: var(--color-accent);
+.site-footer-links a {
+    font-size: 13px;
+    color: #94A3B8;
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
-.footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 20px;
-    text-align: center;
-    font-size: var(--font-size-xs);
-    color: #64748b;
+.site-footer-links a:hover {
+    color: #10B981;
+}
+
+.site-footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 24px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 12px;
+    color: #64748B;
+}
+
+.site-footer-payments {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.site-footer-payments span {
+    color: #64748B;
+}
+
+.site-footer-payments i {
+    font-size: 20px;
+    color: #94A3B8;
 }
 
 @media (max-width: 768px) {
-    .footer-grid {
+    .site-footer {
+        padding: 40px 0 0;
+    }
+
+    .site-footer-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
+
+    .site-footer-bottom {
+        flex-direction: column;
+        text-align: center;
     }
 }
 
 @media (max-width: 480px) {
-    .footer-grid {
+    .site-footer-grid {
         grid-template-columns: 1fr;
+        gap: 28px;
     }
 }

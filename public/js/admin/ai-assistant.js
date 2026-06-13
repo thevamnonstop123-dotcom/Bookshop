@@ -1,124 +1,211 @@
-/* =============================================
-   AI Assistant Chat - Premium
-   ============================================= */
+/**
+ * Bookshop AI Assistant — Chat Interactions
+ * Toggle, send/receive messages, suggestions, clear history
+ */
+(function () {
+    "use strict";
 
-const CHAT_KEY = 'bookshop_ai_chat_history';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    const csrf = csrfToken ? csrfToken.content : "";
 
-function toggleAiChat() {
-    const modal = document.getElementById('aiChatModal');
-    modal.classList.toggle('open');
-    if (modal.classList.contains('open')) {
-        document.getElementById('aiChatInput').focus();
-        loadChatHistory();
+    let isOpen = false;
+    let isTyping = false;
+
+    // ========== TOGGLE ==========
+    window.toggleAiChat = function () {
+        const panel = document.getElementById("aiChatPanel");
+        const overlay = document.getElementById("aiChatOverlay");
+        const btn = document.getElementById("aiFloatingBtn");
+
+        if (!panel) return;
+
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            panel.classList.add("open");
+            panel.setAttribute("aria-hidden", "false");
+            if (overlay) overlay.classList.add("show");
+            if (btn) btn.style.display = "none";
+            document.body.style.overflow = "hidden";
+            document.getElementById("aiChatInput")?.focus();
+            scrollToBottom();
+        } else {
+            panel.classList.remove("open");
+            panel.setAttribute("aria-hidden", "true");
+            if (overlay) overlay.classList.remove("show");
+            if (btn) btn.style.display = "";
+            document.body.style.overflow = "";
+        }
+    };
+
+    // ========== SEND MESSAGE ==========
+    window.sendMessage = function () {
+        const input = document.getElementById("aiChatInput");
+        if (!input || isTyping) return;
+
+        const message = input.value.trim();
+        if (!message) return;
+
+        appendMessage(message, "user");
+        input.value = "";
+        hideSuggestions();
+        showTyping();
+        scrollToBottom();
+
+        fetchAIResponse(message);
+    };
+
+    // ========== SEND PROMPT ==========
+    window.sendPrompt = function (prompt) {
+        const input = document.getElementById("aiChatInput");
+        if (!input || isTyping) return;
+
+        appendMessage(prompt, "user");
+        hideSuggestions();
+        showTyping();
+        scrollToBottom();
+
+        fetchAIResponse(prompt);
+    };
+
+    // ========== CLEAR CHAT ==========
+    window.clearChatHistory = function () {
+        const body = document.getElementById("aiChatBody");
+        const suggestions = document.getElementById("aiSuggestionsWrapper");
+
+        if (!body) return;
+
+        body.innerHTML = `
+            <div class="ai-message ai-message-bot">
+                <div class="ai-message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="ai-message-bubble">
+                    <p>Chat cleared. How can I help you?</p>
+                </div>
+            </div>
+        `;
+
+        if (suggestions) suggestions.style.display = "";
+    };
+
+    // ========== API CALL ==========
+    function fetchAIResponse(message) {
+        isTyping = true;
+
+        fetch("/admin/ai/ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrf,
+                Accept: "application/json",
+            },
+            body: JSON.stringify({ message: message }),
+        })
+            .then(function (res) {
+                return res.json();
+            })
+            .then(function (data) {
+                removeTyping();
+                if (data.response) {
+                    appendMessage(data.response, "bot");
+                } else {
+                    appendMessage(
+                        "Sorry, I could not process that request. Please try again.",
+                        "bot",
+                    );
+                }
+                isTyping = false;
+                scrollToBottom();
+            })
+            .catch(function () {
+                removeTyping();
+                appendMessage(
+                    "Something went wrong. Please check your connection and try again.",
+                    "bot",
+                );
+                isTyping = false;
+                scrollToBottom();
+            });
     }
-}
 
-function sendMessage() {
-    const input = document.getElementById('aiChatInput');
-    const message = input.value.trim();
-    if (!message) return;
+    // ========== APPEND MESSAGE ==========
+    function appendMessage(content, role) {
+        const body = document.getElementById("aiChatBody");
+        if (!body) return;
 
-    addMessage('user', message);
-    input.value = '';
-    saveChatHistory();
+        const wrapper = document.createElement("div");
+        wrapper.className = "ai-message ai-message-" + role;
 
-    const body = document.getElementById('aiChatBody');
-    const loading = document.createElement('div');
-    loading.className = 'ai-message ai-bot';
-    loading.innerHTML = '<div class="ai-message-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-    body.appendChild(loading);
-    body.scrollTop = body.scrollHeight;
+        const avatar = document.createElement("div");
+        avatar.className = "ai-message-avatar";
+        avatar.innerHTML =
+            role === "user"
+                ? '<i class="fas fa-user"></i>'
+                : '<i class="fas fa-robot"></i>';
 
-    fetch('/admin/ai-assistant/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ message })
-    })
-    .then(r => r.json())
-    .then(data => {
-        loading.remove();
-        addMessage('bot', data.reply);
-        saveChatHistory();
-    })
-    .catch(() => {
-        loading.remove();
-        addMessage('bot', 'Sorry, something went wrong.');
-    });
-}
+        const bubble = document.createElement("div");
+        bubble.className = "ai-message-bubble";
+        bubble.innerHTML = "<p>" + formatMessage(content) + "</p>";
 
-function sendPrompt(message) {
-    addMessage('user', message);
-    saveChatHistory();
-
-    const body = document.getElementById('aiChatBody');
-    const loading = document.createElement('div');
-    loading.className = 'ai-message ai-bot';
-    loading.innerHTML = '<div class="ai-message-content"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-    body.appendChild(loading);
-    body.scrollTop = body.scrollHeight;
-
-    fetch('/admin/ai-assistant/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ message })
-    })
-    .then(r => r.json())
-    .then(data => {
-        loading.remove();
-        addMessage('bot', data.reply);
-        saveChatHistory();
-    })
-    .catch(() => {
-        loading.remove();
-        addMessage('bot', 'Sorry, something went wrong.');
-    });
-}
-
-function addMessage(type, text) {
-    const body = document.getElementById('aiChatBody');
-    const div = document.createElement('div');
-    div.className = 'ai-message ai-' + type;
-    div.innerHTML = '<div class="ai-message-content">' + text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') + '</div>';
-    body.appendChild(div);
-    body.scrollTop = body.scrollHeight;
-}
-
-function saveChatHistory() {
-    const messages = [];
-    document.querySelectorAll('#aiChatBody .ai-message').forEach(el => {
-        const type = el.classList.contains('ai-user') ? 'user' : 'bot';
-        const text = el.querySelector('.ai-message-content').innerHTML;
-        messages.push({ type, text });
-    });
-    if (messages.length > 20) messages.splice(0, messages.length - 20);
-    localStorage.setItem(CHAT_KEY, JSON.stringify(messages));
-}
-
-function loadChatHistory() {
-    const data = localStorage.getItem(CHAT_KEY);
-    if (!data) return;
-    try {
-        const messages = JSON.parse(data);
-        const body = document.getElementById('aiChatBody');
-        body.innerHTML = '';
-        messages.forEach(msg => addMessage(msg.type, msg.text));
-    } catch(e) {}
-}
-
-function clearChatHistory() {
-    if (confirm('Clear all chat history?')) {
-        localStorage.removeItem(CHAT_KEY);
-        document.getElementById('aiChatBody').innerHTML = `
-            <div class="ai-message ai-bot">
-                <div class="ai-message-content">👋 Hello! I'm your AI assistant. I can tell you about books, orders, customers, and revenue. Try asking me something!</div>
-            </div>`;
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(bubble);
+        body.appendChild(wrapper);
     }
-}
+
+    // ========== TYPING INDICATOR ==========
+    function showTyping() {
+        const body = document.getElementById("aiChatBody");
+        if (!body) return;
+
+        const typing = document.createElement("div");
+        typing.className = "ai-message ai-message-bot ai-message-typing";
+        typing.id = "aiTypingIndicator";
+
+        const avatar = document.createElement("div");
+        avatar.className = "ai-message-avatar";
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
+
+        const bubble = document.createElement("div");
+        bubble.className = "ai-message-bubble";
+        bubble.innerHTML =
+            '<span class="ai-typing-dot"></span><span class="ai-typing-dot"></span><span class="ai-typing-dot"></span>';
+
+        typing.appendChild(avatar);
+        typing.appendChild(bubble);
+        body.appendChild(typing);
+    }
+
+    function removeTyping() {
+        const indicator = document.getElementById("aiTypingIndicator");
+        if (indicator) indicator.remove();
+    }
+
+    // ========== HELPERS ==========
+    function hideSuggestions() {
+        const suggestions = document.getElementById("aiSuggestionsWrapper");
+        if (suggestions) suggestions.style.display = "none";
+    }
+
+    function scrollToBottom() {
+        const body = document.getElementById("aiChatBody");
+        if (body) {
+            setTimeout(function () {
+                body.scrollTop = body.scrollHeight;
+            }, 100);
+        }
+    }
+
+    function formatMessage(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\n/g, "<br>");
+    }
+
+    // ========== KEYBOARD ==========
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && isOpen) {
+            toggleAiChat();
+        }
+    });
+})();

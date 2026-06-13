@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Banners - Bookshop Admin')
+@section('title', 'Banners — Bookshop Admin')
 @section('page_title', 'Banner Management')
 
 @push('styles')
@@ -10,74 +10,101 @@
 @section('content')
 
     @if (session('success'))
-        <div class="alert alert-success" style="margin-bottom: 20px;">
+        <div class="admin-alert admin-alert-success">
             <i class="fas fa-circle-check"></i> {{ session('success') }}
         </div>
     @endif
 
-    <div class="table-container">
-        <div class="table-header">
-            <h2>All Banners</h2>
-            <a href="{{ route('admin.banners.create') }}" class="btn btn-accent btn-sm">
+    <div class="admin-table-card">
+        <div class="admin-table-header">
+            <div class="admin-table-header-left">
+                <h2 class="admin-table-title">All Banners</h2>
+                <span class="admin-table-count">{{ $banners->count() }} {{ Str::plural('banner', $banners->count()) }}</span>
+            </div>
+            <a href="{{ route('admin.banners.create') }}" class="admin-btn admin-btn-primary">
                 <i class="fas fa-plus"></i> Add Banner
             </a>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Title</th>
-                    <th>Display Order</th>
-                    <th>Period</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($banners as $banner)
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            <img src="{{ asset('storage/' . $banner->image) }}"
-                                 alt="{{ $banner->title }}"
-                                 style="width: 80px; height: 40px; object-fit: cover; border-radius: 4px;">
-                        </td>
-                        <td>{{ $banner->title }}</td>
-                        <td>{{ $banner->display_order }}</td>
-                        <td>{{ $banner->start_date->format('d M Y') }} - {{ $banner->end_date->format('d M Y') }}</td>
-                        <td>
-                            <span class="badge {{ $banner->status === 'active' ? 'badge-success' : 'badge-danger' }}">
-                                {{ ucfirst($banner->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="d-flex gap-5">
-                                <a href="{{ route('admin.banners.edit', $banner) }}" class="btn btn-outline btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <form action="{{ route('admin.banners.destroy', $banner) }}" method="POST"
-                                      onsubmit="return confirm('Delete this banner?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+                        <th style="width: 60px;">#</th>
+                        <th style="width: 120px;">Image</th>
+                        <th>Title</th>
+                        <th style="width: 100px;">Order</th>
+                        <th style="width: 200px;">Period</th>
+                        <th style="width: 100px;">Status</th>
+                        <th style="width: 120px;">Actions</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
-                            <i class="fas fa-image" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
-                            No banners found. <a href="{{ route('admin.banners.create') }}">Add your first banner</a>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($banners as $banner)
+                        <tr>
+                            <td class="admin-table-index">{{ $loop->iteration }}</td>
+                            <td>
+                                <img src="{{ asset('storage/' . $banner->image) }}"
+                                     alt="{{ $banner->title }}"
+                                     class="admin-table-thumb"
+                                     loading="lazy">
+                            </td>
+                            <td>
+                                <div class="admin-table-name">{{ $banner->title }}</div>
+                                @if($banner->description)
+                                    <div class="admin-table-meta">{{ Str::limit($banner->description, 60) }}</div>
+                                @endif
+                            </td>
+                            <td class="admin-table-number">{{ $banner->display_order }}</td>
+                            <td>
+                                <div class="admin-table-dates">
+                                    <span><i class="fas fa-calendar"></i> {{ $banner->start_date->format('d M Y') }}</span>
+                                    <span class="admin-table-dates-separator">to</span>
+                                    <span><i class="fas fa-calendar"></i> {{ $banner->end_date->format('d M Y') }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="admin-badge admin-badge-{{ $banner->status === 'active' ? 'success' : 'danger' }}">
+                                    <i class="fas fa-{{ $banner->status === 'active' ? 'circle-check' : 'circle-xmark' }}"></i>
+                                    {{ ucfirst($banner->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <a href="{{ route('admin.banners.edit', $banner) }}" class="admin-action-btn admin-action-edit" title="Edit">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </a>
+                                    <form action="{{ route('admin.banners.destroy', $banner) }}" method="POST"
+                                          onsubmit="return confirm('Delete this banner? This cannot be undone.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="admin-action-btn admin-action-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7">
+                                <div class="admin-table-empty">
+                                    <div class="admin-table-empty-icon">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                    <h4>No banners found</h4>
+                                    <p>Create promotional banners to display on your homepage hero slider.</p>
+                                    <a href="{{ route('admin.banners.create') }}" class="admin-btn admin-btn-primary">
+                                        <i class="fas fa-plus"></i> Add Banner
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
 @endsection

@@ -1,118 +1,475 @@
 /* =============================================
-   Admin Form - Shared Form Styles
+   ADMIN FORM — Premium
+   Apple / Stripe / Notion inspired
    ============================================= */
 
-.form-container .form-group {
-    margin-bottom: 18px;
+/* ---------- BACK LINK ---------- */
+.admin-form-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color 0.2s ease;
 }
 
-.form-container .form-label {
-    font-size: var(--font-size-xs);
-    font-weight: var(--weight-semibold);
-    color: var(--color-text-secondary);
+.admin-form-back:hover {
+    color: #10B981;
+}
+
+/* ---------- FORM CARD ---------- */
+.admin-form-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid #E2E8F0;
+    padding: 28px;
+    max-width: 640px;
+}
+
+.admin-form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.admin-form-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #ECFDF5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #10B981;
+    flex-shrink: 0;
+}
+
+.admin-form-card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0F172A;
+    letter-spacing: -0.2px;
+    margin-bottom: 2px;
+}
+
+.admin-form-card-subtitle {
+    font-size: 13px;
+    color: #94A3B8;
+}
+
+.admin-form-card-subtitle strong {
+    color: #475569;
+    font-weight: 600;
+}
+
+/* ---------- FORM GRID ---------- */
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.admin-form-group-full {
+    grid-column: 1 / -1;
+}
+
+/* ---------- FORM ELEMENTS ---------- */
+.admin-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.form-container .form-control {
-    padding: 11px 14px;
-    font-size: var(--font-size-base);
-    border-radius: var(--radius-sm);
-    background-color: var(--color-surface);
-    border-color: var(--color-border);
+.admin-form-required {
+    color: #EF4444;
 }
 
-.form-container .form-control:focus {
-    background-color: var(--color-white);
-}
-
-.form-container .form-control.is-invalid {
-    background-color: #fff5f5;
-}
-
-/* Drag & Drop Authors */
-.selected-authors-zone {
-    min-height: 60px;
-    border: 2px dashed var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 12px;
+.admin-form-input-wrapper {
+    position: relative;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    transition: all 0.2s ease;
-    background: var(--color-surface);
+    align-items: center;
 }
-.selected-authors-zone.drop-active {
-    border-color: var(--color-accent);
-    background: #fffbeb;
+
+.admin-form-input-icon {
+    position: absolute;
+    left: 14px;
+    color: #94A3B8;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 1;
 }
-.drop-placeholder {
-    color: var(--color-text-muted);
-    font-size: 13px;
+
+.admin-form-input {
     width: 100%;
-    text-align: center;
+    padding: 11px 14px 11px 40px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #0F172A;
+    background: #FFFFFF;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.admin-form-input::placeholder {
+    color: #94A3B8;
+}
+
+.admin-form-input:focus {
+    outline: none;
+    border-color: #10B981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
+}
+
+.admin-form-input-error {
+    border-color: #EF4444;
+}
+
+.admin-form-input-error:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+}
+
+.admin-form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394A3B8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.admin-form-textarea {
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.admin-form-error {
+    font-size: 12px;
+    color: #EF4444;
+    font-weight: 500;
+}
+
+/* ---------- IMAGE UPLOAD ---------- */
+.admin-form-current-image {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    background: #F8FAFC;
+    margin-bottom: 16px;
+}
+
+.admin-form-current-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.admin-form-current-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+}
+
+.admin-form-current-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0F172A;
+    margin-top: 2px;
+}
+
+.admin-form-image-upload {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 2px dashed #E2E8F0;
+    border-radius: 12px;
+    background: #F8FAFC;
+    flex-wrap: wrap;
+}
+
+.admin-form-image-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+}
+
+.admin-form-image-placeholder {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.admin-form-image-placeholder i {
+    font-size: 18px;
+    color: #94A3B8;
+}
+
+.admin-form-image-placeholder span {
+    font-size: 8px;
+    color: #94A3B8;
+    font-weight: 600;
+}
+
+.admin-form-image-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: #0F172A;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.admin-form-image-btn:hover {
+    background: #1E293B;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.admin-form-input-file {
+    display: none;
+}
+
+.admin-form-image-hint {
+    font-size: 11px;
+    color: #94A3B8;
+    width: 100%;
+}
+
+/* ---------- ACTIONS ---------- */
+.admin-form-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #F1F5F9;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .admin-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-form-card {
+        padding: 20px;
+    }
+
+    .admin-form-current-image {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .admin-form-image-upload {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+
+/* Banner-specific image sizes */
+.admin-form-image-preview-banner {
+    width: 200px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.admin-form-image-placeholder-banner {
+    width: 200px;
+    height: 60px;
+    border-radius: 8px;
+}
+
+.admin-form-current-img-banner {
+    width: 200px;
+    height: 60px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+
+/* Book cover current image */
+.admin-form-current-img-book {
+    width: 80px;
+    height: 104px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+
+
+/* =============================================
+   PERMISSION CARDS — Role Management
+   ============================================= */
+
+.permission-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.permission-card {
+    cursor: pointer;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    background: #FFFFFF;
+}
+
+.permission-card:hover {
+    border-color: #CBD5E1;
+}
+
+.permission-card input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.permission-card-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     padding: 16px;
 }
 
-/* Author Chips */
-.available-authors-grid {
+.permission-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-.author-chip {
-    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-full);
-    font-size: 13px;
-    font-weight: var(--weight-medium);
-    cursor: grab;
-    transition: all 0.2s ease;
-    background: var(--color-white);
-    color: var(--color-text);
-    user-select: none;
-}
-.author-chip:hover {
-    border-color: var(--color-accent);
-    background: #fffbeb;
-}
-.author-chip.selected {
-    opacity: 0.35;
-    pointer-events: none;
-}
-.author-chip.dragging {
-    opacity: 0.4;
-    transform: scale(0.95);
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
 }
 
-/* Selected Author Chip */
-.selected-author-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    background: #fffbeb;
-    border: 1.5px solid var(--color-accent);
-    border-radius: var(--radius-full);
+.permission-icon-books {
+    background: #ECFDF5;
+    color: #10B981;
+}
+
+.permission-icon-orders {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+.permission-icon-users {
+    background: #FFFBEB;
+    color: #F59E0B;
+}
+
+.permission-icon-reports {
+    background: #F3E8FF;
+    color: #7C3AED;
+}
+
+.permission-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.permission-card-title {
     font-size: 13px;
-    font-weight: var(--weight-medium);
-    color: var(--color-accent-dark);
-    animation: popIn 0.2s ease;
+    font-weight: 600;
+    color: #0F172A;
+    display: block;
 }
-.selected-author-chip .remove-author {
-    cursor: pointer;
-    color: var(--color-danger);
-    font-size: 16px;
-    line-height: 1;
-    transition: transform 0.2s ease;
+
+.permission-card-desc {
+    font-size: 11px;
+    color: #94A3B8;
+    display: block;
+    margin-top: 2px;
 }
-.selected-author-chip .remove-author:hover {
-    transform: scale(1.2);
+
+.permission-card-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #CBD5E1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    color: transparent;
+    font-size: 11px;
 }
-@keyframes popIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+
+.permission-card-selected {
+    border-color: #10B981 !important;
+    background: #F0FDF4;
+}
+
+.permission-card-selected .permission-card-check {
+    border-color: #10B981;
+    background: #10B981;
+    color: #FFFFFF;
+}
+
+/* Admin Alert Error */
+.admin-alert-error {
+    background: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .permission-grid {
+        grid-template-columns: 1fr;
+    }
 }

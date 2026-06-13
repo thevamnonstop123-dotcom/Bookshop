@@ -1,5 +1,6 @@
 /* =============================================
-   NAVBAR — Premium, Sticky, Fully Responsive
+   NAVBAR — Premium, Sticky, Responsive
+   Apple / Stripe / Notion inspired
    ============================================= */
 
 /* ---------- NAVBAR CONTAINER ---------- */
@@ -7,16 +8,16 @@
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
     height: 68px;
     transition: box-shadow 0.3s ease;
 }
 
 .navbar.scrolled {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
 .navbar-inner {
@@ -60,7 +61,7 @@
     color: #10B981;
 }
 
-/* ---------- NAV LINKS (Desktop) ---------- */
+/* ---------- NAV LINKS ---------- */
 .navbar-nav {
     display: flex;
     align-items: center;
@@ -71,8 +72,6 @@
     align-items: center;
     gap: 4px;
     list-style: none;
-    margin: 0;
-    padding: 0;
 }
 
 .navbar-link {
@@ -86,6 +85,11 @@
     color: #475569;
     text-decoration: none;
     transition: all 0.2s ease;
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .navbar-link:hover {
@@ -160,6 +164,7 @@
 .navbar-dropdown-item i {
     font-size: 9px;
     color: #94A3B8;
+    transition: all 0.2s ease;
 }
 
 .navbar-dropdown-item:hover {
@@ -189,6 +194,7 @@
     font-weight: 600;
     color: #2563EB;
     text-decoration: none;
+    transition: all 0.2s ease;
 }
 
 .navbar-dropdown-all:hover {
@@ -196,10 +202,10 @@
     color: #1D4ED8;
 }
 
-/* ---------- SEARCH (Desktop) ---------- */
+/* ---------- SEARCH ---------- */
 .navbar-search {
     flex: 1;
-    max-width: 360px;
+    max-width: 400px;
 }
 
 .navbar-search-wrapper {
@@ -220,7 +226,7 @@
     width: 100%;
     padding: 10px 40px 10px 40px;
     border: 1.5px solid #E2E8F0;
-    border-radius: 30px;
+    border-radius: 12px;
     font-size: 14px;
     background: #F8FAFC;
     color: #0F172A;
@@ -235,7 +241,7 @@
     outline: none;
     border-color: #10B981;
     background: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
 }
 
 .navbar-search-clear {
@@ -264,7 +270,7 @@
 /* Auth Buttons */
 .navbar-auth-btn {
     padding: 9px 18px;
-    border-radius: 30px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -310,6 +316,7 @@
     background: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .navbar-user-trigger:hover {
@@ -451,7 +458,7 @@
     position: relative;
     width: 40px;
     height: 40px;
-    border-radius: 30px;
+    border-radius: 10px;
     border: none;
     background: #F8FAFC;
     color: #475569;
@@ -527,12 +534,11 @@
     right: 0;
     bottom: 0;
     background: #FFFFFF;
-    z-index: 1101; /* sit above the navbar (which is 1000) */
+    z-index: 999;
     padding: 20px;
     overflow-y: auto;
     transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 40px rgba(2,6,23,0.08);
 }
 
 .navbar-mobile-panel.open {
@@ -545,7 +551,6 @@
     gap: 16px;
 }
 
-/* Mobile Search */
 .navbar-mobile-search {
     position: relative;
     margin-bottom: 8px;
@@ -553,7 +558,7 @@
 
 .navbar-mobile-search i {
     position: absolute;
-    left: 16px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: #94A3B8;
@@ -562,22 +567,18 @@
 
 .navbar-mobile-search input {
     width: 100%;
-    padding: 14px 16px 14px 44px;
+    padding: 14px 14px 14px 42px;
     border: 1.5px solid #E2E8F0;
-    border-radius: 14px;
+    border-radius: 12px;
     font-size: 15px;
     background: #F8FAFC;
 }
 
-/* Mobile Links */
 .navbar-mobile-links {
     list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.navbar-mobile-links li {
-    margin-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .navbar-mobile-links a {
@@ -585,10 +586,10 @@
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 15px;
     font-weight: 500;
-    color: #1E293B;
+    color: #475569;
     text-decoration: none;
     transition: all 0.2s ease;
 }
@@ -601,7 +602,8 @@
 }
 
 .navbar-mobile-links a:hover {
-    background: #F1F5F9;
+    background: #F8FAFC;
+    color: #0F172A;
 }
 
 .navbar-mobile-divider {
@@ -615,103 +617,71 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 1100; /* just below panel */
+    background: rgba(15, 23, 42, 0.4);
+    z-index: 998;
     opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    transition: opacity 0.35s ease;
 }
 
 .navbar-mobile-overlay.show {
     opacity: 1;
-    visibility: visible;
 }
 
 /* ---------- RESPONSIVE ---------- */
-@media (min-width: 1025px) {
-    .navbar-search {
-        display: block;
-    }
-    
-    .navbar-mobile-search {
-        display: none;
-    }
-}
-
 @media (max-width: 1024px) {
     .navbar-nav {
         display: none;
     }
-    
+
     .navbar-search {
         display: none;
     }
-    
+
     .navbar-mobile-toggle {
         display: flex;
     }
-    
+
     .navbar-mobile-panel {
         display: block;
     }
-    
+
     .navbar-mobile-overlay {
         display: block;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     .navbar {
         height: 60px;
     }
-    
+
     .navbar-logo-text {
-        font-size: 18px;
+        font-size: 17px;
     }
-    
+
     .navbar-logo-icon {
-        width: 34px;
-        height: 34px;
-        font-size: 15px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
     }
-    
-    .navbar-cart-btn {
-        width: 38px;
-        height: 38px;
+
+    .navbar-auth-register {
+        display: none;
     }
-    
+
     .navbar-auth-signin {
         padding: 7px 14px;
         font-size: 12px;
     }
-    
-    .navbar-auth-register {
-        display: none;
-    }
-    
+
     .navbar-mobile-panel {
         top: 60px;
     }
 }
 
-@media (max-width: 480px) {
-    .navbar {
-        height: 56px;
-    }
-    
-    .navbar-logo-text {
-        font-size: 16px;
-    }
-    
-    .navbar-logo-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 13px;
-    }
-    
-    .navbar-cart-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
+/* Hide categories dropdown on desktop (sidebar handles it) */
+@media (min-width: 1025px) {
+    .navbar-dropdown {
+        display: none;
     }
 }

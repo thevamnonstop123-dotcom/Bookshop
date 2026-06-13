@@ -1,79 +1,125 @@
 @extends('layouts.admin')
 
-@section('title', 'Promotions - Bookshop Admin')
+@section('title', 'Promotions — Bookshop Admin')
 @section('page_title', 'Email Promotions')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/admin/table.css') }}">
-    <style>
-        .promo-form { background: var(--color-white); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border-light); margin-bottom: 30px; }
-        .promo-form h3 { margin-bottom: 18px; font-size: 17px; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/admin/form.css') }}">
 @endpush
 
 @section('content')
 
     @if (session('success'))
-        <div class="alert alert-success" style="margin-bottom:20px;">
+        <div class="admin-alert admin-alert-success">
             <i class="fas fa-circle-check"></i> {{ session('success') }}
         </div>
     @endif
 
     {{-- Send Promotion Form --}}
-    <div class="promo-form">
-        <h3><i class="fas fa-bullhorn"></i> Send Promotion to All Customers</h3>
-        <form action="{{ route('admin.promotions.send') }}" method="POST">
+    <div class="admin-form-card" style="max-width: 100%; margin-bottom: 28px;">
+        <div class="admin-form-card-header">
+            <div class="admin-form-card-icon" style="background: #FFFBEB; color: #F59E0B;">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <div>
+                <h2 class="admin-form-card-title">Send Promotion</h2>
+                <p class="admin-form-card-subtitle">
+                    Send an email to all <strong>{{ $activeCustomersCount ?? \App\Models\Customer::where('status', 'active')->count() }}</strong> active customers
+                </p>
+            </div>
+        </div>
+
+        <form action="{{ route('admin.promotions.send') }}" method="POST" class="admin-form">
             @csrf
-            <div class="form-group">
-                <label class="form-label">Subject</label>
-                <input type="text" name="subject" class="form-control" placeholder="e.g., 40% Off — New Arrivals!" required>
+
+            <div class="admin-form-grid">
+                <div class="admin-form-group admin-form-group-full">
+                    <label for="promoSubject" class="admin-form-label">
+                        Subject <span class="admin-form-required">*</span>
+                    </label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-heading admin-form-input-icon"></i>
+                        <input type="text" id="promoSubject" name="subject"
+                               class="admin-form-input" placeholder="e.g., 40% Off — New Arrivals!" required>
+                    </div>
+                </div>
+
+                <div class="admin-form-group admin-form-group-full">
+                    <label for="promoMessage" class="admin-form-label">
+                        Message <span class="admin-form-required">*</span>
+                    </label>
+                    <textarea id="promoMessage" name="message"
+                              class="admin-form-input admin-form-textarea"
+                              rows="6" placeholder="Write your promotion message here..." required></textarea>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Message</label>
-                <textarea name="message" class="form-control" rows="6" placeholder="Write your promotion message here..." required></textarea>
+
+            <div class="admin-form-actions">
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Send to {{ $activeCustomersCount ?? \App\Models\Customer::where('status', 'active')->count() }} Customers
+                </button>
             </div>
-            <button type="submit" class="btn btn-accent">
-                <i class="fas fa-paper-plane"></i> Send to {{ $activeCustomersCount ?? \App\Models\Customer::where('status','active')->count() }} Customers
-            </button>
         </form>
     </div>
 
-    {{-- History --}}
-    <div class="table-container">
-        <div class="table-header">
-            <h2>Sent Promotions</h2>
+    {{-- Sent Promotions Table --}}
+    <div class="admin-table-card">
+        <div class="admin-table-header">
+            <div class="admin-table-header-left">
+                <h2 class="admin-table-title">Sent Promotions</h2>
+                <span class="admin-table-count">{{ $promotions->count() }} {{ Str::plural('campaign', $promotions->count()) }}</span>
+            </div>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Subject</th>
-                    <th>Message</th>
-                    <th>Recipients</th>
-                    <th>Sent By</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($promotions as $promo)
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td class="font-semibold">{{ $promo->subject }}</td>
-                        <td>{{ Str::limit($promo->message, 60) }}</td>
-                        <td>{{ $promo->recipients_count }}</td>
-                        <td>{{ $promo->sentBy->name ?? 'N/A' }}</td>
-                        <td>{{ $promo->sent_at->format('d M Y, H:i') }}</td>
+                        <th style="width: 60px;">#</th>
+                        <th>Subject</th>
+                        <th>Message</th>
+                        <th style="width: 100px;">Recipients</th>
+                        <th style="width: 130px;">Sent By</th>
+                        <th style="width: 140px;">Date</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center" style="padding:40px;color:var(--color-text-muted);">
-                            <i class="fas fa-envelope" style="font-size:40px;display:block;margin-bottom:10px;"></i>
-                            No promotions sent yet.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse ($promotions as $promo)
+                        <tr>
+                            <td class="admin-table-index">{{ $loop->iteration }}</td>
+                            <td>
+                                <div class="admin-table-name">{{ $promo->subject }}</div>
+                            </td>
+                            <td class="admin-table-bio">{{ Str::limit($promo->message, 80) }}</td>
+                            <td class="admin-table-number">
+                                <span class="admin-badge admin-badge-info">
+                                    <i class="fas fa-users"></i> {{ $promo->recipients_count }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="admin-table-name" style="font-size: 12px;">{{ $promo->sentBy->name ?? 'System' }}</div>
+                            </td>
+                            <td class="admin-table-date">{{ $promo->sent_at->format('d M Y, H:i') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6">
+                                <div class="admin-table-empty">
+                                    <div class="admin-table-empty-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <h4>No promotions sent yet</h4>
+                                    <p>Create your first email campaign to engage with your customers.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
 @endsection

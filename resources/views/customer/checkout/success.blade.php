@@ -1,6 +1,6 @@
 @extends('layouts.customer')
 
-@section('title', 'Order Confirmed - Bookshop')
+@section('title', 'Order Confirmed — Bookshop')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/customer/checkout.css') }}">
@@ -8,31 +8,57 @@
 
 @section('content')
 
-<div class="success-modal-overlay" onclick="this.remove()">
-    <div class="success-modal" onclick="event.stopPropagation()">
-        <div class="success-icon">
-            <i class="fas fa-check-circle"></i>
+<div class="success-page">
+    <div class="success-container">
+
+        <div class="success-card">
+            <div class="success-icon">
+                <div class="success-icon-circle">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="success-icon-rings">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <h1 class="success-title">Order Confirmed!</h1>
+            <p class="success-message">Thank you for your purchase. Your order has been received and is being processed.</p>
+
+            <div class="success-order-number">
+                <span class="success-order-label">Order Number</span>
+                <span class="success-order-value">#{{ $order->order_number }}</span>
+            </div>
+
+            <div class="success-details">
+                <div class="success-detail-item">
+                    <i class="fas fa-coins"></i>
+                    <span>Total</span>
+                    <strong>{{ number_format($order->total_amount) }} MMK</strong>
+                </div>
+                <div class="success-detail-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payment</span>
+                    <strong>{{ strtoupper($order->payment_method) }}</strong>
+                </div>
+            </div>
+
+            <div class="success-actions">
+                <a href="{{ route('customer.orders.index') }}" class="success-btn success-btn-outline">
+                    <i class="fas fa-receipt"></i> View My Orders
+                </a>
+                <a href="{{ route('books.index') }}" class="success-btn success-btn-primary">
+                    <i class="fas fa-book-open"></i> Continue Shopping
+                </a>
+            </div>
         </div>
-        <h2>Order Confirmed!</h2>
-        <p>Thank you for your purchase.</p>
-        <div class="order-number">#{{ $order->order_number }}</div>
-        <p style="font-size: 14px;">Total: <strong>{{ number_format($order->total_amount) }} MMK</strong></p>
-        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-            <a href="{{ route('customer.orders.index') }}" class="btn btn-outline">
-                <i class="fas fa-shopping-bag"></i> View Orders
-            </a>
-            <a href="{{ route('books.index') }}" class="btn btn-accent">
-                <i class="fas fa-book"></i> Continue Shopping
-            </a>
-        </div>
+
     </div>
 </div>
 
-<script>
-    setTimeout(() => {
-        document.querySelector('.success-modal-overlay')?.remove();
-        window.location.href = '{{ route('books.index') }}';
-    }, 8000);
-</script>
-
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/customer/checkout.js') }}"></script>
+@endpush

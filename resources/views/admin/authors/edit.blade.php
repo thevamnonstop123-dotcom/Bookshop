@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Author - Bookshop Admin')
+@section('title', 'Edit Author — Bookshop Admin')
 @section('page_title', 'Edit Author')
 
 @push('styles')
@@ -9,55 +9,101 @@
 
 @section('content')
 
-    <div class="form-container" style="max-width: 600px; background: var(--color-white); padding: 28px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
-        <form action="{{ route('admin.authors.update', $author) }}" method="POST" enctype="multipart/form-data">
+    {{-- Back Link --}}
+    <a href="{{ route('admin.authors.index') }}" class="admin-form-back">
+        <i class="fas fa-arrow-left"></i> Back to Authors
+    </a>
+
+    <div class="admin-form-card">
+        <div class="admin-form-card-header">
+            <div class="admin-form-card-icon">
+                <i class="fas fa-feather"></i>
+            </div>
+            <div>
+                <h2 class="admin-form-card-title">Edit Author</h2>
+                <p class="admin-form-card-subtitle">Update information for <strong>{{ $author->name }}</strong></p>
+            </div>
+        </div>
+
+        <form action="{{ route('admin.authors.update', $author) }}" method="POST" enctype="multipart/form-data" class="admin-form">
             @csrf
             @method('PUT')
 
-            <div class="form-group">
-                <label for="name" class="form-label">Author Name</label>
-                <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror"
-                       value="{{ old('name', $author->name) }}" required>
-                @error('name') <span class="invalid-feedback">{{ $message }}</span> @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="bio" class="form-label">Biography</label>
-                <textarea id="bio" name="bio" class="form-control @error('bio') is-invalid @enderror"
-                          rows="4">{{ old('bio', $author->bio) }}</textarea>
-                @error('bio') <span class="invalid-feedback">{{ $message }}</span> @enderror
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Current Photo</label>
-                <div style="margin-bottom: 10px;">
-                    <img src="{{ $author->image ? asset('storage/' . $author->image) : 'https://ui-avatars.com/api/?name=' . urlencode($author->name) . '&background=f59e0b&color=fff&size=100' }}"
-                         alt="{{ $author->name }}"
-                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+            <div class="admin-form-grid">
+                {{-- Name --}}
+                <div class="admin-form-group">
+                    <label for="name" class="admin-form-label">
+                        Author Name <span class="admin-form-required">*</span>
+                    </label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-user-pen admin-form-input-icon"></i>
+                        <input type="text" id="name" name="name"
+                               class="admin-form-input @error('name') admin-form-input-error @enderror"
+                               value="{{ old('name', $author->name) }}" required>
+                    </div>
+                    @error('name')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
                 </div>
-                <label for="image" class="form-label">Change Photo (optional)</label>
-                <input type="file" id="image" name="image" class="form-control @error('image') is-invalid @enderror"
-                       accept=".jpg,.jpeg,.png" onchange="previewImage(event)">
-                <small style="color: var(--color-text-muted); font-size: 12px;">Max 2MB. Leave blank to keep current.</small>
-                @error('image') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                <div style="margin-top: 10px;">
-                    <img id="imagePreview" src="#" alt="Preview" style="display: none; width: 100px; height: 100px; object-fit: cover; border-radius: 50%;">
+
+                {{-- Status --}}
+                <div class="admin-form-group">
+                    <label for="status" class="admin-form-label">Status</label>
+                    <select id="status" name="status" class="admin-form-input admin-form-select">
+                        <option value="active" {{ $author->status == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ $author->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                </div>
+
+                {{-- Biography --}}
+                <div class="admin-form-group admin-form-group-full">
+                    <label for="bio" class="admin-form-label">Biography</label>
+                    <textarea id="bio" name="bio"
+                              class="admin-form-input admin-form-textarea @error('bio') admin-form-input-error @enderror"
+                              rows="5" placeholder="Brief biography of the author">{{ old('bio', $author->bio) }}</textarea>
+                    @error('bio')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Photo --}}
+                <div class="admin-form-group admin-form-group-full">
+                    <label class="admin-form-label">Author Photo</label>
+                    <div class="admin-form-current-image">
+                        <img src="{{ $author->image ? asset('storage/' . $author->image) : 'https://ui-avatars.com/api/?name=' . urlencode($author->name) . '&background=10B981&color=fff&size=96' }}"
+                             alt="{{ $author->name }}"
+                             class="admin-form-current-img">
+                        <div>
+                            <span class="admin-form-current-label">Current photo</span>
+                            <p class="admin-form-current-name">{{ $author->name }}</p>
+                        </div>
+                    </div>
+                    <div class="admin-form-image-upload">
+                        <img id="imagePreview" src="#" alt="New preview"
+                             class="admin-form-image-preview" style="display: none;">
+                        <div class="admin-form-image-placeholder" id="imagePlaceholder">
+                            <i class="fas fa-image"></i>
+                            <span>New photo preview</span>
+                        </div>
+                        <label for="image" class="admin-form-image-btn">
+                            <i class="fas fa-upload"></i> Change Photo
+                        </label>
+                        <input type="file" id="image" name="image"
+                               class="admin-form-input-file @error('image') admin-form-input-error @enderror"
+                               accept=".jpg,.jpeg,.png" onchange="previewImage(event)">
+                        <span class="admin-form-image-hint">Leave blank to keep current. JPG, JPEG, PNG. Max 2MB.</span>
+                    </div>
+                    @error('image')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="status" class="form-label">Status</label>
-                <select id="status" name="status" class="form-control">
-                    <option value="active" {{ $author->status == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ $author->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
-            </div>
-
-            <div class="d-flex gap-10 mt-20">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Update Author
+            <div class="admin-form-actions">
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    <i class="fas fa-check"></i> Update Author
                 </button>
-                <a href="{{ route('admin.authors.index') }}" class="btn btn-outline">Cancel</a>
+                <a href="{{ route('admin.authors.index') }}" class="admin-btn admin-btn-ghost">Cancel</a>
             </div>
         </form>
     </div>
@@ -65,11 +111,5 @@
 @endsection
 
 @push('scripts')
-<script>
-    function previewImage(event) {
-        const img = document.getElementById('imagePreview');
-        img.src = URL.createObjectURL(event.target.files[0]);
-        img.style.display = 'block';
-    }
-</script>
+    <script src="{{ asset('js/admin/form.js') }}"></script>
 @endpush

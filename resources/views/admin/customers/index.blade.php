@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Customers - Bookshop Admin')
+@section('title', 'Customers — Bookshop Admin')
 @section('page_title', 'Customer Management')
 
 @push('styles')
@@ -10,73 +10,86 @@
 @section('content')
 
     @if (session('success'))
-        <div class="alert alert-success" style="margin-bottom: 20px;">
+        <div class="admin-alert admin-alert-success">
             <i class="fas fa-circle-check"></i> {{ session('success') }}
         </div>
     @endif
 
-    <div class="table-container">
-        <div class="table-header">
-            <h2>All Customers</h2>
+    <div class="admin-table-card">
+        <div class="admin-table-header">
+            <div class="admin-table-header-left">
+                <h2 class="admin-table-title">All Customers</h2>
+                <span class="admin-table-count">{{ $customers->count() }} {{ Str::plural('customer', $customers->count()) }}</span>
+            </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Orders</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($customers as $customer)
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            @php
-                                $customerImg = ($customer->image && $customer->image !== 'default.png')
-                                    ? asset('storage/' . $customer->image)
-                                    : null;
-                            @endphp
-                            @if ($customerImg)
-                                <img src="{{ $customerImg }}" alt="{{ $customer->name }}"
-                                     style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
-                            @else
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: #0f172a; font-weight: 700; font-size: 14px;">
-                                    {{ strtoupper(substr($customer->name, 0, 1)) }}
+                        <th style="width: 60px;">#</th>
+                        <th style="width: 56px;">Photo</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th style="width: 80px;">Orders</th>
+                        <th style="width: 100px;">Status</th>
+                        <th style="width: 80px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($customers as $customer)
+                        <tr>
+                            <td class="admin-table-index">{{ $loop->iteration }}</td>
+                            <td>
+                                @php
+                                    $customerImg = ($customer->image && $customer->image !== 'default.png')
+                                        ? asset('storage/' . $customer->image)
+                                        : null;
+                                @endphp
+                                @if ($customerImg)
+                                    <img src="{{ $customerImg }}" alt="{{ $customer->name }}" class="admin-table-avatar" loading="lazy">
+                                @else
+                                    <div class="admin-table-avatar-placeholder">
+                                        {{ strtoupper(substr($customer->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="admin-table-name">{{ $customer->name }}</div>
+                            </td>
+                            <td class="admin-table-email">{{ $customer->email }}</td>
+                            <td>{{ $customer->phone ?? '—' }}</td>
+                            <td class="admin-table-number">{{ $customer->orders_count }}</td>
+                            <td>
+                                <span class="admin-badge admin-badge-{{ $customer->status === 'active' ? 'success' : ($customer->status === 'banned' ? 'danger' : 'warning') }}">
+                                    <i class="fas fa-{{ $customer->status === 'active' ? 'circle-check' : ($customer->status === 'banned' ? 'circle-xmark' : 'circle-pause') }}"></i>
+                                    {{ ucfirst($customer->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ route('admin.customers.show', $customer) }}" class="admin-action-btn admin-action-view" title="View details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8">
+                                <div class="admin-table-empty">
+                                    <div class="admin-table-empty-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <h4>No customers found</h4>
+                                    <p>Customers will appear here once they register.</p>
                                 </div>
-                            @endif
-                        </td>
-                        <td class="font-semibold">{{ $customer->name }}</td>
-                        <td>{{ $customer->email }}</td>
-                        <td>{{ $customer->phone }}</td>
-                        <td>{{ $customer->orders_count }}</td>
-                        <td>
-                            <span class="badge {{ $customer->status === 'active' ? 'badge-success' : ($customer->status === 'banned' ? 'badge-danger' : 'badge-warning') }}">
-                                {{ ucfirst($customer->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-outline btn-sm">
-                                <i class="fas fa-eye"></i> View
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
-                            <i class="fas fa-users" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
-                            No customers found.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
 @endsection

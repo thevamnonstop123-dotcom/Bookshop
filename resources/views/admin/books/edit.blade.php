@@ -1,157 +1,287 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Book - Bookshop Admin')
+@section('title', 'Edit Book — Bookshop Admin')
 @section('page_title', 'Edit Book')
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/admin/form.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/drag-drop.css') }}">
 @endpush
 
 @section('content')
 
-    <div class="form-container" style="max-width: 700px; background: var(--color-white); padding: 28px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
-        <form action="{{ route('admin.books.update', $book) }}" method="POST" enctype="multipart/form-data">
+    <a href="{{ route('admin.books.index') }}" class="admin-form-back">
+        <i class="fas fa-arrow-left"></i> Back to Books
+    </a>
+
+    <div class="admin-form-card">
+        <div class="admin-form-card-header">
+            <div class="admin-form-card-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div>
+                <h2 class="admin-form-card-title">Edit Book</h2>
+                <p class="admin-form-card-subtitle">Update information for <strong>{{ $book->title }}</strong></p>
+            </div>
+        </div>
+
+        <form action="{{ route('admin.books.update', $book) }}" method="POST" enctype="multipart/form-data" class="admin-form">
             @csrf @method('PUT')
 
-            <div class="form-group">
-                <label for="title" class="form-label">Book Title</label>
-                <input type="text" id="title" name="title" class="form-control @error('title') is-invalid @enderror"
-                       value="{{ old('title', $book->title) }}" required>
-                @error('title') <span class="invalid-feedback">{{ $message }}</span> @enderror
-            </div>
+            <div class="admin-form-grid">
+                {{-- Title --}}
+                <div class="admin-form-group admin-form-group-full">
+                    <label for="title" class="admin-form-label">
+                        Book Title <span class="admin-form-required">*</span>
+                    </label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-heading admin-form-input-icon"></i>
+                        <input type="text" id="title" name="title"
+                               class="admin-form-input @error('title') admin-form-input-error @enderror"
+                               value="{{ old('title', $book->title) }}" required>
+                    </div>
+                    @error('title')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
 
-            <div class="d-flex gap-20">
-                <div class="form-group" style="flex: 1;">
-                    <label for="category_id" class="form-label">Category</label>
-                    <select id="category_id" name="category_id" class="form-control @error('category_id') is-invalid @enderror" required>
+                {{-- Category --}}
+                <div class="admin-form-group">
+                    <label for="category_id" class="admin-form-label">
+                        Category <span class="admin-form-required">*</span>
+                    </label>
+                    <select id="category_id" name="category_id"
+                            class="admin-form-input admin-form-select @error('category_id') admin-form-input-error @enderror" required>
                         <option value="">Select Category</option>
                         @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id', $book->category_id) == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                            <option value="{{ $category->id }}"
+                                {{ old('category_id', $book->category_id) == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
                         @endforeach
                     </select>
-                    @error('category_id') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                    @error('category_id')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="isbn" class="form-label">ISBN</label>
-                    <input type="text" id="isbn" name="isbn" class="form-control @error('isbn') is-invalid @enderror"
-                           value="{{ old('isbn', $book->isbn) }}" required>
-                    @error('isbn') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
-            </div>
 
-            {{-- Authors Drag & Drop --}}
-            <div class="form-group">
-                <label class="form-label">Authors</label>
-                <div class="author-selection">
-                    <div class="selected-authors-zone" id="selectedAuthorsZone"
-                         ondragover="event.preventDefault(); this.classList.add('drop-active')"
-                         ondragleave="this.classList.remove('drop-active')"
-                         ondrop="handleAuthorDrop(event)">
-                        <span class="drop-placeholder" id="noAuthorsMsg">Drop authors here or click to select</span>
+                {{-- ISBN --}}
+                <div class="admin-form-group">
+                    <label for="isbn" class="admin-form-label">
+                        ISBN <span class="admin-form-required">*</span>
+                    </label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-barcode admin-form-input-icon"></i>
+                        <input type="text" id="isbn" name="isbn"
+                               class="admin-form-input @error('isbn') admin-form-input-error @enderror"
+                               value="{{ old('isbn', $book->isbn) }}" required>
                     </div>
-                    <div class="available-authors-grid mt-3">
-                        @foreach ($authors as $author)
-                            <div class="author-chip {{ in_array($author->id, old('author_ids', $selectedAuthors)) ? 'selected' : '' }}"
-                                 draggable="true"
-                                 data-author-id="{{ $author->id }}"
-                                 data-author-name="{{ $author->name }}"
-                                 ondragstart="handleAuthorDragStart(event)"
-                                 ondragend="handleAuthorDragEnd(event)"
-                                 onclick="toggleAuthorSelect(this, {{ $author->id }})">
-                                {{ $author->name }}
-                            </div>
-                        @endforeach
+                    @error('isbn')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Authors --}}
+                <div class="admin-form-group admin-form-group-full">
+                    <label class="admin-form-label">Authors</label>
+
+                    <div class="author-selection-container">
+                        <div class="author-dropzone" id="selectedAuthorsZone"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)"
+                             ondrop="handleAuthorDrop(event)">
+                            <span class="author-dropzone-placeholder" id="noAuthorsMsg">
+                                <i class="fas fa-hand-pointer"></i> Drop authors here or click below to select
+                            </span>
+                        </div>
+
+                        <div class="author-grid-label">Available Authors</div>
+                        <div class="author-grid" id="authorGrid">
+                            @foreach ($authors as $author)
+                                <button type="button"
+                                        class="author-chip {{ in_array($author->id, old('author_ids', $selectedAuthors)) ? 'author-chip-selected' : '' }}"
+                                        draggable="true"
+                                        data-author-id="{{ $author->id }}"
+                                        data-author-name="{{ $author->name }}"
+                                        ondragstart="handleAuthorDragStart(event)"
+                                        ondragend="handleAuthorDragEnd(event)"
+                                        onclick="toggleAuthorSelect(this, {{ $author->id }})">
+                                    <i class="fas fa-feather"></i>
+                                    {{ $author->name }}
+                                </button>
+                            @endforeach
+                        </div>
+
+                        <div id="authorInputs"></div>
                     </div>
-                    <div id="authorInputs"></div>
-                    @error('author_ids') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
-            </div>
 
-            <div class="d-flex gap-20">
-                <div class="form-group" style="flex: 1;">
-                    <label for="price" class="form-label">Price (MMK)</label>
-                    <input type="number" id="price" name="price" class="form-control @error('price') is-invalid @enderror"
-                           value="{{ old('price', $book->price) }}" step="0.01" min="0" required>
-                    @error('price') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                    @error('author_ids')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="sale_price" class="form-label">Sale Price (MMK) — Optional</label>
-                    <input type="number" id="sale_price" name="sale_price" class="form-control @error('sale_price') is-invalid @enderror"
-                           value="{{ old('sale_price', $book->sale_price) }}" step="0.01" min="0" placeholder="Leave empty for no discount">
-                    @error('sale_price') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
-            </div>
 
-            <div class="d-flex gap-20">
-                <div class="form-group" style="flex: 1;">
-                    <label for="sale_starts_at" class="form-label">Sale Starts</label>
-                    <input type="datetime-local" id="sale_starts_at" name="sale_starts_at" class="form-control"
-                           value="{{ old('sale_starts_at', $book->sale_starts_at ? $book->sale_starts_at->format('Y-m-d\TH:i') : '') }}">
+                {{-- Price --}}
+                <div class="admin-form-group">
+                    <label for="price" class="admin-form-label">
+                        Price (MMK) <span class="admin-form-required">*</span>
+                    </label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-coins admin-form-input-icon"></i>
+                        <input type="number" id="price" name="price"
+                               class="admin-form-input @error('price') admin-form-input-error @enderror"
+                               value="{{ old('price', $book->price) }}" step="0.01" min="0" required>
+                    </div>
+                    @error('price')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="sale_ends_at" class="form-label">Sale Ends</label>
-                    <input type="datetime-local" id="sale_ends_at" name="sale_ends_at" class="form-control"
-                           value="{{ old('sale_ends_at', $book->sale_ends_at ? $book->sale_ends_at->format('Y-m-d\TH:i') : '') }}">
-                </div>
-            </div>
 
-            <div class="d-flex gap-20">
-                <div class="form-group" style="flex: 1;">
-                    <label for="stock_quantity" class="form-label">Stock Quantity</label>
-                    <input type="number" id="stock_quantity" name="stock_quantity" class="form-control @error('stock_quantity') is-invalid @enderror"
-                           value="{{ old('stock_quantity', $book->stock_quantity) }}" min="0" required>
-                    @error('stock_quantity') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                {{-- Sale Price --}}
+                <div class="admin-form-group">
+                    <label for="sale_price" class="admin-form-label">Sale Price (MMK)</label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-tag admin-form-input-icon"></i>
+                        <input type="number" id="sale_price" name="sale_price"
+                               class="admin-form-input @error('sale_price') admin-form-input-error @enderror"
+                               value="{{ old('sale_price', $book->sale_price) }}" step="0.01" min="0"
+                               placeholder="Leave empty for no discount">
+                    </div>
+                    <span class="admin-form-hint">Optional — leave blank for regular price</span>
+                    @error('sale_price')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="status" class="form-label">Status</label>
-                    <select id="status" name="status" class="form-control">
+
+                {{-- Stock --}}
+                <div class="admin-form-group">
+                    <label for="stock_quantity" class="admin-form-label">Stock Quantity</label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-boxes admin-form-input-icon"></i>
+                        <input type="number" id="stock_quantity" name="stock_quantity"
+                               class="admin-form-input @error('stock_quantity') admin-form-input-error @enderror"
+                               value="{{ old('stock_quantity', $book->stock_quantity) }}" min="0">
+                    </div>
+                    <span class="admin-form-hint">
+                        @if($book->isEbook())
+                            E-book — unlimited access
+                        @else
+                            Current stock: {{ $book->stock_quantity }} units
+                        @endif
+                    </span>
+                    @error('stock_quantity')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Status --}}
+                <div class="admin-form-group">
+                    <label for="status" class="admin-form-label">Status</label>
+                    <select id="status" name="status" class="admin-form-input admin-form-select">
                         <option value="active" {{ $book->status == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ $book->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                 </div>
+
+                {{-- Language --}}
+                <div class="admin-form-group">
+                    <label for="language" class="admin-form-label">Language</label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-language admin-form-input-icon"></i>
+                        <input type="text" id="language" name="language"
+                               class="admin-form-input @error('language') admin-form-input-error @enderror"
+                               value="{{ old('language', $book->language) }}" required>
+                    </div>
+                    @error('language')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Published Date --}}
+                <div class="admin-form-group">
+                    <label for="published_date" class="admin-form-label">
+                        Published Date <span class="admin-form-required">*</span>
+                    </label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-calendar admin-form-input-icon"></i>
+                        <input type="date" id="published_date" name="published_date"
+                               class="admin-form-input @error('published_date') admin-form-input-error @enderror"
+                               value="{{ old('published_date', $book->published_date->format('Y-m-d')) }}" required>
+                    </div>
+                    @error('published_date')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Sale Period --}}
+                <div class="admin-form-group">
+                    <label for="sale_starts_at" class="admin-form-label">Sale Starts</label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-calendar-plus admin-form-input-icon"></i>
+                        <input type="datetime-local" id="sale_starts_at" name="sale_starts_at"
+                               class="admin-form-input"
+                               value="{{ old('sale_starts_at', $book->sale_starts_at ? $book->sale_starts_at->format('Y-m-d\TH:i') : '') }}">
+                    </div>
+                </div>
+
+                <div class="admin-form-group">
+                    <label for="sale_ends_at" class="admin-form-label">Sale Ends</label>
+                    <div class="admin-form-input-wrapper">
+                        <i class="fas fa-calendar-xmark admin-form-input-icon"></i>
+                        <input type="datetime-local" id="sale_ends_at" name="sale_ends_at"
+                               class="admin-form-input"
+                               value="{{ old('sale_ends_at', $book->sale_ends_at ? $book->sale_ends_at->format('Y-m-d\TH:i') : '') }}">
+                    </div>
+                </div>
+
+                {{-- Description --}}
+                <div class="admin-form-group admin-form-group-full">
+                    <label for="description" class="admin-form-label">Description</label>
+                    <textarea id="description" name="description"
+                              class="admin-form-input admin-form-textarea @error('description') admin-form-input-error @enderror"
+                              rows="5" placeholder="Book description">{{ old('description', $book->description) }}</textarea>
+                    @error('description')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Cover --}}
+                <div class="admin-form-group admin-form-group-full">
+                    <label class="admin-form-label">Book Cover</label>
+                    <div class="admin-form-current-image">
+                        <img src="{{ $book->image && $book->image !== 'default.png' ? asset('storage/' . $book->image) : 'https://placehold.co/100x130/F1F5F9/94A3B8?text=Book' }}"
+                             alt="{{ $book->title }}"
+                             class="admin-form-current-img-book">
+                        <div>
+                            <span class="admin-form-current-label">Current cover</span>
+                            <p class="admin-form-current-name">{{ $book->title }}</p>
+                        </div>
+                    </div>
+                    <div class="admin-form-image-upload">
+                        <img id="imagePreview" src="#" alt="New cover preview"
+                             class="admin-form-image-preview admin-form-image-preview-book" style="display: none;">
+                        <div class="admin-form-image-placeholder admin-form-image-placeholder-book" id="imagePlaceholder">
+                            <i class="fas fa-book"></i>
+                            <span>New cover preview</span>
+                        </div>
+                        <label for="image" class="admin-form-image-btn">
+                            <i class="fas fa-upload"></i> Change Cover
+                        </label>
+                        <input type="file" id="image" name="image"
+                               class="admin-form-input-file @error('image') admin-form-input-error @enderror"
+                               accept=".jpg,.jpeg,.png" onchange="previewImage(event)">
+                        <span class="admin-form-image-hint">Leave blank to keep current. JPG, JPEG, PNG. Max 2MB.</span>
+                    </div>
+                    @error('image')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
             </div>
 
-            <div class="d-flex gap-20">
-                <div class="form-group" style="flex: 1;">
-                    <label for="language" class="form-label">Language</label>
-                    <input type="text" id="language" name="language" class="form-control @error('language') is-invalid @enderror"
-                           value="{{ old('language', $book->language) }}" required>
-                    @error('language') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="published_date" class="form-label">Published Date</label>
-                    <input type="date" id="published_date" name="published_date" class="form-control @error('published_date') is-invalid @enderror"
-                           value="{{ old('published_date', $book->published_date->format('Y-m-d')) }}" required>
-                    @error('published_date') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="description" class="form-label">Description</label>
-                <textarea id="description" name="description" class="form-control @error('description') is-invalid @enderror"
-                          rows="5">{{ old('description', $book->description) }}</textarea>
-                @error('description') <span class="invalid-feedback">{{ $message }}</span> @enderror
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Current Cover</label>
-                <div style="margin-bottom: 10px;">
-                    <img src="{{ $book->image && $book->image !== 'default.png' ? asset('storage/' . $book->image) : 'https://placehold.co/120x168/e2e8f0/64748b?text=Book' }}"
-                         alt="{{ $book->title }}" style="width: 100px; border-radius: 6px;">
-                </div>
-                <label for="image" class="form-label">Change Cover (optional)</label>
-                <input type="file" id="image" name="image" class="form-control @error('image') is-invalid @enderror"
-                       accept=".jpg,.jpeg,.png" onchange="previewImage(event)">
-                <small style="color: var(--color-text-muted); font-size: 12px;">Max 2MB. Leave blank to keep current.</small>
-                @error('image') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                <div style="margin-top: 10px;">
-                    <img id="imagePreview" src="#" alt="Preview" style="display: none; width: 100px; border-radius: 6px;">
-                </div>
-            </div>
-
-            <div class="d-flex gap-10 mt-20">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update Book</button>
-                <a href="{{ route('admin.books.index') }}" class="btn btn-outline">Cancel</a>
+            <div class="admin-form-actions">
+                <button type="submit" class="admin-btn admin-btn-primary">
+                    <i class="fas fa-check"></i> Update Book
+                </button>
+                <a href="{{ route('admin.books.index') }}" class="admin-btn admin-btn-ghost">Cancel</a>
             </div>
         </form>
     </div>
@@ -159,51 +289,9 @@
 @endsection
 
 @push('scripts')
-<script>
-    function previewImage(event) {
-        const img = document.getElementById('imagePreview');
-        img.src = URL.createObjectURL(event.target.files[0]);
-        img.style.display = 'block';
-    }
-
-    let selectedAuthors = @json(old('author_ids', $selectedAuthors));
-
-    function renderSelectedAuthors() {
-        const zone = document.getElementById('selectedAuthorsZone');
-        const msg = document.getElementById('noAuthorsMsg');
-        const inputs = document.getElementById('authorInputs');
-        zone.querySelectorAll('.selected-author-chip').forEach(el => el.remove());
-        inputs.innerHTML = '';
-        if (selectedAuthors.length === 0) {
-            msg.style.display = 'block';
-        } else {
-            msg.style.display = 'none';
-            selectedAuthors.forEach(id => {
-                const chip = document.querySelector('.author-chip[data-author-id="'+id+'"]');
-                const name = chip ? chip.dataset.authorName : 'Author';
-                const tag = document.createElement('span');
-                tag.className = 'selected-author-chip';
-                tag.innerHTML = name + ' <span class="remove-author" onclick="removeAuthor('+id+')">&times;</span>';
-                zone.appendChild(tag);
-                const input = document.createElement('input');
-                input.type = 'hidden'; input.name = 'author_ids[]'; input.value = id;
-                inputs.appendChild(input);
-            });
-        }
-        document.querySelectorAll('.author-chip').forEach(chip => {
-            chip.classList.toggle('selected', selectedAuthors.includes(parseInt(chip.dataset.authorId)));
-        });
-    }
-
-    function addAuthor(id) { if (!selectedAuthors.includes(id)) { selectedAuthors.push(id); renderSelectedAuthors(); } }
-    function removeAuthor(id) { selectedAuthors = selectedAuthors.filter(a => a !== id); renderSelectedAuthors(); }
-    function toggleAuthorSelect(chip, id) { selectedAuthors.includes(id) ? removeAuthor(id) : addAuthor(id); }
-
-    let draggedId = null;
-    function handleAuthorDragStart(e) { draggedId = parseInt(e.target.dataset.authorId); e.target.classList.add('dragging'); }
-    function handleAuthorDragEnd(e) { e.target.classList.remove('dragging'); document.getElementById('selectedAuthorsZone').classList.remove('drop-active'); draggedId = null; }
-    function handleAuthorDrop(e) { e.preventDefault(); document.getElementById('selectedAuthorsZone').classList.remove('drop-active'); if (draggedId) addAuthor(draggedId); }
-
-    renderSelectedAuthors();
-</script>
+    <script>
+        window.selectedAuthors = @json(old('author_ids', $selectedAuthors));
+    </script>
+    <script src="{{ asset('js/admin/form.js') }}"></script>
+    <script src="{{ asset('js/admin/drag-drop-authors.js') }}"></script>
 @endpush

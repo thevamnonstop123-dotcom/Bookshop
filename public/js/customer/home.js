@@ -186,6 +186,24 @@
         initHeroSlider();
         initCarousel('newArrivalsTrack', 'newArrivalsPrev', 'newArrivalsNext');
         initCarousel('bestSellersTrack', 'bestSellersPrev', 'bestSellersNext');
+
+        // Overlay Add to Cart — delegate to existing add-cart button in the same card
+        document.querySelectorAll('.overlay-add-cart').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const id = this.dataset.bookId;
+                const card = this.closest('.book-card');
+                if (!card) return;
+                const addBtn = card.querySelector('.btn-add-cart[data-book-id="' + id + '"]');
+                if (addBtn) {
+                    addBtn.click();
+                } else {
+                    // fallback: trigger global first add-cart
+                    const globalBtn = document.querySelector('.btn-add-cart[data-book-id="' + id + '"]');
+                    if (globalBtn) globalBtn.click();
+                }
+            });
+        });
     });
 
 })();

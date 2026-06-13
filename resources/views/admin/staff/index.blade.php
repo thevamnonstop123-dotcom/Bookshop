@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Staff - Bookshop Admin')
+@section('title', 'Staff — Bookshop Admin')
 @section('page_title', 'Staff Management')
 
 @push('styles')
@@ -10,96 +10,118 @@
 @section('content')
 
     @if (session('success'))
-        <div class="alert alert-success" style="margin-bottom: 20px;">
+        <div class="admin-alert admin-alert-success">
             <i class="fas fa-circle-check"></i> {{ session('success') }}
         </div>
     @endif
 
     @if (session('error'))
-        <div class="alert alert-danger" style="margin-bottom: 20px;">
+        <div class="admin-alert admin-alert-error">
             <i class="fas fa-circle-exclamation"></i> {{ session('error') }}
         </div>
     @endif
 
-    <div class="table-container">
-        <div class="table-header">
-            <h2>All Staff</h2>
-            <a href="{{ route('admin.staff.create') }}" class="btn btn-accent btn-sm">
+    <div class="admin-table-card">
+        <div class="admin-table-header">
+            <div class="admin-table-header-left">
+                <h2 class="admin-table-title">All Staff</h2>
+                <span class="admin-table-count">{{ $staff->count() }} {{ Str::plural('member', $staff->count()) }}</span>
+            </div>
+            <a href="{{ route('admin.staff.create') }}" class="admin-btn admin-btn-primary">
                 <i class="fas fa-plus"></i> Add Staff
             </a>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($staff as $member)
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            @php
-                                $staffImg = ($member->image && $member->image !== 'default.png')
-                                    ? asset('storage/' . $member->image)
-                                    : null;
-                            @endphp
-                            @if ($staffImg)
-                                <img src="{{ $staffImg }}" alt="{{ $member->name }}"
-                                     style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
-                            @else
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: #0f172a; font-weight: 700; font-size: 14px;">
-                                    {{ strtoupper(substr($member->name, 0, 1)) }}
-                                </div>
-                            @endif
-                        </td>
-                        <td class="font-semibold">{{ $member->name }}</td>
-                        <td>{{ $member->email }}</td>
-                        <td>{{ $member->phone }}</td>
-                        <td>
-                            <span class="badge badge-info">{{ $member->role?->name ?? 'N/A' }}</span>
-                        </td>
-                        <td>
-                            <span class="badge {{ $member->status === 'active' ? 'badge-success' : 'badge-danger' }}">
-                                {{ ucfirst($member->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="d-flex gap-5">
-                                <a href="{{ route('admin.staff.edit', $member) }}" class="btn btn-outline btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                @if ($member->id !== auth('staff')->id())
-                                    <form action="{{ route('admin.staff.destroy', $member) }}" method="POST"
-                                          onsubmit="return confirm('Delete this staff account?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                        <th style="width: 60px;">#</th>
+                        <th style="width: 56px;">Photo</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th style="width: 130px;">Role</th>
+                        <th style="width: 90px;">Status</th>
+                        <th style="width: 120px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($staff as $member)
+                        <tr>
+                            <td class="admin-table-index">{{ $loop->iteration }}</td>
+                            <td>
+                                @php
+                                    $staffImg = ($member->image && $member->image !== 'default.png')
+                                        ? asset('storage/' . $member->image)
+                                        : null;
+                                @endphp
+                                @if ($staffImg)
+                                    <img src="{{ $staffImg }}" alt="{{ $member->name }}" class="admin-table-avatar" loading="lazy">
+                                @else
+                                    <div class="admin-table-avatar-placeholder">
+                                        {{ strtoupper(substr($member->name, 0, 1)) }}
+                                    </div>
                                 @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center" style="padding: 40px; color: var(--color-text-muted);">
-                            <i class="fas fa-user-shield" style="font-size: 40px; display: block; margin-bottom: 10px;"></i>
-                            No staff accounts found.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                            </td>
+                            <td>
+                                <div class="admin-table-name">{{ $member->name }}</div>
+                            </td>
+                            <td class="admin-table-email">{{ $member->email }}</td>
+                            <td>{{ $member->phone ?? '—' }}</td>
+                            <td>
+                                <span class="admin-badge admin-badge-info">
+                                    <i class="fas fa-user-shield"></i>
+                                    {{ $member->role?->name ?? 'N/A' }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="admin-badge admin-badge-{{ $member->status === 'active' ? 'success' : 'danger' }}">
+                                    <i class="fas fa-{{ $member->status === 'active' ? 'circle-check' : 'circle-xmark' }}"></i>
+                                    {{ ucfirst($member->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <a href="{{ route('admin.staff.edit', $member) }}" class="admin-action-btn admin-action-edit" title="Edit">
+                                        <i class="fas fa-pen-to-square"></i>
+                                    </a>
+                                    @if ($member->id !== auth('staff')->id())
+                                        <form action="{{ route('admin.staff.destroy', $member) }}" method="POST"
+                                              onsubmit="return confirm('Delete this staff account? This cannot be undone.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="admin-action-btn admin-action-delete" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="admin-action-btn admin-action-self" title="This is you" style="cursor: default; opacity: 0.4;">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8">
+                                <div class="admin-table-empty">
+                                    <div class="admin-table-empty-icon">
+                                        <i class="fas fa-user-shield"></i>
+                                    </div>
+                                    <h4>No staff accounts found</h4>
+                                    <p>Add staff members to help manage your bookstore.</p>
+                                    <a href="{{ route('admin.staff.create') }}" class="admin-btn admin-btn-primary">
+                                        <i class="fas fa-plus"></i> Add Staff
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
 @endsection

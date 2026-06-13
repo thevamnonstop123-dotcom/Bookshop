@@ -1,65 +1,77 @@
 @extends('layouts.customer')
 
-@section('title', 'Reset Password - Bookshop')
+@section('title', 'Reset Password — Bookshop')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/customer/login.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer/auth.css') }}">
 @endpush
 
 @section('content')
-<div class="customer-login-container">
-    <div class="customer-login-card">
-        <div class="customer-login-brand">
-            <div class="brand-icon"><i class="fas fa-book-open"></i></div>
-            <h1>Book<span>shop</span></h1>
-        </div>
-        <h2 class="customer-login-title">Reset Password</h2>
-        <p class="customer-login-subtitle">Enter your new password</p>
+<div class="auth-page">
+    <div class="auth-page-container auth-page-container-single">
 
-        @if ($errors->any())
-            <div class="alert alert-danger"><i class="fas fa-circle-exclamation"></i> {{ $errors->first() }}</div>
-        @endif
+        <div class="auth-card">
 
-        <form action="{{ route('password.update') }}" method="POST">
-            @csrf
-            <input type="hidden" name="token" value="{{ $token }}">
-            <input type="hidden" name="email" value="{{ $email }}">
-
-            <div class="form-group">
-                <label class="form-label">New Password</label>
-                <div class="password-wrapper">
-                    <input type="password" name="password" class="form-control" placeholder="Minimum 8 characters" required>
-                    <button type="button" class="password-toggle" onclick="togglePass()" tabindex="-1">
-                        <i class="fas fa-eye" id="toggleIcon"></i>
-                    </button>
+            <a href="{{ route('customer.home') }}" class="auth-brand">
+                <div class="auth-brand-icon">
+                    <i class="fas fa-book-open"></i>
                 </div>
+                <span class="auth-brand-text">Book<span class="auth-brand-accent">shop</span></span>
+            </a>
+
+            <div class="auth-icon-circle auth-icon-circle-success">
+                <i class="fas fa-lock"></i>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" name="password_confirmation" class="form-control" placeholder="Re-enter password" required>
-            </div>
+            <h1 class="auth-title">Reset Password</h1>
+            <p class="auth-subtitle">Create a new password for your account</p>
 
-            <button type="submit" class="btn btn-primary" style="width:100%;">Reset Password</button>
-        </form>
+            @if ($errors->any())
+                <div class="auth-alert auth-alert-error">
+                    <i class="fas fa-circle-exclamation"></i> {{ $errors->first() }}
+                </div>
+            @endif
+
+            <form action="{{ route('password.update') }}" method="POST" class="auth-form">
+                @csrf
+                <input type="hidden" name="token" value="{{ $token }}">
+                <input type="hidden" name="email" value="{{ $email }}">
+
+                <div class="auth-form-group">
+                    <label for="password" class="auth-label">New Password</label>
+                    <div class="auth-input-wrapper">
+                        <i class="fas fa-lock auth-input-icon"></i>
+                        <input type="password" id="password" name="password"
+                               class="auth-input @error('password') auth-input-error @enderror"
+                               placeholder="Minimum 8 characters" required minlength="8" autocomplete="new-password">
+                        <button type="button" class="auth-password-toggle" onclick="togglePassword('password')" tabindex="-1" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    @error('password') <span class="auth-error-text">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="auth-form-group">
+                    <label for="password_confirmation" class="auth-label">Confirm Password</label>
+                    <div class="auth-input-wrapper">
+                        <i class="fas fa-lock auth-input-icon"></i>
+                        <input type="password" id="password_confirmation" name="password_confirmation"
+                               class="auth-input" placeholder="Re-enter password"
+                               required minlength="8" autocomplete="new-password">
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit-btn auth-submit-accent">
+                    <i class="fas fa-check"></i> Reset Password
+                </button>
+            </form>
+
+        </div>
+
     </div>
 </div>
 @endsection
 
 @push('scripts')
-<script>
-    function togglePass() {
-        const pass = document.querySelector('input[name="password"]');
-        const icon = document.getElementById('toggleIcon');
-        if (pass.type === 'password') {
-            pass.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            pass.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
-</script>
+    <script src="{{ asset('js/customer/auth.js') }}"></script>
 @endpush
