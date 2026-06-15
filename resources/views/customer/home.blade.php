@@ -359,4 +359,20 @@
 
 @push('scripts')
     <script src="{{ asset('js/customer/home.js') }}"></script>
+    @if(session('login_error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (typeof openLoginModal === 'function') {
+                    openLoginModal();
+                }
+                const errorEl = document.getElementById('loginError');
+                if (errorEl) {
+                    errorEl.style.display = 'block';
+                    errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> {{ session('login_error') }}';
+                }
+            }, 100);
+        });
+    </script>
+@endif
 @endpush

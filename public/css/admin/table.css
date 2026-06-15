@@ -3,11 +3,22 @@
    Apple / Stripe / Notion inspired
    ============================================= */
 
+:root {
+    --tbl-primary: #10B981;
+    --tbl-primary-hover: #059669;
+    --tbl-text-dark: #0F172A;
+    --tbl-text-medium: #475569;
+    --tbl-text-muted: #64748B;      /* CRITICAL FIX: Shifted from #94A3B8 for clean contrast visibility */
+    --tbl-border: #E2E8F0;
+    --tbl-bg-light: #F8FAFC;
+    --tbl-bg-hover: #F1F5F9;
+}
+
 /* ---------- TABLE CARD ---------- */
 .admin-table-card {
     background: #FFFFFF;
     border-radius: 16px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--tbl-border);
     overflow: hidden;
 }
 
@@ -31,14 +42,14 @@
 .admin-table-title {
     font-size: 17px;
     font-weight: 700;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
     letter-spacing: -0.2px;
 }
 
 .admin-table-count {
     font-size: 13px;
-    color: #94A3B8;
-    font-weight: 500;
+    color: var(--tbl-text-muted);
+    font-weight: 600;
 }
 
 /* ---------- TABLE WRAPPER ---------- */
@@ -55,7 +66,7 @@
 }
 
 .admin-table thead {
-    background: #F8FAFC;
+    background: var(--tbl-bg-light);
 }
 
 .admin-table thead th {
@@ -65,15 +76,15 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: #64748B;
-    border-bottom: 2px solid #E2E8F0;
+    color: var(--tbl-text-medium);
+    border-bottom: 2px solid var(--tbl-border);
     white-space: nowrap;
 }
 
 .admin-table tbody td {
     padding: 12px 14px;
     border-bottom: 1px solid #F1F5F9;
-    color: #475569;
+    color: var(--tbl-text-medium);
     vertical-align: middle;
 }
 
@@ -82,33 +93,33 @@
 }
 
 .admin-table tbody tr:hover {
-    background: #F8FAFC;
+    background: var(--tbl-bg-light);
 }
 
 .admin-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* Table Cells */
+/* Dynamic Table Structural Fields */
 .admin-table-index {
-    color: #94A3B8;
-    font-weight: 500;
+    color: var(--tbl-text-muted);
+    font-weight: 600;
     font-size: 12px;
 }
 
 .admin-table-name {
     font-weight: 600;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
 }
 
 .admin-table-meta {
     font-size: 12px;
-    color: #94A3B8;
+    color: var(--tbl-text-muted);
     margin-top: 2px;
 }
 
 .admin-table-bio {
-    color: #64748B;
+    color: var(--tbl-text-medium);
     font-size: 12px;
     max-width: 250px;
     line-height: 1.5;
@@ -116,7 +127,7 @@
 
 .admin-table-number {
     font-weight: 600;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
 }
 
 .admin-table-avatar {
@@ -124,7 +135,7 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #E2E8F0;
+    border: 2px solid var(--tbl-border);
 }
 
 .admin-table-avatar-placeholder {
@@ -145,7 +156,7 @@
     height: 48px;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--tbl-border);
 }
 
 .admin-table-dates {
@@ -159,12 +170,12 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    color: #64748B;
+    color: var(--tbl-text-medium);
 }
 
 .admin-table-dates i {
     font-size: 10px;
-    color: #94A3B8;
+    color: var(--tbl-text-muted);
 }
 
 .admin-table-dates-separator {
@@ -176,17 +187,17 @@
 }
 
 .admin-table-email {
-    color: #64748B;
+    color: var(--tbl-text-medium);
     font-size: 13px;
 }
 
 .admin-table-date {
     font-size: 12px;
-    color: #64748B;
+    color: var(--tbl-text-medium);
     white-space: nowrap;
 }
 
-/* Actions */
+/* Actions Engine */
 .admin-table-actions {
     display: flex;
     gap: 6px;
@@ -196,9 +207,9 @@
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    border: 1.5px solid #E2E8F0;
+    border: 1.5px solid var(--tbl-border);
     background: #FFFFFF;
-    color: #64748B;
+    color: var(--tbl-text-medium);
     font-size: 13px;
     cursor: pointer;
     display: flex;
@@ -221,10 +232,6 @@
     background: #FEF2F2;
 }
 
-.admin-action-view {
-    text-decoration: none;
-}
-
 .admin-action-view:hover {
     border-color: #2563EB;
     color: #2563EB;
@@ -232,12 +239,12 @@
 }
 
 .admin-action-self {
-    border-color: #E2E8F0;
+    border-color: var(--tbl-border);
     color: #CBD5E1;
     cursor: default;
 }
 
-/* Empty State */
+/* Empty Workspace Placeholder States */
 .admin-table-empty {
     text-align: center;
     padding: 60px 20px;
@@ -252,27 +259,27 @@
     align-items: center;
     justify-content: center;
     font-size: 26px;
-    color: #94A3B8;
+    color: var(--tbl-text-muted);
     margin-bottom: 16px;
 }
 
 .admin-table-empty h4 {
     font-size: 16px;
     font-weight: 700;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
     margin-bottom: 6px;
 }
 
 .admin-table-empty p {
     font-size: 13px;
-    color: #94A3B8;
+    color: var(--tbl-text-muted);
     margin-bottom: 20px;
     max-width: 380px;
     margin-left: auto;
     margin-right: auto;
 }
 
-/* Pagination */
+/* Pagination Grid Centering */
 .admin-table-pagination {
     padding: 16px 24px;
     border-top: 1px solid #F1F5F9;
@@ -280,7 +287,7 @@
     justify-content: center;
 }
 
-/* ---------- BADGES ---------- */
+/* ---------- STATUS BADGES ---------- */
 .admin-badge {
     display: inline-flex;
     align-items: center;
@@ -323,7 +330,7 @@
     font-size: 12px;
 }
 
-/* ---------- BUTTONS ---------- */
+/* ---------- CONTROL ACTION BUTTONS ---------- */
 .admin-btn {
     display: inline-flex;
     align-items: center;
@@ -341,13 +348,13 @@
 }
 
 .admin-btn-primary {
-    background: #10B981;
+    background: var(--tbl-primary);
     color: #FFFFFF;
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .admin-btn-primary:hover {
-    background: #059669;
+    background: var(--tbl-primary-hover);
     color: #FFFFFF;
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
     transform: translateY(-1px);
@@ -355,14 +362,14 @@
 
 .admin-btn-ghost {
     background: #FFFFFF;
-    color: #64748B;
-    border: 1.5px solid #E2E8F0;
+    color: var(--tbl-text-medium);
+    border: 1.5px solid var(--tbl-border);
 }
 
 .admin-btn-ghost:hover {
     border-color: #CBD5E1;
-    color: #0F172A;
-    background: #F8FAFC;
+    color: var(--tbl-text-dark);
+    background: var(--tbl-bg-light);
 }
 
 .admin-btn-sm {
@@ -371,7 +378,7 @@
     border-radius: 8px;
 }
 
-/* ---------- ALERT ---------- */
+/* Global Shared Layout Alerts */
 .admin-alert {
     display: flex;
     align-items: center;
@@ -396,10 +403,8 @@
 }
 
 /* =============================================
-   PAYMENT STYLES
+   FINANCIAL TRANSACTION INFRASTRUCTURE
    ============================================= */
-
-/* Stats Grid */
 .payment-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -411,7 +416,7 @@
     background: #FFFFFF;
     border-radius: 14px;
     padding: 16px 18px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--tbl-border);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -438,7 +443,7 @@
 
 .payment-stat-revenue .payment-stat-icon {
     background: #ECFDF5;
-    color: #10B981;
+    color: var(--tbl-primary);
 }
 
 .payment-stat-completed .payment-stat-icon {
@@ -465,8 +470,8 @@
 
 .payment-stat-label {
     font-size: 10px;
-    font-weight: 600;
-    color: #94A3B8;
+    font-weight: 700;
+    color: var(--tbl-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
@@ -475,7 +480,7 @@
 .payment-stat-value {
     font-size: 18px;
     font-weight: 800;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
     letter-spacing: -0.3px;
     white-space: nowrap;
     overflow: hidden;
@@ -483,7 +488,7 @@
 }
 
 .payment-stat-revenue .payment-stat-value {
-    color: #10B981;
+    color: var(--tbl-primary);
 }
 
 .payment-stat-pending .payment-stat-value {
@@ -494,7 +499,7 @@
     color: #EF4444;
 }
 
-/* Filter Tabs */
+/* Control Navigation Filters */
 .payment-filter-tabs {
     display: flex;
     gap: 6px;
@@ -509,42 +514,42 @@
     padding: 8px 14px;
     border-radius: 8px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
     background: #FFFFFF;
-    color: #475569;
-    border: 1.5px solid #E2E8F0;
+    color: var(--tbl-text-medium);
+    border: 1.5px solid var(--tbl-border);
     white-space: nowrap;
 }
 
 .payment-filter-tab i {
     font-size: 11px;
-    color: #94A3B8;
+    color: var(--tbl-text-muted);
 }
 
 .payment-filter-tab:hover {
-    border-color: #10B981;
-    color: #10B981;
+    border-color: var(--tbl-primary);
+    color: var(--tbl-primary);
     background: #F0FDF4;
 }
 
 .payment-filter-tab:hover i {
-    color: #10B981;
+    color: var(--tbl-primary);
 }
 
 .payment-filter-tab-active {
-    background: #0F172A;
+    background: var(--tbl-text-dark);
     color: #FFFFFF;
-    border-color: #0F172A;
+    border-color: var(--tbl-text-dark);
     font-weight: 600;
 }
 
 .payment-filter-tab-active i {
-    color: #10B981;
+    color: var(--tbl-primary);
 }
 
-/* Payment Method Badge */
+/* Payment Badges */
 .payment-method-badge {
     display: inline-flex;
     align-items: center;
@@ -585,19 +590,17 @@
     border: 1px solid #FDE68A;
 }
 
-/* Payment Reference */
 .payment-reference {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
     font-size: 11px;
-    color: #64748B;
+    color: var(--tbl-text-medium);
     letter-spacing: 0.2px;
     word-break: break-all;
 }
 
-/* Order Table Link */
 .order-table-link {
     font-weight: 700;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
     text-decoration: none;
     transition: color 0.2s ease;
     letter-spacing: 0.3px;
@@ -605,18 +608,18 @@
 }
 
 .order-table-link:hover {
-    color: #10B981;
+    color: var(--tbl-primary);
 }
 
 /* =============================================
-   BOOK-SPECIFIC TABLE STYLES
+   BOOK MODULE SPECIFIC SCALING
    ============================================= */
 .admin-table-book-cover {
     width: 44px;
     height: 60px;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--tbl-border);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
@@ -637,13 +640,13 @@
 
 .admin-table-category {
     font-size: 12px;
-    color: #64748B;
+    color: var(--tbl-text-medium);
     font-weight: 500;
 }
 
 .admin-table-authors {
     font-size: 12px;
-    color: #64748B;
+    color: var(--tbl-text-medium);
     max-width: 160px;
     line-height: 1.5;
 }
@@ -656,13 +659,13 @@
 
 .admin-table-price-regular {
     font-weight: 600;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
     font-size: 13px;
 }
 
 .admin-table-price-original {
     font-size: 11px;
-    color: #94A3B8;
+    color: var(--tbl-text-muted);
     text-decoration: line-through;
 }
 
@@ -677,25 +680,95 @@
 }
 
 /* =============================================
-   ORDER ITEMS TABLE (Detail pages)
+   ORDER SUB-ITEMS DETAIL ENTRIES
    ============================================= */
 .order-items-total-label {
     text-align: right;
     font-size: 15px;
     font-weight: 700;
-    color: #0F172A;
+    color: var(--tbl-text-dark);
     padding: 16px 14px 0 !important;
 }
 
 .order-items-total-amount {
     font-size: 18px;
     font-weight: 800;
-    color: #10B981;
+    color: var(--tbl-primary);
     padding: 16px 14px 0 !important;
 }
 
 /* =============================================
-   RESPONSIVE
+   ORDER FILTERS CONTROL BAR
+   ============================================= */
+.order-filter-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.order-filter-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    background: #FFFFFF;
+    color: var(--tbl-text-medium);
+    border: 1.5px solid var(--tbl-border);
+    white-space: nowrap;
+}
+
+.order-filter-tab i {
+    font-size: 12px;
+    color: var(--tbl-text-muted);
+    transition: color 0.25s ease;
+}
+
+.order-filter-tab:hover {
+    border-color: var(--tbl-primary);
+    color: var(--tbl-primary);
+    background: #F0FDF4;
+}
+
+.order-filter-tab:hover i {
+    color: var(--tbl-primary);
+}
+
+.order-filter-tab-active {
+    background: var(--tbl-text-dark) !important;
+    color: #FFFFFF !important;
+    border-color: var(--tbl-text-dark) !important;
+    font-weight: 600;
+}
+
+.order-filter-tab-active i {
+    color: var(--tbl-primary) !important;
+}
+
+.order-filter-count {
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 8px;
+    border-radius: 100px;
+    min-width: 22px;
+    text-align: center;
+    line-height: 1.4;
+    color: var(--tbl-text-medium);
+}
+
+.order-filter-tab-active .order-filter-count {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+}
+
+/* =============================================
+   RESPONSIVE DESIGN SYSTEM OVERRIDES
    ============================================= */
 @media (max-width: 1024px) {
     .payment-stats-grid {
@@ -708,10 +781,6 @@
         flex-direction: column;
         align-items: flex-start;
         padding: 16px;
-    }
-
-    .admin-table-wrapper {
-        margin: 0;
     }
 
     .admin-table {
@@ -763,74 +832,4 @@
     .admin-table {
         min-width: 400px;
     }
-}
-
-
-/* =============================================
-   ORDER FILTER TABS
-   ============================================= */
-.order-filter-tabs {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.order-filter-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 9px 16px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    background: #FFFFFF;
-    color: #475569;
-    border: 1.5px solid #E2E8F0;
-    white-space: nowrap;
-}
-
-.order-filter-tab i {
-    font-size: 12px;
-    color: #94A3B8;
-    transition: color 0.25s ease;
-}
-
-.order-filter-tab:hover {
-    border-color: #10B981;
-    color: #10B981;
-    background: #F0FDF4;
-}
-
-.order-filter-tab:hover i {
-    color: #10B981;
-}
-
-.order-filter-tab-active {
-    background: #0F172A !important;
-    color: #FFFFFF !important;
-    border-color: #0F172A !important;
-    font-weight: 600;
-}
-
-.order-filter-tab-active i {
-    color: #10B981 !important;
-}
-
-.order-filter-count {
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(0, 0, 0, 0.06);
-    padding: 2px 8px;
-    border-radius: 100px;
-    min-width: 22px;
-    text-align: center;
-    line-height: 1.4;
-}
-
-.order-filter-tab-active .order-filter-count {
-    background: rgba(255, 255, 255, 0.15);
-    color: #FFFFFF;
 }

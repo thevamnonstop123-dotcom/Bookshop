@@ -12,12 +12,18 @@ class ForgotPasswordController extends Controller
 {
     public function showLinkRequestForm()
     {
-        return view('customer.auth.passwords.email');
+        return view('password.email');
     }
 
     public function sendResetLinkEmail(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:customers,email']);
+        $request->validate([
+            'email' => 'required|email|exists:customers,email'
+        ], [
+            'email.required' => 'Email address is required.',
+            'email.email'    => 'Please enter a valid email address (e.g., user@domain.com).',
+            'email.exists'   => 'This email is not registered in our system.',
+        ]);
 
         $customer = Customer::where('email', $request->email)->first();
         $token = Str::random(64);
@@ -29,26 +35,20 @@ class ForgotPasswordController extends Controller
 
         $resetLink = route('password.reset', ['token' => $token, 'email' => $request->email]);
 
-        // Send email using the same method that works in tinker
-        Mail::raw(
-            "Hello {$customer->name},\n\n".
-            "Click this link to reset your Bookshop password:\n\n".
-            "{$resetLink}\n\n".
-            "This link expires in 60 minutes.\n\n".
-            "If you didn't request this, ignore this email.\n\n".
-            "— Bookshop Team",
-            function ($message) use ($request, $customer) {
-                $message->to($request->email, $customer->name)
-                        ->subject('Reset Your Bookshop Password');
-            }
-        );
+        Mail::send('mail.password-reset', [
+            'name' => $customer->name,
+            'resetLink' => $resetLink
+        ], function ($message) use ($request, $customer) {
+            $message->to($request->email, $customer->name)
+                    ->subject('Reset Your Bookshop Password');
+        });
 
-        return back()->with('success', 'Password reset link sent! Check your inbox.');
+        return back()->with('status', 'Password reset link sent! Check your inbox.');
     }
 
     public function showResetForm(Request $request)
     {
-        return view('customer.auth.passwords.reset', [
+        return view('password.reset', [
             'token' => $request->token,
             'email' => $request->email
         ]);
@@ -57,9 +57,16 @@ class ForgotPasswordController extends Controller
     public function reset(Request $request)
     {
         $request->validate([
-            'token' => 'required',
-            'email' => 'required|email|exists:customers,email',
+            'token'    => 'required',
+            'email'    => 'required|email|exists:customers,email',
             'password' => 'required|min:8|confirmed',
+        ], [
+            'email.required'     => 'Email address is required.',
+            'email.email'        => 'Please enter a valid email address.',
+            'email.exists'       => 'This email is not registered.',
+            'password.required'  => 'New password is required.',
+            'password.min'       => 'Password must be at least 8 characters.',
+            'password.confirmed' => 'Password confirmation does not match.',
         ]);
 
         $reset = \DB::table('password_reset_tokens')
@@ -75,6 +82,6 @@ class ForgotPasswordController extends Controller
         $customer->update(['password' => bcrypt($request->password)]);
         \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        return redirect()->route('login')->with('success', 'Password reset! Please login.');
+        return redirect()->route('login')->with('status', 'Password reset successfully! Please login.');
     }
 }

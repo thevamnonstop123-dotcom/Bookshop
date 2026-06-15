@@ -11,47 +11,40 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    /**
-     * Show customer login form.
-     */
     public function showLoginForm()
     {
-        return redirect('/?login=open');
+        if (auth()->guard('customer')->check()) {
+            return redirect()->route('customer.home');
+        }
+        return redirect()->route('customer.home', ['login' => 'open']);
     }
 
-    /**
-     * Handle customer login.
-     */
     public function login(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
 
         if (Auth::guard('customer')->attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-
-            return redirect()->intended(route('customer.home'))
-                ->with('success', 'Welcome back!');
+            return redirect()->intended(route('customer.home'))->with('success', 'Welcome back!');
         }
 
-        return redirect('/?login=open&error=1')
-        ->withErrors(['email' => 'Invalid credentials. Please try again.'])
-        ->withInput($request->except('password'));
+        // If request expects JSON (AJAX/fetch), return JSON error so front-end can display without reload
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json(['message' => 'Invalid email or password. Please try again.'], 422);
+        }
+        // Store error in session and redirect for normal form submit
+        return redirect()->route('customer.home', ['login' => 'open'])
+            ->with('login_error', 'Invalid email or password. Please try again.');
     }
 
-    /**
-     * Show customer registration form.
-     */
     public function showRegisterForm()
     {
-        return view('customer.auth.register');
+        if (auth()->guard('customer')->check()) {
+            return redirect()->route('customer.home');
+        }
+        return view('auth.register');
     }
 
-    /**
-     * Handle customer registration.
-     */
-        /**
-     * Handle customer registration.
-     */
     public function register(RegisterRequest $request)
     {
         $customer = Customer::create([
@@ -71,17 +64,13 @@ class AuthController extends Controller
             ->with('success', 'Welcome to Bookshop! Your account has been created.');
     }
 
-    /**
-     * Handle logout.
-     */
     public function logout()
     {
         Auth::guard('customer')->logout();
-
         request()->session()->invalidate();
         request()->session()->regenerateToken();
-
-        return redirect()->route('login')
+        
+        return redirect()->route('customer.home', ['login' => 'open'])
             ->with('success', 'You have been logged out.');
     }
 }

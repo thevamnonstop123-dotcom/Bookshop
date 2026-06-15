@@ -1,6 +1,5 @@
 /**
  * Bookshop Auth — All Auth Interactions
- * Modal, password toggles, strength meter, social login
  */
 (function () {
     'use strict';
@@ -9,26 +8,53 @@
     window.openLoginModal = function () {
         const modal = document.getElementById('loginModal');
         if (modal) {
-            // Show overlay immediately and mark active
             modal.style.display = 'flex';
             modal.classList.add('active');
             modal.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            document.body.style.overflow = 'hidden';
+            
+            // Check for error in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                const errorEl = document.getElementById('loginError');
+                if (errorEl) {
+                    errorEl.style.display = 'block';
+                    errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Invalid email or password. Please try again.';
+                }
+                // Clean URL without reloading
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            }
         } else {
             console.error("Modal element #loginModal not found in the DOM.");
         }
     };
 
     window.closeLoginModal = function () {
-        const modal = document.getElementById('loginModal');
-        if (modal) { 
-            modal.classList.remove('active'); 
-            modal.setAttribute('aria-hidden', 'true'); 
-            // Hide overlay with inline style to ensure it doesn't take up layout space
-            modal.style.display = 'none';
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.style.display = 'none';
+    }
+    document.body.style.overflow = '';
+    
+    // Clear error message when closing modal
+    const errorEl = document.getElementById('loginError');
+    if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.innerHTML = '';
+    }
+    
+    // Optional: Clear session error via AJAX (to prevent showing again)
+    fetch('/clear-login-error', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
         }
-        document.body.style.overflow = ''; // Restore background scrolling
-    };
+    }).catch(err => console.log('Error cleared'));
+};
 
     window.switchToRegister = function (e) {
         if (e) e.preventDefault();
@@ -50,17 +76,6 @@
     document.addEventListener('click', function (e) {
         const modal = document.getElementById('loginModal');
         if (modal && e.target === modal) window.closeLoginModal();
-    });
-
-    // Social buttons: open in same tab (server handles redirect)
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.social-btn').forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                // allow normal anchor behavior; this listener simply adds a subtle animation
-                btn.classList.add('pressed');
-                setTimeout(function () { btn.classList.remove('pressed'); }, 220);
-            });
-        });
     });
 
     // Close on Escape
@@ -97,6 +112,69 @@
         }
     };
 
+    // ========== PASSWORD STRENGTH METER ==========
+    function updatePasswordStrength() {
+        const password = document.getElementById('password');
+        if (!password) return;
+        
+        const value = password.value;
+        const hasMinLength = value.length >= 8;
+        const hasLetter = /[a-zA-Z]/.test(value);
+        const hasNumber = /[0-9]/.test(value);
+        
+        let strengthText = '';
+        let strengthColor = '';
+        let width = '0%';
+        
+        if (value.length === 0) {
+            const container = document.querySelector('.password-strength');
+            if (container) container.innerHTML = '';
+            return;
+        }
+        
+        if (!hasMinLength) {
+            strengthText = '✗ Weak (need 8+ characters)';
+            strengthColor = '#EF4444';
+            width = '33%';
+        } else if (hasMinLength && (!hasLetter || !hasNumber)) {
+            strengthText = '⚠ Medium (add letters & numbers)';
+            strengthColor = '#F59E0B';
+            width = '66%';
+        } else {
+            strengthText = '✓ Strong password!';
+            strengthColor = '#10B981';
+            width = '100%';
+        }
+        
+        const container = document.getElementById('passwordStrength');
+        if (container) {
+            container.innerHTML = `
+                <div class="strength-bar">
+                    <div class="strength-fill" style="width: ${width}; background: ${strengthColor};"></div>
+                </div>
+                <span class="strength-text" style="color: ${strengthColor};">${strengthText}</span>
+            `;
+        }
+    }
+
+    // Initialize strength meter
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordField = document.getElementById('password');
+        if (passwordField) {
+            passwordField.addEventListener('input', updatePasswordStrength);
+        }
+    });
+
+    // ========== AUTO-OPEN MODAL ON PAGE LOAD ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('login') || urlParams.has('login=open') || urlParams.has('login-open')) {
+            setTimeout(function() {
+                openLoginModal();
+            }, 100);
+        }
+    });
+
     // ========== LOGIN FORM HANDLER ==========
     window.handleLogin = async function (e) {
         e.preventDefault();
@@ -130,10 +208,16 @@
                 window.location.reload();
             } else {
                 const data = await resp.json();
-                if (errorEl) { errorEl.style.display = 'block'; errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + (data.message || 'Invalid credentials'); }
+                if (errorEl) { 
+                    errorEl.style.display = 'block'; 
+                    errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + (data.message || 'Invalid credentials. Please try again.');
+                }
             }
         } catch (err) {
-            if (errorEl) { errorEl.style.display = 'block'; errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Something went wrong.'; }
+            if (errorEl) { 
+                errorEl.style.display = 'block'; 
+                errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Something went wrong. Please try again.';
+            }
         }
 
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In'; }
@@ -174,10 +258,16 @@
                 window.location.reload();
             } else {
                 const data = await resp.json();
-                if (errorEl) { errorEl.style.display = 'block'; errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + (data.message || Object.values(data.errors || {}).flat().join('<br>')); }
+                if (errorEl) { 
+                    errorEl.style.display = 'block'; 
+                    errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + (data.message || Object.values(data.errors || {}).flat().join('<br>'));
+                }
             }
         } catch (err) {
-            if (errorEl) { errorEl.style.display = 'block'; errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Something went wrong.'; }
+            if (errorEl) { 
+                errorEl.style.display = 'block'; 
+                errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Something went wrong. Please try again.';
+            }
         }
 
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account'; }

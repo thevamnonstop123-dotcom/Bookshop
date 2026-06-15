@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\SocialiteController;
+use App\Http\Controllers\Customer\ForgotPasswordController; 
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -18,17 +19,18 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+    // ========== CUSTOM PASSWORD RESET ROUTES (using your controller) ==========
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])
         ->name('password.request');
 
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])
         ->name('password.email');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+    Route::get('reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])
         ->name('password.reset');
 
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.store');
+    Route::post('reset-password', [ForgotPasswordController::class, 'reset'])
+        ->name('password.update');
 });
 
 // Social Login

@@ -98,20 +98,23 @@
 
     </div>
 
-    {{-- Quick Actions --}}
-    <div class="dashboard-quick-actions">
-        <a href="{{ route('admin.orders.index') }}" class="dashboard-quick-action">
-            <i class="fas fa-receipt"></i> View Orders
-        </a>
-        <a href="{{ route('admin.books.create') }}" class="dashboard-quick-action">
-            <i class="fas fa-plus"></i> Add Book
-        </a>
-        <a href="{{ route('admin.customers.index') }}" class="dashboard-quick-action">
-            <i class="fas fa-users"></i> Customers
-        </a>
-        <a href="{{ route('admin.books.index') }}" class="dashboard-quick-action">
-            <i class="fas fa-book"></i> All Books
-        </a>
+    {{-- Quick Actions Card Wrapper --}}
+    <div class="dashboard-quick-actions-card">
+        <h3 class="dashboard-quick-actions-title">Quick Utilities</h3>
+        <div class="dashboard-quick-actions">
+            <a href="{{ route('admin.orders.index') }}" class="dashboard-quick-action">
+                <i class="fas fa-receipt"></i> View Orders
+            </a>
+            <a href="{{ route('admin.books.create') }}" class="dashboard-quick-action">
+                <i class="fas fa-plus"></i> Add Book
+            </a>
+            <a href="{{ route('admin.customers.index') }}" class="dashboard-quick-action">
+                <i class="fas fa-users"></i> Customers
+            </a>
+            <a href="{{ route('admin.books.index') }}" class="dashboard-quick-action">
+                <i class="fas fa-book"></i> All Books
+            </a>
+        </div>
     </div>
 
     {{-- Chart Section --}}

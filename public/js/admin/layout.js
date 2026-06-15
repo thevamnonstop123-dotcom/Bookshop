@@ -1,6 +1,5 @@
 /**
  * Bookshop Admin Layout — Sidebar & Topbar Interactions
- * Mobile toggle, tablet collapse, overlay
  */
 (function () {
     'use strict';
@@ -10,7 +9,7 @@
     const hamburger = document.getElementById('mobileHamburger');
     const collapseToggle = document.getElementById('sidebarCollapseToggle');
 
-    // ========== MOBILE MENU ==========
+    // ========== MOBILE MENU SYSTEM ==========
     function openSidebar() {
         if (!sidebar) return;
         sidebar.classList.add('open');
@@ -39,14 +38,14 @@
         overlay.addEventListener('click', closeSidebar);
     }
 
-    // ========== TABLET COLLAPSE ==========
+    // ========== TABLET COLLAPSE TOGGLE ==========
     if (collapseToggle) {
         collapseToggle.addEventListener('click', function () {
             sidebar.classList.toggle('open');
         });
     }
 
-    // ========== CLOSE SIDEBAR ON MOBILE LINK CLICK ==========
+    // ========== RESPONSIVE CLOSURE VIA LINKS ==========
     const sidebarLinks = sidebar ? sidebar.querySelectorAll('.admin-sidebar-link') : [];
     sidebarLinks.forEach(function (link) {
         link.addEventListener('click', function () {
@@ -56,14 +55,48 @@
         });
     });
 
-    // ========== KEYBOARD ESCAPE ==========
+    // ========== SUBMENU CONTROLS & EVENT MANAGEMENT ==========
+    const parentItems = sidebar ? sidebar.querySelectorAll('.admin-sidebar-parent') : [];
+    
+    parentItems.forEach(function (listItem) {
+        const btn = listItem.querySelector('.admin-sidebar-parent-toggle');
+        const submenu = listItem.querySelector('.admin-sidebar-submenu');
+        if (!btn || !submenu) return;
+
+        // Inline Accordion Trigger (Active when Expanded)
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            // Layout Guard: Bypass click accordion modifications if collapsed on tablet
+            if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
+                return; 
+            }
+
+            submenu.classList.toggle('open');
+            const icon = btn.querySelector('.admin-sidebar-dropdown-icon');
+            if (icon) icon.classList.toggle('open');
+        });
+
+        // Hover Class Bindings for Stable Flyout Transitions
+        listItem.addEventListener('mouseenter', function () {
+            if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
+                submenu.classList.add('flyout-active');
+            }
+        });
+
+        listItem.addEventListener('mouseleave', function () {
+            submenu.classList.remove('flyout-active');
+        });
+    });
+
+    // ========== ACCESSIBILITY KEYBOARD TRIGGERS ==========
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open') && window.innerWidth <= 768) {
             closeSidebar();
         }
     });
 
-    // ========== RESIZE HANDLER ==========
+    // ========== WINDOW WINDOW RESIZE EVENT CLEANUP ==========
     window.addEventListener('resize', function () {
         if (window.innerWidth > 768 && sidebar && sidebar.classList.contains('open') && overlay && overlay.classList.contains('show')) {
             closeSidebar();
