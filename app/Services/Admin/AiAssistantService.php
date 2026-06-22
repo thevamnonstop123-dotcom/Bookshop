@@ -4,158 +4,116 @@ namespace App\Services\Admin;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class AiAssistantService
 {
     /**
-     * Process a chat message and return AI response.
+     * Core chat pipeline utilizing dynamic database state reflection.
      */
     public function chat(string $message): string
     {
-        // Try to answer from database first
-        $dbAnswer = $this->queryDatabase($message);
-        
-        if ($dbAnswer) {
-            return $dbAnswer;
+        $apiKey = config('services.groq.key');
+        if (!$apiKey) {
+            logger()->error('AI Assistant: Missing Groq API Key configuration.');
+            return "⚠️ System configuration error. Component offline.";
         }
 
-        // Fallback: ask Groq AI
-        return $this->askGroq($message);
+        // Pull fresh database state snapshot
+        $contextPayload = $this->compileSystemContext();
+
+        $systemPrompt = "You are the central Business Intelligence Core Engine for this bookstore's administration portal.\n" .
+                        "You possess real-time visibility into the operational database snapshot below:\n" .
+                        "=========================================================\n" .
+                        "{$contextPayload}\n" .
+                        "=========================================================\n\n" .
+                        "CRITICAL OPERATIONAL RULES:\n" .
+                        "1. Rely ONLY on the numbers provided in the matrix above. Never guess or hallucinate statistics.\n" .
+                        "2. If the user asks for financial revenue, counts, or specific inventory alerts, report them exactly.\n" .
+                        "3. If the user requests business planning, marketing insights, or operational advice, synthesize your strategy using the live metrics provided.\n" .
+                        "4. Maintain a professional, direct tone. Format answers using markdown clear tables or bullet points. Use emojis.";
+
+        try {
+            $response = Http::timeout(10)
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type' => 'application/json'
+                ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                    'model' => 'llama-3.3-70b-versatile',
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user', 'content' => $message]
+                    ],
+                    'temperature' => 0.3, // Low variance to keep metric delivery strict
+                    'max_tokens' => 500
+                ]);
+
+            if ($response->successful()) {
+                return trim($response->json()['choices'][0]['message']['content'] ?? '');
+            }
+            
+            logger()->error('Groq API Connection Failed', ['status' => $response->status(), 'body' => $response->body()]);
+        } catch (\Exception $e) {
+            logger()->error('AI Assistant Pipeline Exception: ' . $e->getMessage());
+        }
+
+        return "⚠️ Failed to stream response processing block. Please try your request again.";
     }
 
     /**
-     * Try to answer from database queries.
+     * Compiles live telemetry matrix from storage layers.
+     * PERFORMANCE NOTE: Ensure indexes exist on: payments(status), books(status, stock_quantity), customers(created_at)
      */
-    private function queryDatabase(string $message): ?string
+    private function compileSystemContext(): string
     {
-        $msg = strtolower($message);
-
-        // Total books
-        if (preg_match('/(how many|total|count).*book/', $msg)) {
-            $count = DB::table('books')->whereNull('deleted_at')->count();
-            $active = DB::table('books')->where('status', 'active')->whereNull('deleted_at')->count();
-            return "📚 You have **{$count}** books total, **{$active}** active.";
-        }
-
-        // Total customers
-        if (preg_match('/(how many|total|count).*customer/', $msg)) {
-            $count = DB::table('customers')->count();
-            $active = DB::table('customers')->where('status', 'active')->count();
-            return "👥 You have **{$count}** customers, **{$active}** active.";
-        }
-
-        // Total orders
-        if (preg_match('/(how many|total|count).*order/', $msg)) {
-            $count = DB::table('orders')->count();
-            $pending = DB::table('orders')->where('status', 'pending')->count();
-            return "📦 **{$count}** total orders, **{$pending}** pending.";
-        }
-
-        // Total revenue
-        if (preg_match('/(revenue|sales|earning|income)/', $msg)) {
-            $total = DB::table('payments')->where('status', 'completed')->sum('amount');
-            $thisMonth = DB::table('payments')
-                ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
-                ->sum('amount');
-            return "💰 Total revenue: **" . number_format($total) . " MMK** | This month: **" . number_format($thisMonth) . " MMK**";
-        }
-
-        // Low stock
-        if (preg_match('/(low|out of|running out).*stock/', $msg)) {
-            $lowStock = DB::table('books')
+        // Cache heavy computational calculations for 30 seconds to defend database thread pools
+        return Cache::remember('admin_ai_db_snapshot', 30, function () {
+            
+            $booksTotal = DB::table('books')->whereNull('deleted_at')->count();
+            $booksActive = DB::table('books')->where('status', 'active')->whereNull('deleted_at')->count();
+            
+            $customersTotal = DB::table('customers')->count();
+            $customersActive = DB::table('customers')->where('status', 'active')->count();
+            $customersToday = DB::table('customers')->whereDate('created_at', today())->count();
+            $customersThisWeek = DB::table('customers')->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
+            
+            $ordersTotal = DB::table('orders')->count();
+            $ordersPending = DB::table('orders')->where('status', 'pending')->count();
+            
+            $revenueTotal = DB::table('payments')->where('status', 'completed')->sum('amount');
+            $revenueMonth = DB::table('payments')->where('status', 'completed')->whereMonth('created_at', now()->month)->sum('amount');
+            
+            $categories = DB::table('categories')->where('status', 'active')->pluck('name')->join(', ');
+            
+            $lowStockArray = DB::table('books')
                 ->where('stock_quantity', '<', 5)
                 ->where('stock_quantity', '>', 0)
                 ->where('status', 'active')
                 ->whereNull('deleted_at')
                 ->pluck('title')
                 ->toArray();
-            
-            if (empty($lowStock)) {
-                return "✅ No low stock alerts! All books have 5+ copies.";
-            }
-            return "⚠️ Low stock alert: **" . implode(', ', $lowStock) . "**";
-        }
+            $lowStockText = empty($lowStockArray) ? "None (all active variants possess 5+ copies)" : implode(', ', $lowStockArray);
 
-        // Best sellers (by order count)
-        if (preg_match('/(best|top|popular|selling).*book/', $msg)) {
             $topBooks = DB::table('order_items')
                 ->join('books', 'order_items.book_id', '=', 'books.id')
                 ->select('books.title', DB::raw('SUM(order_items.quantity) as total_sold'))
                 ->groupBy('books.id', 'books.title')
                 ->orderByDesc('total_sold')
                 ->limit(3)
-                ->get();
-            
-            if ($topBooks->isEmpty()) {
-                return "📊 No sales data yet.";
-            }
-            $list = $topBooks->map(fn($b) => "**{$b->title}** ({$b->total_sold} sold)")->join(', ');
-            return "🏆 Best sellers: " . $list;
-        }
+                ->get()
+                ->map(fn($b) => "{$b->title} ({$b->total_sold} units sold)")
+                ->join(' | ');
 
-        // New customers
-        if (preg_match('/(new|recent).*customer/', $msg)) {
-            $today = DB::table('customers')->whereDate('created_at', today())->count();
-            $thisWeek = DB::table('customers')->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
-            return "👋 New customers: **{$today}** today, **{$thisWeek}** this week.";
-        }
-
-        // Categories
-        if (preg_match('/(category|categories)/', $msg)) {
-            $categories = DB::table('categories')->where('status', 'active')->pluck('name')->toArray();
-            return "📂 Categories: **" . implode(', ', $categories) . "**";
-        }
-
-        // Help
-        if (preg_match('/(help|what can you do|commands)/', $msg)) {
-            return "🤖 I can answer:\n• How many books/customers/orders?\n• Total revenue?\n• Low stock alerts?\n• Best selling books?\n• New customers?\n• Categories list\n\nJust ask me!";
-        }
-
-        return null;
-    }
-
-    /**
-     * Fallback: ask Groq AI.
-     */
-    private function askGroq(string $message): string
-    {
-        $apiKey = config('services.groq.key');
-        $context = $this->getDatabaseContext();
-
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $apiKey,
-            ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => 'llama-3.3-70b-versatile',
-                'messages' => [
-                    ['role' => 'system', 'content' => "You are a helpful bookstore admin assistant. Here's the current database summary: {$context}. Keep answers short and friendly. Use emojis."],
-                    ['role' => 'user', 'content' => $message]
-                ],
-                'temperature' => 0.7,
-                'max_tokens' => 200,
-            ]);
-
-            if ($response->successful()) {
-                return trim($response->json()['choices'][0]['message']['content'] ?? '');
-            }
-        } catch (\Exception $e) {}
-
-        return "Sorry, I couldn't process that. Try asking about books, orders, customers, or revenue!";
-    }
-
-    /**
-     * Get a summary of the database for AI context.
-     */
-    private function getDatabaseContext(): string
-    {
-        $books = DB::table('books')->where('status', 'active')->whereNull('deleted_at')->count();
-        $customers = DB::table('customers')->count();
-        $orders = DB::table('orders')->count();
-        $revenue = DB::table('payments')->where('status', 'completed')->sum('amount');
-        $lowStock = DB::table('books')->where('stock_quantity', '<', 5)->where('stock_quantity', '>', 0)->whereNull('deleted_at')->count();
-
-        return "Books: {$books} active, Customers: {$customers}, Orders: {$orders}, Revenue: " . number_format($revenue) . " MMK, Low stock items: {$lowStock}";
+            return "Gross Total Revenue: " . number_format($revenueTotal) . " MMK\n" .
+                   "Current Month Revenue: " . number_format($revenueMonth) . " MMK\n" .
+                   "Total Books in System: {$booksTotal} (Active: {$booksActive})\n" .
+                   "Low Stock Items: {$lowStockText}\n" .
+                   "Top 3 Best Selling Books: " . ($topBooks ?: "No sales data logged yet") . "\n" .
+                   "Total Registered Customers: {$customersTotal} (Active: {$customersActive})\n" .
+                   "New Customers Added Today: {$customersToday}\n" .
+                   "New Customers Added This Week: {$customersThisWeek}\n" .
+                   "Total Logged Orders: {$ordersTotal} (Pending: {$ordersPending})\n" .
+                   "Active System Store Categories: [{$categories}]";
+        });
     }
 }

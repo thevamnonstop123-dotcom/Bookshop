@@ -3,51 +3,26 @@
 
         {{-- Logo --}}
         <a href="{{ route('customer.home') }}" class="navbar-logo" aria-label="Bookshop Home">
-            <div class="navbar-logo-icon">
-                <i class="fas fa-book-open"></i>
-            </div>
-            <span class="navbar-logo-text">
-                Book<span class="navbar-logo-accent">shop</span>
-            </span>
+            <div class="navbar-logo-icon"><i class="fas fa-book-open"></i></div>
+            <span class="navbar-logo-text">Book<span class="navbar-logo-accent">shop</span></span>
         </a>
 
-        {{-- Desktop Navigation Links --}}
-        <nav class="navbar-nav" id="navbarNav">
+        {{-- Desktop Nav --}}
+        <nav class="navbar-nav">
             <ul class="navbar-links">
-                <li>
-                    <a href="{{ route('customer.home') }}" class="navbar-link {{ request()->routeIs('customer.home') ? 'navbar-link-active' : '' }}">
-                        Home
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('books.index') }}" class="navbar-link {{ request()->routeIs('books.index') && !request('sort') ? 'navbar-link-active' : '' }}">
-                        Books
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="navbar-link {{ request('sort') === 'latest' ? 'navbar-link-active' : '' }}">
-                        New Arrivals
-                    </a>
-                </li>
+                <li><a href="{{ route('customer.home') }}" class="navbar-link {{ request()->routeIs('customer.home') ? 'navbar-link-active' : '' }}">Home</a></li>
+                <li><a href="{{ route('books.index') }}" class="navbar-link {{ request()->routeIs('books.index') && !request('sort') ? 'navbar-link-active' : '' }}">Books</a></li>
+                <li><a href="{{ route('books.index', ['sort' => 'latest']) }}" class="navbar-link {{ request('sort') === 'latest' ? 'navbar-link-active' : '' }}">New Arrivals</a></li>
             </ul>
         </nav>
 
-        {{-- Search --}}
-        <form action="{{ route('books.index') }}" method="GET" class="navbar-search" id="navbarSearch">
+        {{-- Search (Desktop) --}}
+        <form action="{{ route('books.index') }}" method="GET" class="navbar-search">
             <div class="navbar-search-wrapper">
                 <i class="fas fa-search navbar-search-icon"></i>
-                <input
-                    type="text"
-                    name="search"
-                    class="navbar-search-input"
-                    placeholder="Search books, authors..."
-                    value="{{ request('search') }}"
-                    autocomplete="off"
-                >
+                <input type="text" name="search" class="navbar-search-input" placeholder="Search books, authors..." value="{{ request('search') }}">
                 @if(request('search'))
-                    <a href="{{ route('books.index') }}" class="navbar-search-clear" aria-label="Clear search">
-                        <i class="fas fa-times"></i>
-                    </a>
+                    <a href="{{ route('books.index') }}" class="navbar-search-clear"><i class="fas fa-times"></i></a>
                 @endif
             </div>
         </form>
@@ -62,19 +37,23 @@
                         : 'https://ui-avatars.com/api/?name=' . urlencode($currentUser->name) . '&background=10B981&color=fff&size=60';
                 @endphp
 
-                {{-- User Menu --}}
+                <button class="navbar-icon-btn navbar-search-toggle" id="navbarSearchToggle"><i class="fas fa-search"></i></button>
+                <button class="navbar-icon-btn" id="navbarNotificationBtn"><i class="fas fa-bell"></i><span class="navbar-icon-badge" id="notificationBadge" style="display:none;">0</span></button>
+
+                {{-- Wishlist --}}
+                @auth('customer')
+                    <a href="{{ route('customer.wishlist.index') }}" class="navbar-icon-btn" id="navbarWishlistBtn" aria-label="Wishlist">
+                        <i class="fas fa-heart"></i>
+                    </a>
+                @endauth
+                <button class="navbar-cart-btn" id="navbarCartBtn"><i class="fas fa-bag-shopping"></i><span class="navbar-cart-badge" id="cartCount">0</span></button>
+
                 <div class="navbar-user" id="navbarUser">
-                    <button class="navbar-user-trigger" id="navbarUserTrigger">
-                        <img src="{{ $avatarUrl }}" alt="{{ $currentUser->name }}" class="navbar-user-avatar">
-                        <i class="fas fa-chevron-down navbar-user-chevron"></i>
-                    </button>
+                    <button class="navbar-user-trigger"><img src="{{ $avatarUrl }}" alt="{{ $currentUser->name }}" class="navbar-user-avatar"></button>
                     <div class="navbar-user-panel" id="navbarUserPanel">
                         <div class="navbar-user-header">
                             <img src="{{ $avatarUrl }}" alt="{{ $currentUser->name }}" class="navbar-user-header-avatar">
-                            <div>
-                                <strong>{{ $currentUser->name }}</strong>
-                                <span>{{ $currentUser->email }}</span>
-                            </div>
+                            <div><strong>{{ $currentUser->name }}</strong><span>{{ $currentUser->email }}</span></div>
                         </div>
                         <div class="navbar-user-links">
                             <a href="{{ route('customer.profile') }}"><i class="fas fa-user"></i> My Profile</a>
@@ -84,34 +63,37 @@
                         <div class="navbar-user-footer">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="navbar-user-logout">
-                                    <i class="fas fa-arrow-right-from-bracket"></i> Sign Out
-                                </button>
+                                <button type="submit" class="navbar-user-logout"><i class="fas fa-arrow-right-from-bracket"></i> Sign Out</button>
                             </form>
                         </div>
                     </div>
                 </div>
-
-                {{-- Cart --}}
-                <button class="navbar-cart-btn" id="navbarCartBtn" aria-label="Open cart">
-                    <i class="fas fa-bag-shopping"></i>
-                    <span class="navbar-cart-badge" id="cartCount">0</span>
-                </button>
-
             @else
                 <button class="navbar-auth-btn navbar-auth-signin" id="navbarSignInBtn">Sign In</button>
                 <button class="navbar-auth-btn navbar-auth-register" id="navbarRegisterBtn">Register</button>
             @endauth
-
-            {{-- Mobile Toggle (Hamburger) --}}
-            <button class="navbar-mobile-toggle" id="navbarMobileToggle" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </div>
 
-    {{-- Mobile Overlay --}}
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    {{-- Mobile Search Overlay --}}
+    <div class="navbar-search-overlay" id="navbarSearchOverlay">
+        <div class="navbar-search-overlay-header">
+            <button class="navbar-search-back" id="navbarSearchBack"><i class="fas fa-arrow-left"></i></button>
+            <form action="{{ route('books.index') }}" method="GET" class="navbar-search-overlay-form">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" class="navbar-search-overlay-input" placeholder="Search books..." autofocus>
+            </form>
+        </div>
+    </div>
+
+    {{-- Notifications --}}
+    <div class="navbar-notification-panel" id="notificationPanel">
+        <div class="notification-panel-header">
+            <strong>Notifications</strong>
+            <button onclick="markAllRead()" class="notification-mark-all">Mark all read</button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>
+        </div>
+    </div>
 </header>

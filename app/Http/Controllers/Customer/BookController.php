@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Services\Customer\BookService;
+use App\Services\Customer\WishlistService;
 use Illuminate\Http\Request;
 use App\Models\Book;
 
@@ -25,7 +26,13 @@ class BookController extends Controller
         $books = $this->bookService->getBooks($filters);
         $categories = $this->bookService->getCategories();
 
-        return view('customer.books.index', compact('books', 'categories', 'filters'));
+        $wishlistedIds = [];
+        if (auth('customer')->check()) {
+            $wishlistedIds = app(WishlistService::class)
+                ->getWishlistedIds(auth('customer')->id());
+        }
+
+        return view('customer.books.index', compact('books', 'categories', 'filters', 'wishlistedIds'));
     }
 
     /**
@@ -33,18 +40,24 @@ class BookController extends Controller
      */
     public function show($slug)
     {
-        $book = \App\Models\Book::with(['authors', 'category'])
+        $book = Book::with(['authors', 'category'])
             ->where('slug', $slug)
             ->where('status', 'active')
             ->firstOrFail();
 
-        $relatedBooks = \App\Models\Book::with('authors')
+        $relatedBooks = Book::with('authors')
             ->where('category_id', $book->category_id)
             ->where('id', '!=', $book->id)
             ->where('status', 'active')
             ->limit(4)
             ->get();
 
-        return view('customer.books.show', compact('book', 'relatedBooks'));
+        $wishlistedIds = [];
+        if (auth('customer')->check()) {
+            $wishlistedIds = app(WishlistService::class)
+                ->getWishlistedIds(auth('customer')->id());
+        }
+
+        return view('customer.books.show', compact('book', 'relatedBooks', 'wishlistedIds'));
     }
 }

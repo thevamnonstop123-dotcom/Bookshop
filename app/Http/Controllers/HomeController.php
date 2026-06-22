@@ -8,13 +8,10 @@ use App\Models\Book;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Order;
-use Illuminate\Http\Request;
+use App\Services\Customer\WishlistService;
 
 class HomeController extends Controller
 {
-    /**
-     * Show home page with preloaded data to avoid inline queries in blade.
-     */
     public function index()
     {
         $banners = Banner::where('status','active')
@@ -32,6 +29,13 @@ class HomeController extends Controller
         $newBooks = Book::with(['authors','category'])->where('status','active')->latest()->limit(5)->get();
         $bestSellers = Book::with(['authors','category'])->where('status','active')->inRandomOrder()->limit(5)->get();
 
+        // Wishlisted book IDs for heart icon
+        $wishlistedIds = [];
+        if (auth('customer')->check()) {
+            $wishlistedIds = app(WishlistService::class)
+                ->getWishlistedIds(auth('customer')->id());
+        }
+
         return view('customer.home', compact(
             'banners',
             'totalBooks',
@@ -39,7 +43,8 @@ class HomeController extends Controller
             'totalOrders',
             'categories',
             'newBooks',
-            'bestSellers'
+            'bestSellers',
+            'wishlistedIds'
         ));
     }
 }

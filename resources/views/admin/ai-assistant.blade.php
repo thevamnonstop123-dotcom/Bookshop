@@ -1,14 +1,12 @@
-{{-- Floating AI Button --}}
+{{-- Floating AI Button with Volumetric 3D styling --}}
 <button class="ai-floating-btn" id="aiFloatingBtn" onclick="toggleAiChat()" aria-label="Open AI Assistant">
-    <div class="ai-floating-pulse"></div>
-    <div class="ai-floating-icon">
-        <i class="fas fa-wand-magic-sparkles"></i>
+    <div class="ai-floating-surface">
+        <i class="fas fa-brain"></i>
     </div>
 </button>
 
 {{-- AI Chat Panel --}}
 <aside class="ai-chat-panel" id="aiChatPanel" aria-hidden="true">
-
     {{-- Header --}}
     <div class="ai-chat-header">
         <div class="ai-chat-header-left">
@@ -19,7 +17,7 @@
                 <h3 class="ai-chat-header-title">AI Assistant</h3>
                 <span class="ai-chat-header-subtitle">Powered by Groq</span>
             </div>
-        </div>
+        </div>`
         <div class="ai-chat-header-actions">
             <button class="ai-chat-header-btn" onclick="clearChatHistory()" title="Clear conversation" aria-label="Clear chat">
                 <i class="fas fa-broom"></i>
@@ -30,19 +28,12 @@
         </div>
     </div>
 
-    {{-- Messages --}}
+    {{-- Chat Body --}}
     <div class="ai-chat-body" id="aiChatBody">
-        <div class="ai-message ai-message-bot">
-            <div class="ai-message-avatar">
-                <i class="fas fa-robot"></i>
-            </div>
-            <div class="ai-message-bubble">
-                <p>Hello! I am your AI assistant. I can help you with books, orders, customers, revenue, and more. Try asking me something!</p>
-            </div>
-        </div>
+        {{-- Messages render here dynamically from LocalStorage --}}
     </div>
 
-    {{-- Suggestions --}}
+    {{-- Transformative Suggestions Wrapper --}}
     <div class="ai-suggestions-wrapper" id="aiSuggestionsWrapper">
         <span class="ai-suggestions-label">Suggested Questions</span>
         <div class="ai-suggestions" id="aiSuggestions">
@@ -73,7 +64,7 @@
         </div>
     </div>
 
-    {{-- Input --}}
+    {{-- Footer --}}
     <div class="ai-chat-footer">
         <div class="ai-chat-input-wrapper">
             <input
@@ -90,8 +81,6 @@
         </div>
         <p class="ai-chat-disclaimer">Responses are AI-generated. Verify critical data.</p>
     </div>
-
 </aside>
 
-{{-- Overlay for mobile --}}
 <div class="ai-chat-overlay" id="aiChatOverlay" onclick="toggleAiChat()"></div>

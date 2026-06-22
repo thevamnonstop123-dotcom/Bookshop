@@ -4,6 +4,8 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/customer/book-detail.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer/books.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer/home.css') }}">
 @endpush
 
 @section('content')
@@ -160,6 +162,13 @@
                         <button class="detail-action-btn detail-action-cart btn-add-cart" data-book-id="{{ $book->id }}">
                             <i class="fas fa-shopping-bag"></i> Add to Cart
                         </button>
+                        @auth('customer')
+                            <button class="btn-wishlist-toggle {{ in_array($book->id, $wishlistedIds ?? []) ? 'wishlisted' : '' }}"
+                                    data-book-id="{{ $book->id }}" onclick="toggleWishlist(this, {{ $book->id }})" aria-label="Wishlist"
+                                    style="width:44px;height:44px;font-size:18px;">
+                                <i class="{{ in_array($book->id, $wishlistedIds ?? []) ? 'fas' : 'far' }} fa-heart"></i>
+                            </button>
+                        @endauth
                         <button class="detail-action-btn detail-action-buy" id="buyNowBtn">
                             <i class="fas fa-bolt"></i> Buy Now
                         </button>

@@ -38,6 +38,14 @@ class PromotionService
             } catch (\Exception $e) {
                 // Skip failed emails
             }
+
+            // Create notification for this customer
+            \App\Models\Notification::create([
+                'customer_id' => $customer->id,
+                'type' => 'promotion',
+                'title' => $subject,
+                'message' => $message,
+            ]);
         }
 
         return PromotionEmail::create([

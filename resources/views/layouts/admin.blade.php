@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="{{ asset('css/admin/layout.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/ai-assistant.css') }}">
 
+    <link rel="stylesheet" href="{{ asset('css/admin/ai-assistant.css?v=' . time()) }}">
+
     @stack('styles')
 </head>
 <body>
@@ -49,6 +51,7 @@
     {{-- Scripts --}}
     <script src="{{ asset('js/admin/layout.js') }}"></script>
     <script src="{{ asset('js/admin/ai-assistant.js') }}"></script>
+    <script src="{{ asset('js/admin/ai-assistant.js?v=' . time()) }}"></script>
     @stack('scripts')
 </body>
 </html>

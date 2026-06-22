@@ -9,6 +9,8 @@ use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\ForgotPasswordController;
 use App\Http\Controllers\Customer\EbookController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Customer\NotificationController;
+use App\Http\Controllers\Customer\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,4 +79,13 @@ Route::middleware('auth:customer')->group(function () {
     Route::get('/my-library', [EbookController::class, 'library'])->name('customer.ebooks.library');
     Route::get('/ebooks/{book}/read', [EbookController::class, 'read'])->name('customer.ebooks.read');
     Route::get('/ebooks/{book}/download', [EbookController::class, 'download'])->name('customer.ebooks.download');
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
+
+    // Wishlist
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index');
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('customer.wishlist.toggle');
 });

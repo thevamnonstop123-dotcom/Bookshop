@@ -32,6 +32,9 @@
     <main class="main-content">
         @yield('content')
     </main>
+    
+    {{-- Bottom Navigation (Mobile) --}}
+    @include('components.customer.bottom-nav')
 
     {{-- Footer --}}
     @include('components.customer.footer')
