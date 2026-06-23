@@ -374,7 +374,7 @@
 .permission-card input[type="checkbox"] {
     position: absolute;
     opacity: 0;
-    pointer-events: none;
+    cursor: pointer;
 }
 
 .permission-card-content {

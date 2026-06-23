@@ -16,71 +16,55 @@ class RoleController extends Controller
         $this->roleService = $roleService;
     }
 
-    /**
-     * Display all roles.
-     */
     public function index()
     {
         $roles = $this->roleService->getAll();
-
         return view('admin.roles.index', compact('roles'));
     }
 
-    /**
-     * Show create form.
-     */
     public function create()
     {
         return view('admin.roles.create');
     }
 
-    /**
-     * Store a new role.
-     */
     public function store(RoleRequest $request)
     {
-        $this->roleService->create($request->validated());
+        $role = Role::create([
+            'name'              => $request->name,
+            'can_manage_books'  => $request->has('can_manage_books') ? 1 : 0,
+            'can_manage_orders' => $request->has('can_manage_orders') ? 1 : 0,
+            'can_manage_users'  => $request->has('can_manage_users') ? 1 : 0,
+            'can_view_reports'  => $request->has('can_view_reports') ? 1 : 0,
+        ]);
 
-        return redirect()
-            ->route('admin.roles.index')
-            ->with('success', 'Role created successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
     }
 
-    /**
-     * Show edit form.
-     */
     public function edit(Role $role)
     {
         return view('admin.roles.edit', compact('role'));
     }
 
-    /**
-     * Update a role.
-     */
     public function update(RoleRequest $request, Role $role)
     {
-        $this->roleService->update($role, $request->validated());
+        $role->update([
+            'name'              => $request->name,
+            'can_manage_books'  => $request->has('can_manage_books') ? 1 : 0,
+            'can_manage_orders' => $request->has('can_manage_orders') ? 1 : 0,
+            'can_manage_users'  => $request->has('can_manage_users') ? 1 : 0,
+            'can_view_reports'  => $request->has('can_view_reports') ? 1 : 0,
+        ]);
 
-        return redirect()
-            ->route('admin.roles.index')
-            ->with('success', 'Role updated successfully.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
     }
 
-    /**
-     * Delete a role.
-     */
     public function destroy(Role $role)
     {
-        $deleted = $this->roleService->delete($role);
-
-        if (!$deleted) {
-            return redirect()
-                ->route('admin.roles.index')
-                ->with('error', 'Cannot delete role with assigned staff members.');
+        if ($role->staff()->count() > 0) {
+            return redirect()->route('admin.roles.index')->with('error', 'Cannot delete role with assigned staff members.');
         }
 
-        return redirect()
-            ->route('admin.roles.index')
-            ->with('success', 'Role deleted successfully.');
+        $role->delete();
+        return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
     }
 }

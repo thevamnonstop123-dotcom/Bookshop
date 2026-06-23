@@ -16,11 +16,7 @@ class RoleRequest extends FormRequest
         $roleId = $this->route('role')?->id;
 
         return [
-            'name'              => 'required|string|max:50|unique:roles,name,' . $roleId,
-            'can_manage_books'  => 'boolean',
-            'can_manage_orders' => 'boolean',
-            'can_manage_users'  => 'boolean',
-            'can_view_reports'  => 'boolean',
+            'name' => 'required|string|max:50|unique:roles,name,' . $roleId,
         ];
     }
 }

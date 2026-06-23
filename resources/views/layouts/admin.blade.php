@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/layout.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/ai-assistant.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin/table.css') }}">
 
     <link rel="stylesheet" href="{{ asset('css/admin/ai-assistant.css?v=' . time()) }}">
 

@@ -18,34 +18,16 @@ class PromotionService
 
     /**
      * Send promotion email to all active customers.
+     * Now dispatches in background via queue.
      */
     public function send(string $subject, string $message, int $staffId): PromotionEmail
     {
         $customers = Customer::where('status', 'active')->get();
-        $count = 0;
+        $count = $customers->count();
 
+        // Dispatch email jobs to queue (background)
         foreach ($customers as $customer) {
-            try {
-                Mail::send('admin.promotions.email-template', [
-                    'name' => $customer->name,
-                    'subject' => $subject,
-                    'content' => $message,
-                ], function ($mail) use ($customer, $subject) {
-                    $mail->to($customer->email, $customer->name)
-                         ->subject($subject);
-                });
-                $count++;
-            } catch (\Exception $e) {
-                // Skip failed emails
-            }
-
-            // Create notification for this customer
-            \App\Models\Notification::create([
-                'customer_id' => $customer->id,
-                'type' => 'promotion',
-                'title' => $subject,
-                'message' => $message,
-            ]);
+            \App\Jobs\SendPromotionEmail::dispatch($customer, $subject, $message);
         }
 
         return PromotionEmail::create([
