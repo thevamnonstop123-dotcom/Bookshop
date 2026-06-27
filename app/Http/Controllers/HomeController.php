@@ -29,6 +29,17 @@ class HomeController extends Controller
         $newBooks = Book::with(['authors','category'])->where('status','active')->latest()->limit(5)->get();
         $bestSellers = Book::with(['authors','category'])->where('status','active')->inRandomOrder()->limit(5)->get();
 
+        $topAuthors = \App\Models\Author::withCount('books')
+            ->where('status', 'active')
+            ->orderByDesc('books_count')
+            ->limit(5)
+            ->get();
+
+        // Get the most famous book for each author
+        $topAuthors->each(function ($author) {
+            $author->famousBook = $author->books()->where('status', 'active')->first();
+        });
+
         // Wishlisted book IDs for heart icon
         $wishlistedIds = [];
         if (auth('customer')->check()) {
@@ -36,7 +47,7 @@ class HomeController extends Controller
                 ->getWishlistedIds(auth('customer')->id());
         }
 
-        return view('customer.home', compact(
+            return view('customer.home', compact(
             'banners',
             'totalBooks',
             'totalCustomers',
@@ -44,7 +55,8 @@ class HomeController extends Controller
             'categories',
             'newBooks',
             'bestSellers',
-            'wishlistedIds'
+            'wishlistedIds',
+            'topAuthors'
         ));
     }
 }

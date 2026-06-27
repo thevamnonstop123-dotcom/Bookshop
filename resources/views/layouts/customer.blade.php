@@ -9,7 +9,7 @@
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
 
-    {{-- Design System --}}
+    {{-- Design System Variables & Base Glass Reset --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
     {{-- Layout Styles --}}
@@ -17,33 +17,43 @@
     <link rel="stylesheet" href="{{ asset('css/customer/cart.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customer/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customer/auth.css') }}">
-
+    <link rel="stylesheet" href="{{ asset('css/customer/footer.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pagination.css') }}">
     @stack('styles')
 </head>
 <body>
 
-    {{-- Navigation --}}
-    @include('components.customer.navbar')
+    {{-- Main UI Glass Window Envelope --}}
+    <div class="app-glass-container">
 
-    {{-- Mobile Sidebar --}}
-    @include('components.customer.sidebar')
+        {{-- Navigation --}}
+        @include('components.customer.navbar')
 
-    {{-- Page Content --}}
-    <main class="main-content">
-        @yield('content')
-    </main>
+        {{-- Page Content --}}
+        <main class="main-content">
+            @yield('content')
+        </main>
+
+        {{-- Footer --}}
+        @include('components.customer.footer')
+
+    </div> {{-- End app-glass-container --}}
+
+
+    {{-- Functional Overlays (Kept outside to prevent layout clipping and positioning bugs) --}}
     
     {{-- Bottom Navigation (Mobile) --}}
     @include('components.customer.bottom-nav')
 
-    {{-- Footer --}}
-    @include('components.customer.footer')
+    {{-- Mobile/Categories Sidebar --}}
+    @include('components.customer.sidebar')
 
     {{-- Cart Drawer --}}
     @include('customer.cart.drawer')
 
     {{-- Login/Register Modal --}}
     @include('customer.auth.login-modal')
+
 
     {{-- Core Scripts --}}
     <script src="{{ asset('js/app.js') }}"></script>

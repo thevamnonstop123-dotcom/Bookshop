@@ -1,65 +1,65 @@
-/**
- * Bookshop Books Listing — Interactions
- * Mobile filter sidebar, price validation
- */
 (function () {
     'use strict';
 
-    document.addEventListener('DOMContentLoaded', function () {
-        initMobileSidebar();
-        initPriceValidation();
-    });
+    class BookFilters {
+        constructor() {
+            this.sidebar = new MobileSidebar();
+            this.priceValidator = new PriceValidator();
+        }
+    }
 
-    // ========== MOBILE SIDEBAR ==========
-    function initMobileSidebar() {
-        const toggle = document.getElementById('filterToggle');
-        const sidebar = document.getElementById('booksSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const closeBtn = document.getElementById('sidebarClose');
+    class MobileSidebar {
+        constructor() {
+            this.toggle = document.getElementById('filterToggle');
+            this.sidebar = document.getElementById('booksSidebar');
+            this.overlay = document.getElementById('sidebarOverlay');
+            this.closeBtn = document.getElementById('sidebarClose');
+            this.init();
+        }
 
-        if (!toggle || !sidebar || !overlay) return;
+        init() {
+            if (!this.toggle || !this.sidebar || !this.overlay) return;
+            this.toggle.addEventListener('click', () => this.open());
+            this.overlay.addEventListener('click', () => this.close());
+            if (this.closeBtn) this.closeBtn.addEventListener('click', () => this.close());
+            document.addEventListener('keydown', (e) => e.key === 'Escape' && this.close());
+        }
 
-        function open() {
-            sidebar.classList.add('open');
-            overlay.classList.add('show');
+        open() {
+            this.sidebar.classList.add('open');
+            this.overlay.classList.add('show');
             document.body.style.overflow = 'hidden';
         }
 
-        function close() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('show');
+        close() {
+            this.sidebar.classList.remove('open');
+            this.overlay.classList.remove('show');
             document.body.style.overflow = '';
         }
-
-        toggle.addEventListener('click', open);
-        overlay.addEventListener('click', close);
-        if (closeBtn) closeBtn.addEventListener('click', close);
-
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && sidebar.classList.contains('open')) {
-                close();
-            }
-        });
     }
 
-    // ========== PRICE VALIDATION ==========
-    function initPriceValidation() {
-        const form = document.getElementById('priceFilterForm');
-        if (!form) return;
+    class PriceValidator {
+        constructor() {
+            this.form = document.getElementById('priceFilterForm');
+            this.init();
+        }
 
-        form.addEventListener('submit', function (e) {
-            const minInput = document.getElementById('minPrice');
-            const maxInput = document.getElementById('maxPrice');
-            const min = parseInt(minInput.value) || 0;
-            const max = parseInt(maxInput.value) || 0;
+        init() {
+            if (!this.form) return;
+            this.form.addEventListener('submit', (e) => this.validate(e));
+        }
 
-            if (min < 0) minInput.value = 0;
-            if (max < 0) maxInput.value = 0;
+        validate(e) {
+            const min = parseInt(document.getElementById('minPrice')?.value) || 0;
+            const max = parseInt(document.getElementById('maxPrice')?.value) || 0;
 
-            if (min > 0 && max > 0 && max < min) {
+            if (max > 0 && max < min) {
                 e.preventDefault();
                 alert('Maximum price must be greater than minimum price.');
             }
-        });
+        }
     }
+
+    document.addEventListener('DOMContentLoaded', () => new BookFilters());
 })();
+

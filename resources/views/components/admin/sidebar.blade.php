@@ -154,7 +154,7 @@
 
     {{-- Footer --}}
     <div class="admin-sidebar-footer">
-        <i class="fas fa-circle admin-footer-status-dot"></i>
-        <span>&copy; {{ date('Y') }} Bookshop v1.0</span>
+        <i class="fas fa-circle" style="font-size:6px;color:#10B981;margin-right:6px;"></i>
+        &copy; {{ date('Y') }} Bookshop v1.0
     </div>
 </aside>

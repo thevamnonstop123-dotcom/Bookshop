@@ -27,6 +27,19 @@
                                 </span>
                                 <h1 class="hero-heading">{{ $banner->title }}</h1>
                                 <p class="hero-description">{{ $banner->description }}</p>
+                                    @if($banner->end_date)
+                                <div class="hero-countdown" data-end="{{ $banner->end_date->format('Y-m-d H:i:s') }}">
+                                    <span class="hero-countdown-label">Offer ends in:</span>
+                                    <div class="hero-countdown-timer">
+                                        <span class="countdown-days-wrap">
+                                            <span class="countdown-days">00</span>d
+                                        </span>
+                                        <span class="countdown-hours">00</span>h
+                                        <span class="countdown-mins">00</span>m
+                                        <span class="countdown-secs">00</span>s
+                                    </div>
+                                </div>
+                                @endif
                                 <div class="hero-actions">
                                     <a href="{{ route('books.index') }}" class="btn-hero btn-hero-primary">
                                         Shop Now <i class="fas fa-arrow-right"></i>
@@ -172,12 +185,46 @@
         </div>
     </section>
 
+    {{-- SHOP BY AUTHOR --}}
+    @if(isset($topAuthors) && $topAuthors->count() > 0)
+        <section class="section section-surface">
+            <div class="container">
+                <div class="section-heading">
+                    <span class="section-eyebrow">Writers</span>
+                    <h2 class="section-title">Shop by Author</h2>
+                    <p class="section-subtitle">Discover books from your favorite writers</p>
+                </div>
+                <div class="authors-grid">
+                    @foreach($topAuthors as $author)
+                        <a href="{{ route('books.index', ['author' => $author->id]) }}" class="author-card">
+                            <div class="author-card-avatar">
+                                <img src="{{ $author->image && $author->image !== 'default.png' ? asset('storage/'.$author->image) : 'https://ui-avatars.com/api/?name='.urlencode($author->name).'&background=10B981&color=fff&size=96' }}"
+                                     alt="{{ $author->name }}" class="author-card-img">
+                                <div class="author-card-ring"></div>
+                            </div>
+                            <div class="author-card-info">
+                                <h4 class="author-card-name">{{ $author->name }}</h4>
+                                <span class="author-card-books">{{ $author->books_count }} {{ Str::plural('book', $author->books_count) }}</span>
+                                @if($author->famousBook)
+                                    <span class="author-card-famous">📖 {{ $author->famousBook->title }}</span>
+                                @endif
+                            </div>
+                            <span class="author-card-arrow">
+                                View Books <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- NEW ARRIVALS CAROUSEL --}}
     @if($newBooks->count() > 0)
         <section class="section section-surface">
             <div class="container">
-                <div class="section-heading section-heading-row">
-                    <div>
+                <div class="section-heading-row">
+                    <div class="heading-text-group">
                         <span class="section-eyebrow">Fresh</span>
                         <h2 class="section-title">New Arrivals</h2>
                         <p class="section-subtitle">Just added to our shelves</p>

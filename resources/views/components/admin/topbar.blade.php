@@ -31,9 +31,9 @@
         </div>
 
         {{-- Solid High-Action Logout Button --}}
-        <form action="{{ route('admin.logout') }}" method="POST" class="admin-topbar-logout-form">
+        <form action="{{ route('admin.logout') }}" method="POST" class="admin-topbar-logout-form" data-tooltip="Sign Out">
             @csrf
-            <button type="submit" class="admin-topbar-action-solid">
+            <button type="submit" class="admin-topbar-action-solid" aria-label="Sign Out">
                 <i class="fas fa-power-off"></i>
             </button>
         </form>

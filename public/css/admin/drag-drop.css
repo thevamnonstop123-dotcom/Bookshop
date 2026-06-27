@@ -1,5 +1,7 @@
 /* =============================================
-   AUTHOR DRAG & DROP — Premium Selection
+   AUTHOR DRAG & DROP + FORM COMPONENTS
+   Premium Educational E-commerce
+   Aligned with Design System (No Hardcoded Values)
    ============================================= */
 
 .author-selection-container {
@@ -11,30 +13,30 @@
 /* Drop Zone */
 .author-dropzone {
     min-height: 60px;
-    border: 2px dashed #E2E8F0;
-    border-radius: 12px;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
     padding: 14px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
-    transition: all 0.25s ease;
-    background: #F8FAFC;
+    gap: var(--space-1);
+    transition: all var(--transition-fast);
+    background: var(--color-bg);
 }
 
 .author-dropzone-active {
-    border-color: #10B981;
-    background: #F0FDF4;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08);
+    border-color: var(--color-primary);
+    background: var(--color-info-bg);
+    box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.08);
 }
 
 .author-dropzone-placeholder {
-    color: #94A3B8;
-    font-size: 13px;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-1);
 }
 
 /* Selected Author Chip */
@@ -43,10 +45,11 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border-radius: 8px;
-    background: #10B981;
-    color: #FFFFFF;
-    font-size: 13px;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     animation: chipIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -65,16 +68,16 @@
 .selected-author-remove {
     width: 18px;
     height: 18px;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     border: none;
     background: rgba(255, 255, 255, 0.25);
-    color: #FFFFFF;
+    color: var(--color-white);
     font-size: 9px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast);
     padding: 0;
 }
 
@@ -84,9 +87,9 @@
 
 /* Author Grid */
 .author-grid-label {
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     font-weight: 600;
-    color: #94A3B8;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -94,7 +97,7 @@
 .author-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--space-1);
 }
 
 /* Author Chip */
@@ -102,45 +105,45 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
-    border-radius: 10px;
-    border: 1.5px solid #E2E8F0;
-    background: #FFFFFF;
-    color: #475569;
-    font-size: 13px;
+    padding: var(--space-1) 14px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-family: var(--font-body);
+    font-size: var(--font-size-sm);
     font-weight: 500;
     cursor: grab;
-    transition: all 0.25s ease;
-    font-family: inherit;
+    transition: all var(--transition-fast);
     user-select: none;
 }
 
 .author-chip i {
     font-size: 11px;
-    color: #94A3B8;
+    color: var(--color-text-muted);
 }
 
 .author-chip:hover {
-    border-color: #10B981;
-    color: #10B981;
-    background: #F0FDF4;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-info-bg);
 }
 
 .author-chip:hover i {
-    color: #10B981;
+    color: var(--color-primary);
 }
 
 .author-chip-selected {
-    border-color: #10B981 !important;
-    background: #ECFDF5 !important;
-    color: #059669 !important;
+    border-color: var(--color-primary);
+    background: var(--color-info-bg);
+    color: var(--color-primary-dark);
     font-weight: 600;
     cursor: default;
     opacity: 0.6;
 }
 
 .author-chip-selected i {
-    color: #059669 !important;
+    color: var(--color-primary-dark);
 }
 
 .author-chip-dragging {
@@ -158,15 +161,15 @@
     gap: 12px;
     cursor: pointer;
     user-select: none;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1.5px solid #E2E8F0;
-    background: #F8FAFC;
-    transition: all 0.25s ease;
+    padding: 12px var(--space-2);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--color-border);
+    background: var(--color-bg);
+    transition: all var(--transition-fast);
 }
 
 .admin-form-toggle:hover {
-    border-color: #CBD5E1;
+    border-color: var(--color-text-muted);
 }
 
 .admin-form-toggle input[type="checkbox"] {
@@ -179,7 +182,7 @@
     width: 44px;
     height: 24px;
     border-radius: 12px;
-    background: #CBD5E1;
+    background: var(--color-border);
     position: relative;
     transition: background 0.3s ease;
     flex-shrink: 0;
@@ -192,14 +195,14 @@
     left: 2px;
     width: 20px;
     height: 20px;
-    border-radius: 50%;
-    background: #FFFFFF;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
     transition: transform 0.3s ease;
 }
 
 .admin-form-toggle input:checked + .admin-form-toggle-switch {
-    background: #10B981;
+    background: var(--color-primary);
 }
 
 .admin-form-toggle input:checked + .admin-form-toggle-switch::after {
@@ -207,29 +210,31 @@
 }
 
 .admin-form-toggle-label {
-    font-size: 13px;
+    font-size: var(--font-size-sm);
     font-weight: 500;
-    color: #475569;
+    color: var(--color-text-secondary);
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
-/* File Upload */
+/* =============================================
+   FILE UPLOAD
+   ============================================= */
 .admin-form-file-upload {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 16px;
-    border: 2px dashed #E2E8F0;
-    border-radius: 12px;
-    background: #F8FAFC;
+    padding: 14px var(--space-2);
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
     flex-wrap: wrap;
 }
 
 .admin-form-file-icon {
     font-size: 28px;
-    color: #EF4444;
+    color: var(--color-danger);
     flex-shrink: 0;
 }
 
@@ -239,37 +244,41 @@
 }
 
 .admin-form-file-label {
-    font-size: 13px;
+    font-size: var(--font-size-sm);
     font-weight: 600;
-    color: #0F172A;
+    color: var(--color-text);
     display: block;
 }
 
 .admin-form-file-hint {
-    font-size: 11px;
-    color: #94A3B8;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
 }
 
 .admin-form-file-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
-    border-radius: 8px;
-    background: #0F172A;
-    color: #FFFFFF;
-    font-size: 12px;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-size: var(--font-size-xs);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all var(--transition-fast);
     white-space: nowrap;
+    border: none;
 }
 
 .admin-form-file-btn:hover {
-    background: #1E293B;
+    background: var(--color-primary-dark);
 }
 
-/* Description Actions */
+/* =============================================
+   DESCRIPTION ACTIONS
+   ============================================= */
 .admin-form-description-actions {
     display: flex;
     align-items: center;
@@ -277,15 +286,19 @@
     margin-top: 10px;
 }
 
-/* Loading */
+/* =============================================
+   LOADING
+   ============================================= */
 .admin-form-loading {
     display: none;
-    font-size: 12px;
-    color: #64748B;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
     font-weight: 500;
 }
 
-/* AI Bulk Actions */
+/* =============================================
+   AI BULK ACTIONS
+   ============================================= */
 .ai-bulk-actions {
     display: flex;
     align-items: center;
@@ -293,30 +306,43 @@
     flex-wrap: wrap;
 }
 
-/* Button Size Variant */
+/* =============================================
+   BUTTON SIZE VARIANT
+   ============================================= */
 .admin-btn-sm {
     padding: 7px 14px;
-    font-size: 12px;
-    border-radius: 8px;
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
 }
 
-/* Form Hint */
+/* =============================================
+   FORM HINT
+   ============================================= */
 .admin-form-hint {
-    font-size: 11px;
-    color: #94A3B8;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
     margin-top: 2px;
 }
 
-/* Book Cover Image Sizes */
+/* =============================================
+   BOOK COVER IMAGE
+   ============================================= */
 .admin-form-image-preview-book {
     width: 100px;
     height: 130px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     object-fit: cover;
+    border: 1px solid var(--color-border);
 }
 
 .admin-form-image-placeholder-book {
     width: 100px;
     height: 130px;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
 }

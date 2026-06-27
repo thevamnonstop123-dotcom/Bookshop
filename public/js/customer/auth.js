@@ -12,7 +12,12 @@
             modal.classList.add('active');
             modal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
-            
+
+            // Reset to login form view and clear all forms
+            window.switchToLogin();
+            resetAllForms();
+            clearAllErrors();
+
             // Check for error in URL
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('error')) {
@@ -21,7 +26,6 @@
                     errorEl.style.display = 'block';
                     errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Invalid email or password. Please try again.';
                 }
-                // Clean URL without reloading
                 const newUrl = window.location.pathname;
                 window.history.replaceState({}, '', newUrl);
             }
@@ -31,45 +35,110 @@
     };
 
     window.closeLoginModal = function () {
-    const modal = document.getElementById('loginModal');
-    if (modal) {
-        modal.classList.remove('active');
-        modal.setAttribute('aria-hidden', 'true');
-        modal.style.display = 'none';
-    }
-    document.body.style.overflow = '';
-    
-    // Clear error message when closing modal
-    const errorEl = document.getElementById('loginError');
-    if (errorEl) {
-        errorEl.style.display = 'none';
-        errorEl.innerHTML = '';
-    }
-    
-    // Optional: Clear session error via AJAX (to prevent showing again)
-    fetch('/clear-login-error', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.style.display = 'none';
         }
-    }).catch(err => console.log('Error cleared'));
-};
+        document.body.style.overflow = '';
 
+        // Reset all forms when modal closes
+        resetAllForms();
+        clearAllErrors();
+    };
+
+    // ========== FORM RESET HELPERS ==========
+    function resetAllForms() {
+        const loginForm = document.getElementById('modalLoginForm');
+        const registerForm = document.getElementById('modalRegisterForm');
+
+        if (loginForm) loginForm.reset();
+        if (registerForm) registerForm.reset();
+
+        // Reset password toggle icons back to eye
+        const modalToggleIcon = document.getElementById('modalToggleIcon');
+        const modalRegToggleIcon = document.getElementById('modalRegToggleIcon');
+        const loginPassField = document.querySelector('#modalLoginForm input[name="password"]');
+        const regPassField = document.querySelector('#modalRegisterForm input[name="password"]');
+
+        if (modalToggleIcon) {
+            modalToggleIcon.classList.remove('fa-eye-slash');
+            modalToggleIcon.classList.add('fa-eye');
+        }
+        if (modalRegToggleIcon) {
+            modalRegToggleIcon.classList.remove('fa-eye-slash');
+            modalRegToggleIcon.classList.add('fa-eye');
+        }
+        if (loginPassField) loginPassField.type = 'password';
+        if (regPassField) regPassField.type = 'password';
+
+        // Reset password strength meter
+        const container = document.getElementById('passwordStrength');
+        if (container) container.innerHTML = '';
+    }
+
+    function clearAllErrors() {
+        const errorEls = ['loginError', 'registerError', 'loginSuccess'];
+        errorEls.forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = 'none';
+                el.innerHTML = '';
+            }
+        });
+    }
+
+    // ========== FORM SWITCHING ==========
     window.switchToRegister = function (e) {
         if (e) e.preventDefault();
         const loginForm = document.getElementById('loginFormContent');
         const registerForm = document.getElementById('registerFormContent');
+        const loginFormEl = document.getElementById('modalLoginForm');
+        const registerFormEl = document.getElementById('modalRegisterForm');
+
         if (loginForm) loginForm.style.display = 'none';
         if (registerForm) registerForm.style.display = 'block';
+
+        // Reset login form when switching away
+        if (loginFormEl) loginFormEl.reset();
+        clearAllErrors();
+
+        // Reset password toggle
+        const icon = document.getElementById('modalToggleIcon');
+        const passField = document.querySelector('#modalLoginForm input[name="password"]');
+        if (icon) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+        if (passField) passField.type = 'password';
     };
 
     window.switchToLogin = function (e) {
         if (e) e.preventDefault();
         const loginForm = document.getElementById('loginFormContent');
         const registerForm = document.getElementById('registerFormContent');
+        const registerFormEl = document.getElementById('modalRegisterForm');
+
         if (registerForm) registerForm.style.display = 'none';
         if (loginForm) loginForm.style.display = 'block';
+
+        // Reset register form when switching away
+        if (registerFormEl) registerFormEl.reset();
+        clearAllErrors();
+
+        // Reset password toggle
+        const icon = document.getElementById('modalRegToggleIcon');
+        const passField = document.querySelector('#modalRegisterForm input[name="password"]');
+        if (icon) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+        if (passField) passField.type = 'password';
+
+        // Reset password strength meter
+        const container = document.getElementById('passwordStrength');
+        if (container) container.innerHTML = '';
     };
 
     // Close on overlay click
@@ -88,7 +157,7 @@
         const field = document.querySelector('#modalLoginForm input[name="password"]');
         const icon = document.getElementById('modalToggleIcon');
         if (!field || !icon) return;
-        
+
         if (field.type === 'password') {
             field.type = 'text';
             icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -102,7 +171,7 @@
         const field = document.querySelector('#modalRegisterForm input[name="password"]');
         const icon = document.getElementById('modalRegToggleIcon');
         if (!field || !icon) return;
-        
+
         if (field.type === 'password') {
             field.type = 'text';
             icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -116,22 +185,22 @@
     function updatePasswordStrength() {
         const password = document.getElementById('password');
         if (!password) return;
-        
+
         const value = password.value;
         const hasMinLength = value.length >= 8;
         const hasLetter = /[a-zA-Z]/.test(value);
         const hasNumber = /[0-9]/.test(value);
-        
+
         let strengthText = '';
         let strengthColor = '';
         let width = '0%';
-        
+
         if (value.length === 0) {
-            const container = document.querySelector('.password-strength');
+            const container = document.getElementById('passwordStrength');
             if (container) container.innerHTML = '';
             return;
         }
-        
+
         if (!hasMinLength) {
             strengthText = '✗ Weak (need 8+ characters)';
             strengthColor = '#EF4444';
@@ -145,7 +214,7 @@
             strengthColor = '#10B981';
             width = '100%';
         }
-        
+
         const container = document.getElementById('passwordStrength');
         if (container) {
             container.innerHTML = `
@@ -158,7 +227,7 @@
     }
 
     // Initialize strength meter
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const passwordField = document.getElementById('password');
         if (passwordField) {
             passwordField.addEventListener('input', updatePasswordStrength);
@@ -166,10 +235,10 @@
     });
 
     // ========== AUTO-OPEN MODAL ON PAGE LOAD ==========
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('login') || urlParams.has('login=open') || urlParams.has('login-open')) {
-            setTimeout(function() {
+            setTimeout(function () {
                 openLoginModal();
             }, 100);
         }
@@ -205,17 +274,19 @@
             if (resp.redirected) {
                 window.location.href = resp.url;
             } else if (resp.ok) {
+                // Reset form before reload
+                form.reset();
                 window.location.reload();
             } else {
                 const data = await resp.json();
-                if (errorEl) { 
-                    errorEl.style.display = 'block'; 
+                if (errorEl) {
+                    errorEl.style.display = 'block';
                     errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + (data.message || 'Invalid credentials. Please try again.');
                 }
             }
         } catch (err) {
-            if (errorEl) { 
-                errorEl.style.display = 'block'; 
+            if (errorEl) {
+                errorEl.style.display = 'block';
                 errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Something went wrong. Please try again.';
             }
         }
@@ -255,17 +326,22 @@
             if (resp.redirected) {
                 window.location.href = resp.url;
             } else if (resp.ok) {
+                // Reset form before reload
+                form.reset();
+                // Clear password strength meter
+                const container = document.getElementById('passwordStrength');
+                if (container) container.innerHTML = '';
                 window.location.reload();
             } else {
                 const data = await resp.json();
-                if (errorEl) { 
-                    errorEl.style.display = 'block'; 
+                if (errorEl) {
+                    errorEl.style.display = 'block';
                     errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> ' + (data.message || Object.values(data.errors || {}).flat().join('<br>'));
                 }
             }
         } catch (err) {
-            if (errorEl) { 
-                errorEl.style.display = 'block'; 
+            if (errorEl) {
+                errorEl.style.display = 'block';
                 errorEl.innerHTML = '<i class="fas fa-circle-exclamation"></i> Something went wrong. Please try again.';
             }
         }

@@ -279,6 +279,48 @@ const Cart = {
     formatCurrency(amount) {
         return Number(amount).toLocaleString('en-US') + ' MMK';
     },
+
+    
 };
 
 document.addEventListener('DOMContentLoaded', () => Cart.init());
+// Wishlist toggle — optimistic UI update
+document.addEventListener('click', function (e) {
+    const heartBtn = e.target.closest('.wishlist-toggle, .book-card-wishlist, .wishlist-btn');
+    if (!heartBtn) return;
+
+    e.preventDefault();
+
+    const bookId = heartBtn.dataset.bookId;
+    const icon = heartBtn.querySelector('i');
+    const isCurrentlyLiked = heartBtn.classList.contains('active') || icon?.classList.contains('fas');
+
+    // Optimistic update
+    if (isCurrentlyLiked) {
+        heartBtn.classList.remove('active');
+        if (icon) { icon.classList.remove('fas'); icon.classList.add('far'); }
+    } else {
+        heartBtn.classList.add('active');
+        if (icon) { icon.classList.remove('far'); icon.classList.add('fas'); }
+    }
+
+    // Send to server
+    fetch('/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ book_id: bookId })
+    }).catch(() => {
+        // Revert on error
+        if (isCurrentlyLiked) {
+            heartBtn.classList.add('active');
+            if (icon) { icon.classList.add('fas'); icon.classList.remove('far'); }
+        } else {
+            heartBtn.classList.remove('active');
+            if (icon) { icon.classList.remove('fas'); icon.classList.add('far'); }
+        }
+    });
+});

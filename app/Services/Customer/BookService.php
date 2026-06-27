@@ -31,6 +31,11 @@ class BookService
             ->when(isset($filters['max_price']), function ($query) use ($filters) {
                 $query->where('price', '<=', $filters['max_price']);
             })
+            ->when(isset($filters['author']), function ($query) use ($filters) {
+                $query->whereHas('authors', function ($q) use ($filters) {
+                    $q->where('authors.id', $filters['author']);
+                });
+            })
             ->when(isset($filters['sort']), function ($query) use ($filters) {
                 match ($filters['sort']) {
                     'price_asc'  => $query->orderBy('price', 'asc'),

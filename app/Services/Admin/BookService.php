@@ -12,16 +12,12 @@ class BookService
      * Get all books with relationships.
      */
     public function getAll()
-{
-    return Book::with(['category', 'authors'])
-        ->latest()
-        ->paginate(20);  // Changed from ->get() to ->paginate(20)
-}
-
+    {
+        return Book::with(['category', 'authors'])
+            ->latest()
+            ->paginate(20);  // Changed from ->get() to ->paginate(20)
+    }
     /**
-     * Store a new book.
-     */
-        /**
      * Store a new book.
      */
     public function create(array $data): Book

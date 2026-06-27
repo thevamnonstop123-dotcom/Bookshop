@@ -1,6 +1,6 @@
 /* =============================================
-   PAYMENTS PAGE — Premium, No Scrollbars
-   Apple / Stripe / Notion inspired
+   PAYMENTS PAGE — Premium Educational E-commerce
+   Aligned with Design System (No Hardcoded Values)
    ============================================= */
 
 /* ---------- STATS GRID ---------- */
@@ -8,23 +8,24 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 14px;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-3);
 }
 
 .payment-stat-card {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 16px 18px;
-    border: 1px solid #E2E8F0;
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    padding: var(--space-2) 18px;
+    border: 1px solid var(--color-border);
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.3s ease;
+    transition: all var(--transition-smooth);
     min-width: 0;
+    box-shadow: var(--shadow-xs);
 }
 
 .payment-stat-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
 }
 
@@ -32,7 +33,7 @@
     width: 40px;
     height: 40px;
     min-width: 40px;
-    border-radius: 10px;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,23 +42,23 @@
 }
 
 .payment-stat-revenue .payment-stat-icon {
-    background: #ECFDF5;
-    color: #10B981;
+    background: var(--color-success-bg);
+    color: var(--color-success);
 }
 
 .payment-stat-completed .payment-stat-icon {
-    background: #EFF6FF;
-    color: #2563EB;
+    background: var(--color-info-bg);
+    color: var(--color-primary);
 }
 
 .payment-stat-pending .payment-stat-icon {
-    background: #FFFBEB;
-    color: #F59E0B;
+    background: var(--color-warning-bg);
+    color: var(--color-accent);
 }
 
 .payment-stat-failed .payment-stat-icon {
-    background: #FEF2F2;
-    color: #EF4444;
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
 }
 
 .payment-stat-info {
@@ -70,16 +71,17 @@
 .payment-stat-label {
     font-size: 10px;
     font-weight: 600;
-    color: #94A3B8;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
 }
 
 .payment-stat-value {
+    font-family: var(--font-heading);
     font-size: 18px;
-    font-weight: 800;
-    color: #0F172A;
+    font-weight: 700;
+    color: var(--color-text);
     letter-spacing: -0.3px;
     white-space: nowrap;
     overflow: hidden;
@@ -87,15 +89,15 @@
 }
 
 .payment-stat-revenue .payment-stat-value {
-    color: #10B981;
+    color: var(--color-success);
 }
 
 .payment-stat-pending .payment-stat-value {
-    color: #F59E0B;
+    color: var(--color-accent-dark);
 }
 
 .payment-stat-failed .payment-stat-value {
-    color: #EF4444;
+    color: var(--color-danger);
 }
 
 /* ---------- FILTER TABS ---------- */
@@ -110,42 +112,43 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 12px;
+    padding: var(--space-1) 14px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: var(--font-size-xs);
     font-weight: 500;
     text-decoration: none;
-    transition: all 0.2s ease;
-    background: #FFFFFF;
-    color: #475569;
-    border: 1.5px solid #E2E8F0;
+    transition: all var(--transition-fast);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1.5px solid var(--color-border);
     white-space: nowrap;
 }
 
 .payment-filter-tab i {
     font-size: 11px;
-    color: #94A3B8;
+    color: var(--color-text-muted);
 }
 
 .payment-filter-tab:hover {
-    border-color: #10B981;
-    color: #10B981;
-    background: #F0FDF4;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-info-bg);
 }
 
 .payment-filter-tab:hover i {
-    color: #10B981;
+    color: var(--color-primary);
 }
 
 .payment-filter-tab-active {
-    background: #0F172A;
-    color: #FFFFFF;
-    border-color: #0F172A;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border-color: var(--color-primary);
     font-weight: 600;
 }
 
 .payment-filter-tab-active i {
-    color: #10B981;
+    color: var(--color-accent-light);
 }
 
 /* ---------- PAYMENT METHOD BADGE ---------- */
@@ -154,8 +157,8 @@
     align-items: center;
     gap: 5px;
     padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
     font-weight: 700;
     letter-spacing: 0.2px;
     white-space: nowrap;
@@ -172,19 +175,19 @@
 }
 
 .payment-method-badge-kpay {
-    background: #ECFDF5;
+    background: var(--color-success-bg);
     color: #059669;
     border: 1px solid #A7F3D0;
 }
 
 .payment-method-badge-wave {
-    background: #EFF6FF;
-    color: #2563EB;
+    background: var(--color-info-bg);
+    color: var(--color-primary);
     border: 1px solid #BFDBFE;
 }
 
 .payment-method-badge-cod {
-    background: #FFFBEB;
+    background: var(--color-warning-bg);
     color: #D97706;
     border: 1px solid #FDE68A;
 }
@@ -192,8 +195,8 @@
 /* ---------- PAYMENT REFERENCE ---------- */
 .payment-reference {
     font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-    font-size: 11px;
-    color: #64748B;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
     letter-spacing: 0.2px;
     word-break: break-all;
 }
@@ -201,15 +204,15 @@
 /* ---------- ORDER TABLE LINK ---------- */
 .order-table-link {
     font-weight: 700;
-    color: #0F172A;
+    color: var(--color-text);
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: color var(--transition-fast);
     letter-spacing: 0.3px;
     white-space: nowrap;
 }
 
 .order-table-link:hover {
-    color: #10B981;
+    color: var(--color-primary);
 }
 
 /* ---------- RESPONSIVE ---------- */
