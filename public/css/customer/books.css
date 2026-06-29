@@ -368,25 +368,34 @@
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-card);
     overflow: hidden;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        0 8px 16px rgba(0, 0, 0, 0.03);
     transition:
-        transform var(--transition-smooth),
-        box-shadow var(--transition-smooth);
+        transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
 }
+
 .book-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-6px);
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.06),
+        0 8px 16px rgba(0, 0, 0, 0.06),
+        0 16px 32px rgba(0, 0, 0, 0.05),
+        0 24px 48px rgba(0, 0, 0, 0.04);
 }
 
-/* Cover */
 .book-card-cover {
     position: relative;
     display: block;
-    aspect-ratio: 4/5;
+    aspect-ratio: 3/4;
     overflow: hidden;
     background: var(--color-bg);
 }
+
 .book-card-img {
     width: 100%;
     height: 100%;
@@ -646,4 +655,210 @@
         flex: 0 0 150px;
         max-width: 150px;
     }
+}
+
+/* =============================================
+   BOOKS HERO / SEARCH
+   ============================================= */
+.books-hero {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    padding: var(--space-5) 0 var(--space-5);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.books-hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -15%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.1), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.books-hero-title {
+    font-family: var(--font-heading);
+    font-size: 32px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0 0 var(--space-1);
+    letter-spacing: -0.5px;
+}
+
+.books-hero-subtitle {
+    font-size: var(--font-size-base);
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0 0 var(--space-3);
+}
+
+/* Search */
+.books-search-form {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.books-search-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--color-surface);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    padding: 4px 4px 4px 18px;
+    transition: all var(--transition-fast);
+}
+
+.books-search-wrapper:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+}
+
+.books-search-icon {
+    color: var(--color-text-muted);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.books-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    background: transparent;
+}
+
+.books-search-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.books-search-clear {
+    color: var(--color-text-muted);
+    padding: 8px;
+    transition: color var(--transition-fast);
+}
+
+.books-search-clear:hover {
+    color: var(--color-danger);
+}
+
+.books-search-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-full);
+    border: none;
+    background: var(--color-primary);
+    color: #FFFFFF;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+}
+
+.books-search-btn:hover {
+    background: var(--color-primary-dark);
+}
+
+/* =============================================
+   FILTER LIST — SCROLLABLE (Authors)
+   ============================================= */
+.filter-list-scrollable {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.filter-list-scrollable::-webkit-scrollbar {
+    width: 3px;
+}
+
+.filter-list-scrollable::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+}
+
+/* =============================================
+   PAGINATION WRAPPER
+   ============================================= */
+.pagination-wrapper {
+    margin-top: var(--space-5);
+    display: flex;
+    justify-content: center;
+}
+
+/* =============================================
+   RESPONSIVE ADDITIONS
+   ============================================= */
+@media (max-width: 768px) {
+    .books-hero {
+        padding: var(--space-4) 0 var(--space-4);
+    }
+
+    .books-hero-title {
+        font-size: 24px;
+    }
+
+    .books-hero-subtitle {
+        font-size: var(--font-size-sm);
+    }
+
+    .books-search-wrapper {
+        padding: 4px 4px 4px 14px;
+    }
+
+    .books-search-input {
+        padding: 10px 10px;
+        font-size: var(--font-size-sm);
+    }
+
+    .books-search-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .books-hero-title {
+        font-size: 20px;
+    }
+}
+
+/* =============================================
+   BOOK CARD — RATING
+   ============================================= */
+.book-card-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: var(--space-1);
+}
+
+.book-card-stars {
+    display: flex;
+    gap: 1px;
+    color: var(--color-accent);
+    font-size: 11px;
+}
+
+.book-card-stars .fa-star-empty {
+    color: var(--color-border);
+}
+
+.book-card-rating-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-left: 2px;
+}
+
+.book-card-rating-count {
+    font-size: 11px;
+    color: var(--color-text-muted);
 }

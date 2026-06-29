@@ -153,40 +153,68 @@
                 <h2 class="section-title">Shop by Category</h2>
                 <p class="section-subtitle">Find exactly what you need from our curated collections</p>
             </div>
-            @if($categories->count() > 0)
-                <div class="categories-grid">
+            @if($categories->isNotEmpty())
+                <div class="categories-image-grid">
                     @foreach($categories as $cat)
-                        <a href="{{ route('books.index', ['category' => $cat->id]) }}" class="category-card">
-                            <div class="category-icon">
-                                <i class="fas fa-{{ match(strtolower($cat->name)) {
-                                    'books' => 'book',
-                                    'pens' => 'pen',
-                                    'pencils' => 'pencil',
-                                    'bags' => 'bag-shopping',
-                                    'uniforms' => 'shirt',
-                                    'art supplies' => 'palette',
-                                    default => 'layer-group'
-                                } }}"></i>
+                        <a href="{{ route('books.index', ['category' => $cat->id]) }}" class="category-image-card">
+                            <div class="category-image-wrapper">
+                                <img src="{{ $cat->avatarUrl }}" alt="{{ $cat->name }}" class="category-image-img" loading="lazy">
+                                <div class="category-image-overlay"></div>
                             </div>
-                            <h3 class="category-name">{{ $cat->name }}</h3>
-                            <span class="category-link">
+                            <div class="category-image-body">
+                                <h3 class="category-image-name">{{ $cat->name }}</h3>
+                                <span class="category-image-count">{{ $cat->books_count }} {{ Str::plural('Book', $cat->books_count) }}</span>
+                            </div>
+                            <span class="category-image-arrow">
                                 Explore <i class="fas fa-arrow-right"></i>
                             </span>
                         </a>
                     @endforeach
                 </div>
-            @else
-                <div class="empty-state">
-                    <div class="empty-icon"><i class="fas fa-layer-group"></i></div>
-                    <h3>No categories yet</h3>
-                    <p>Check back soon for our curated collections.</p>
+                <div class="section-view-all-wrapper">
+                    <a href="{{ route('books.index') }}" class="section-view-all">
+                        View All Categories <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             @endif
         </div>
     </section>
 
+    {{-- BEST SELLERS CAROUSEL --}}
+    @if($bestSellers->count() > 0)
+        <section class="section">
+            <div class="container">
+                <div class="section-heading section-heading-row">
+                    <div>
+                        <span class="section-eyebrow">Popular</span>
+                        <h2 class="section-title">Best Sellers</h2>
+                        <p class="section-subtitle">What everyone is reading this month</p>
+                    </div>
+                    <a href="{{ route('books.index') }}" class="section-view-all">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="carousel-wrapper">
+                    <button class="carousel-arrow carousel-arrow-left" id="bestSellersPrev" aria-label="Previous books">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="carousel-track-wrapper">
+                        <div class="carousel-track" id="bestSellersTrack">
+                            @foreach($bestSellers as $book)
+                                @include('components.customer.book-card', ['book' => $book])
+                            @endforeach
+                        </div>
+                    </div>
+                    <button class="carousel-arrow carousel-arrow-right" id="bestSellersNext" aria-label="Next books">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- SHOP BY AUTHOR --}}
-    @if(isset($topAuthors) && $topAuthors->count() > 0)
+    @if($topAuthors->isNotEmpty())
         <section class="section section-surface">
             <div class="container">
                 <div class="section-heading">
@@ -196,17 +224,16 @@
                 </div>
                 <div class="authors-grid">
                     @foreach($topAuthors as $author)
-                        <a href="{{ route('books.index', ['author' => $author->id]) }}" class="author-card">
+                        <a href="{{ route('authors.show', $author) }}" class="author-card">
                             <div class="author-card-avatar">
-                                <img src="{{ $author->image && $author->image !== 'default.png' ? asset('storage/'.$author->image) : 'https://ui-avatars.com/api/?name='.urlencode($author->name).'&background=10B981&color=fff&size=96' }}"
-                                     alt="{{ $author->name }}" class="author-card-img">
+                                <img src="{{ $author->avatarUrl }}" alt="{{ $author->name }}" class="author-card-img">
                                 <div class="author-card-ring"></div>
                             </div>
                             <div class="author-card-info">
                                 <h4 class="author-card-name">{{ $author->name }}</h4>
-                                <span class="author-card-books">{{ $author->books_count }} {{ Str::plural('book', $author->books_count) }}</span>
+                                <span class="author-card-books">{{ $author->books_count }} {{ Str::plural('Book', $author->books_count) }}</span>
                                 @if($author->famousBook)
-                                    <span class="author-card-famous">📖 {{ $author->famousBook->title }}</span>
+                                    <span class="author-card-famous">📖 {{ Str::limit($author->famousBook->title, 25) }}</span>
                                 @endif
                             </div>
                             <span class="author-card-arrow">
@@ -214,6 +241,11 @@
                             </span>
                         </a>
                     @endforeach
+                </div>
+                <div class="section-view-all-wrapper">
+                    <a href="{{ route('authors.index') }}" class="section-view-all">
+                        View All Authors <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </section>
@@ -245,39 +277,6 @@
                         </div>
                     </div>
                     <button class="carousel-arrow carousel-arrow-right" id="newArrivalsNext" aria-label="Next books">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-    @endif
-
-    {{-- BEST SELLERS CAROUSEL --}}
-    @if($bestSellers->count() > 0)
-        <section class="section">
-            <div class="container">
-                <div class="section-heading section-heading-row">
-                    <div>
-                        <span class="section-eyebrow">Popular</span>
-                        <h2 class="section-title">Best Sellers</h2>
-                        <p class="section-subtitle">What everyone is reading this month</p>
-                    </div>
-                    <a href="{{ route('books.index') }}" class="section-view-all">
-                        View All <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-                <div class="carousel-wrapper">
-                    <button class="carousel-arrow carousel-arrow-left" id="bestSellersPrev" aria-label="Previous books">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div class="carousel-track-wrapper">
-                        <div class="carousel-track" id="bestSellersTrack">
-                            @foreach($bestSellers as $book)
-                                @include('components.customer.book-card', ['book' => $book])
-                            @endforeach
-                        </div>
-                    </div>
-                    <button class="carousel-arrow carousel-arrow-right" id="bestSellersNext" aria-label="Next books">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>

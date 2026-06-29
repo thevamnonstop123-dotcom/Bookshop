@@ -24,7 +24,11 @@ class HomeController extends Controller
         $totalCustomers = Customer::count();
         $totalOrders = Order::count();
 
-        $categories = Category::where('status','active')->get();
+        $categories = Category::withCount('books')
+        ->where('status', 'active')
+        ->orderBy('name')
+        ->limit(4)
+        ->get();
 
         $newBooks = Book::with(['authors','category'])->where('status','active')->latest()->limit(5)->get();
         $bestSellers = Book::with(['authors','category'])->where('status','active')->inRandomOrder()->limit(5)->get();

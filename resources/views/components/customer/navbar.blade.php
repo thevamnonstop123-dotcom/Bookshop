@@ -7,51 +7,93 @@
             <span class="navbar-logo-text">Book<span class="navbar-logo-accent">shop</span></span>
         </a>
 
-        {{-- Desktop Nav --}}
-        <nav class="navbar-nav">
+        {{-- Desktop Nav Links --}}
+        <nav class="navbar-nav navbar-desktop-only">
             <ul class="navbar-links">
                 <li><a href="{{ route('customer.home') }}" class="navbar-link {{ request()->routeIs('customer.home') ? 'navbar-link-active' : '' }}">Home</a></li>
                 <li><a href="{{ route('books.index') }}" class="navbar-link {{ request()->routeIs('books.index') && !request('sort') ? 'navbar-link-active' : '' }}">Books</a></li>
-                <li><a href="{{ route('books.index', ['sort' => 'latest']) }}" class="navbar-link {{ request('sort') === 'latest' ? 'navbar-link-active' : '' }}">New Arrivals</a></li>
+                <li><a href="{{ route('authors.index') }}" class="navbar-link {{ request()->routeIs('authors.*') ? 'navbar-link-active' : '' }}">Authors</a></li>
+                <li><a href="{{ route('books.index', ['sort' => 'bestseller']) }}" class="navbar-link">Best Sellers</a></li>
             </ul>
         </nav>
 
         {{-- Search (Desktop) --}}
-        <form action="{{ route('books.index') }}" method="GET" class="navbar-search">
-            <div class="navbar-search-wrapper">
+        <div class="navbar-search navbar-desktop-only" id="desktopSearchWrap">
+            <form action="{{ route('books.index') }}" method="GET" class="navbar-search-wrapper">
                 <i class="fas fa-search navbar-search-icon"></i>
-                <input type="text" name="search" class="navbar-search-input" placeholder="Search books, authors..." value="{{ request('search') }}">
+                <input type="text" name="search" class="navbar-search-input" 
+                       placeholder="Search books, authors..." 
+                       value="{{ request('search') }}"
+                       id="desktopSearchInput"
+                       autocomplete="off">
                 @if(request('search'))
                     <a href="{{ route('books.index') }}" class="navbar-search-clear"><i class="fas fa-times"></i></a>
                 @endif
-            </div>
-        </form>
+            </form>
 
-        {{-- Actions --}}
-        <div class="navbar-actions">
+            {{-- Desktop search dropdown --}}
+            <div class="navbar-search-dropdown" id="desktopSearchDropdown" style="display:none;">
+                @php $recentSearches = session('recent_searches', []); @endphp
+                @if(!empty($recentSearches))
+                    <div class="navbar-search-dropdown-section">
+                        <div class="navbar-search-dropdown-header">
+                            <span class="navbar-search-dropdown-title">Recent</span>
+                            <button type="button" class="navbar-search-clear-all" onclick="clearSearchHistory()">Clear All</button>
+                        </div>
+                        @foreach($recentSearches as $index => $term)
+                            <div class="navbar-search-suggestion-item-wrap">
+                                <a href="{{ route('books.index', ['search' => $term]) }}" class="navbar-search-dropdown-item">
+                                    <i class="fas fa-clock-rotate-left"></i> {{ $term }}
+                                </a>
+                                <button type="button" class="navbar-search-suggestion-delete" onclick="deleteSearchHistory({{ $index }})" aria-label="Remove {{ $term }}">
+                                    <i class="fas fa-xmark"></i>
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+                <div class="navbar-search-dropdown-section">
+                    <span class="navbar-search-dropdown-title">Popular</span>
+                    <a href="{{ route('books.index', ['search' => 'Programming']) }}" class="navbar-search-dropdown-item">
+                        <i class="fas fa-fire"></i> Programming
+                    </a>
+                    <a href="{{ route('books.index', ['search' => 'Psychology']) }}" class="navbar-search-dropdown-item">
+                        <i class="fas fa-fire"></i> Psychology
+                    </a>
+                    <a href="{{ route('books.index', ['search' => 'Fiction']) }}" class="navbar-search-dropdown-item">
+                        <i class="fas fa-fire"></i> Fiction
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {{-- Desktop Actions --}}
+        <div class="navbar-actions navbar-desktop-only">
             @auth('customer')
                 @php
                     $currentUser = Auth::guard('customer')->user();
                     $avatarUrl = ($currentUser->image && $currentUser->image !== 'default.png')
                         ? asset('storage/' . $currentUser->image)
-                        : 'https://ui-avatars.com/api/?name=' . urlencode($currentUser->name) . '&background=10B981&color=fff&size=60';
+                        : 'https://ui-avatars.com/api/?name=' . urlencode($currentUser->name) . '&background=1E3A8A&color=fff&size=60';
                 @endphp
 
-                {{-- Search Icon (Mobile only) --}}
-                <button class="navbar-icon-btn navbar-search-toggle" id="navbarSearchToggle"><i class="fas fa-search"></i></button>
+                <a href="{{ route('customer.wishlist.index') }}" class="navbar-icon-btn" aria-label="Wishlist">
+                    <i class="fas fa-heart"></i>
+                </a>
+                <button class="navbar-icon-btn" id="navbarNotificationBtn" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="navbar-icon-badge" id="notificationBadge" style="display:none;">0</span>
+                </button>
+                <button class="navbar-cart-btn" id="navbarCartBtn" aria-label="Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="navbar-cart-badge" id="cartCount" style="display:none;">0</span>
+                </button>
 
-                {{-- Notifications (Desktop + Mobile) --}}
-                <button class="navbar-icon-btn" id="navbarNotificationBtn"><i class="fas fa-bell"></i><span class="navbar-icon-badge" id="notificationBadge" style="display:none;">0</span></button>
-
-                {{-- Wishlist (Desktop only) --}}
-                <a href="{{ route('customer.wishlist.index') }}" class="navbar-icon-btn navbar-desktop-only" id="navbarWishlistBtn"><i class="fas fa-heart"></i></a>
-
-                {{-- Cart --}}
-                <button class="navbar-cart-btn" id="navbarCartBtn"><i class="fas fa-bag-shopping"></i><span class="navbar-cart-badge" id="cartCount">0</span></button>
-
-                {{-- User (Desktop only) --}}
-                <div class="navbar-user navbar-desktop-only" id="navbarUser">
-                    <button class="navbar-user-trigger"><img src="{{ $avatarUrl }}" alt="{{ $currentUser->name }}" class="navbar-user-avatar"></button>
+                {{-- User Dropdown --}}
+                <div class="navbar-user" id="navbarUser">
+                    <button class="navbar-user-trigger">
+                        <img src="{{ $avatarUrl }}" alt="{{ $currentUser->name }}" class="navbar-user-avatar">
+                    </button>
                     <div class="navbar-user-panel" id="navbarUserPanel">
                         <div class="navbar-user-header">
                             <img src="{{ $avatarUrl }}" alt="{{ $currentUser->name }}" class="navbar-user-header-avatar">
@@ -66,18 +108,43 @@
                         <div class="navbar-user-footer">
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="navbar-user-logout"><i class="fas fa-arrow-right-from-bracket"></i> Sign Out</button>
+                                <button type="submit" class="navbar-user-logout">
+                                    <i class="fas fa-arrow-right-from-bracket"></i> Sign Out
+                                </button>
                             </form>
                         </div>
                     </div>
                 </div>
-
-                {{-- More Menu (Mobile only) --}}
-                <button class="navbar-icon-btn navbar-mobile-only" id="navbarMoreBtn"><i class="fas fa-ellipsis"></i></button>
-
             @else
                 <button class="navbar-auth-btn navbar-auth-signin" id="navbarSignInBtn">Sign In</button>
                 <button class="navbar-auth-btn navbar-auth-register" id="navbarRegisterBtn">Register</button>
+            @endauth
+        </div>
+
+        {{-- MOBILE TOP NAV ACTIONS --}}
+        <div class="navbar-mobile-actions" id="navbarMobileActions">
+            <button class="navbar-icon-btn" onclick="openMobileSearch()" aria-label="Search">
+                <i class="fas fa-search"></i>
+            </button>
+            @auth('customer')
+                @php
+                    $mobileUser = Auth::guard('customer')->user();
+                    $mobileAvatarUrl = ($mobileUser->image && $mobileUser->image !== 'default.png')
+                        ? asset('storage/' . $mobileUser->image)
+                        : 'https://ui-avatars.com/api/?name=' . urlencode($mobileUser->name) . '&background=1E3A8A&color=fff&size=60';
+                @endphp
+                <button class="navbar-icon-btn" id="mobileNotificationBtn" aria-label="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="navbar-icon-badge" id="mobileNotificationBadge" style="display:none;">0</span>
+                </button>
+                <a href="{{ route('customer.wishlist.index') }}" class="navbar-icon-btn" aria-label="Wishlist">
+                    <i class="fas fa-heart"></i>
+                </a>
+                <a href="{{ route('customer.profile') }}" class="navbar-icon-btn navbar-mobile-avatar-btn" aria-label="Profile">
+                    <img src="{{ $mobileAvatarUrl }}" alt="{{ $mobileUser->name }}" class="navbar-user-avatar" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
+                </a>
+            @else
+                <button class="navbar-auth-btn navbar-auth-signin" onclick="openLoginModal()">Sign In</button>
             @endauth
         </div>
     </div>
@@ -85,11 +152,52 @@
     {{-- Mobile Search Overlay --}}
     <div class="navbar-search-overlay" id="navbarSearchOverlay">
         <div class="navbar-search-overlay-header">
-            <button class="navbar-search-back" id="navbarSearchBack"><i class="fas fa-arrow-left"></i></button>
-            <form action="{{ route('books.index') }}" method="GET" class="navbar-search-overlay-form">
+            <button class="navbar-search-back" onclick="closeMobileSearch()" aria-label="Back">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <form action="{{ route('books.index') }}" method="GET" class="navbar-search-overlay-form" id="mobileSearchForm">
                 <i class="fas fa-search"></i>
-                <input type="text" name="search" class="navbar-search-overlay-input" placeholder="Search books..." autofocus>
+                <input type="text" name="search" class="navbar-search-overlay-input" 
+                    id="mobileSearchInput"
+                    placeholder="Search books, authors, categories..." 
+                    autocomplete="off">
             </form>
+        </div>
+        <div class="navbar-search-suggestions">
+            @php $recentSearches = session('recent_searches', []); @endphp
+            @if(!empty($recentSearches))
+                <div class="navbar-search-suggestions-section">
+                    <div class="navbar-search-suggestions-header">
+                        <h4 class="navbar-search-suggestions-title">Recent Searches</h4>
+                        <button type="button" class="navbar-search-clear-all" onclick="clearSearchHistory()">Clear All</button>
+                    </div>
+                    @foreach($recentSearches as $index => $term)
+                        <div class="navbar-search-suggestion-item-wrap">
+                            <a href="{{ route('books.index', ['search' => $term]) }}" class="navbar-search-suggestion-item">
+                                <i class="fas fa-clock-rotate-left"></i> {{ $term }}
+                            </a>
+                            <button type="button" class="navbar-search-suggestion-delete" onclick="deleteSearchHistory({{ $index }})" aria-label="Remove {{ $term }}">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            <div class="navbar-search-suggestions-section">
+                <h4 class="navbar-search-suggestions-title">Popular</h4>
+                <a href="{{ route('books.index', ['search' => 'Psychology']) }}" class="navbar-search-suggestion-item">
+                    <i class="fas fa-fire"></i> Psychology
+                </a>
+                <a href="{{ route('books.index', ['search' => 'Laravel']) }}" class="navbar-search-suggestion-item">
+                    <i class="fas fa-fire"></i> Laravel
+                </a>
+                <a href="{{ route('books.index', ['search' => 'Fiction']) }}" class="navbar-search-suggestion-item">
+                    <i class="fas fa-fire"></i> Fiction
+                </a>
+                <a href="{{ route('books.index', ['search' => 'Programming']) }}" class="navbar-search-suggestion-item">
+                    <i class="fas fa-fire"></i> Programming
+                </a>
+            </div>
         </div>
     </div>
 
@@ -100,32 +208,10 @@
             <button onclick="markAllRead()" class="notification-mark-all">Mark all read</button>
         </div>
         <div class="notification-list" id="notificationList">
-            <div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>
-        </div>
-    </div>
-
-    {{-- Mobile More Menu (Horizontal Grid) --}}
-    <div class="mobile-more-overlay" id="mobileMoreOverlay" onclick="toggleMobileMore()"></div>
-    <div class="mobile-more-panel" id="mobileMorePanel">
-        <div class="mobile-more-header">
-            <h3>Menu</h3>
-            <button onclick="toggleMobileMore()"><i class="fas fa-xmark"></i></button>
-        </div>
-        <div class="mobile-more-grid">
-            <a href="{{ route('customer.profile') }}" class="mobile-more-item"><i class="fas fa-user"></i><span>Profile</span></a>
-            <a href="{{ route('customer.orders.index') }}" class="mobile-more-item"><i class="fas fa-receipt"></i><span>Orders</span></a>
-            <a href="{{ route('customer.wishlist.index') }}" class="mobile-more-item"><i class="fas fa-heart"></i><span>Wishlist</span></a>
-            <a href="{{ route('customer.ebooks.library') }}" class="mobile-more-item"><i class="fas fa-bookmark"></i><span>Library</span></a>
-            <a href="#" class="mobile-more-item" onclick="toggleNotifications()"><i class="fas fa-bell"></i><span>Notifications</span></a>
-            <a href="#" class="mobile-more-item" onclick="openLoginModal()"><i class="fas fa-tag"></i><span>Coupons</span></a>
-            <a href="mailto:support@bookshop.com" class="mobile-more-item"><i class="fas fa-envelope"></i><span>Contact</span></a>
-            <a href="#" class="mobile-more-item"><i class="fas fa-question-circle"></i><span>FAQ</span></a>
-        </div>
-        <div class="mobile-more-footer">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="mobile-more-logout"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
-            </form>
+            <div class="notification-empty">
+                <i class="fas fa-bell-slash"></i>
+                <p>No notifications yet</p>
+            </div>
         </div>
     </div>
 </header>

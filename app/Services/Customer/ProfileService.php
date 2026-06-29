@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 class ProfileService
 {
     /**
-     * Update customer profile.
+     * Update customer profile (name, phone, dob, gender, image only).
      */
     public function updateProfile(Customer $customer, array $data): Customer
     {
@@ -22,15 +22,48 @@ class ProfileService
             $data['image'] = $data['image']->store('customers', 'public');
         }
 
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
-
         $customer->update($data);
 
         return $customer;
+    }
+
+    /**
+     * Change email (requires current password verification).
+     */
+    public function changeEmail(Customer $customer, string $currentPassword, string $newEmail): void
+    {
+        if (!Hash::check($currentPassword, $customer->password)) {
+            throw new \Exception('Current password is incorrect.');
+        }
+
+        $customer->update(['email' => $newEmail]);
+    }
+
+    /**
+     * Change password.
+     */
+    public function changePassword(Customer $customer, string $currentPassword, string $newPassword): void
+    {
+        if (!Hash::check($currentPassword, $customer->password)) {
+            throw new \Exception('Current password is incorrect.');
+        }
+
+        $customer->update(['password' => Hash::make($newPassword)]);
+    }
+
+    /**
+     * Upload profile photo only.
+     */
+    public function updatePhoto(Customer $customer, UploadedFile $image): string
+    {
+        if ($customer->image && $customer->image !== 'default.png') {
+            Storage::disk('public')->delete($customer->image);
+        }
+
+        $path = $image->store('customers', 'public');
+        $customer->update(['image' => $path]);
+
+        return $path;
     }
 
     /**
@@ -46,7 +79,6 @@ class ProfileService
      */
     public function storeAddress(int $customerId, array $data): CustomerAddress
     {
-        // If this is the default, unset others
         if (!empty($data['is_default'])) {
             CustomerAddress::where('customer_id', $customerId)->update(['is_default' => false]);
         }

@@ -24,11 +24,12 @@ class CategoryService
         return Category::where('status', 'active')->orderBy('name')->get();
     }
 
-    /**
-     * Store a new category.
-     */
-    public function create(array $data): Category
+    public function store(array $data): Category
     {
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            $data['image'] = $data['image']->store('categories', 'public');
+        }
+
         $data['created_by'] = auth('staff')->id();
         $data['updated_by'] = auth('staff')->id();
 
@@ -40,8 +41,14 @@ class CategoryService
      */
     public function update(Category $category, array $data): Category
     {
-        $data['updated_by'] = auth('staff')->id();
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            if ($category->image && $category->image !== 'default.png') {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($category->image);
+            }
+            $data['image'] = $data['image']->store('categories', 'public');
+        }
 
+        $data['updated_by'] = auth('staff')->id();
         $category->update($data);
 
         return $category;

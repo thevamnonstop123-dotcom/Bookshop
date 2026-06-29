@@ -11,6 +11,10 @@ use App\Http\Controllers\Customer\EbookController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Customer\NotificationController;
 use App\Http\Controllers\Customer\WishlistController;
+use App\Http\Controllers\Customer\AuthorController;
+use App\Http\Controllers\Customer\CategoryController;
+use App\Http\Controllers\Customer\RatingController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -74,6 +78,9 @@ Route::middleware('auth:customer')->group(function () {
     Route::put('/profile/address/{addressId}', [ProfileController::class, 'updateAddress'])->name('customer.address.update');
     Route::delete('/profile/address/{addressId}', [ProfileController::class, 'deleteAddress'])->name('customer.address.delete');
     Route::patch('/profile/address/{addressId}/default', [ProfileController::class, 'setDefaultAddress'])->name('customer.address.default');
+    Route::post('/profile/email', [ProfileController::class, 'changeEmail'])->name('customer.profile.email');
+    Route::post('/profile/password', [ProfileController::class, 'changePassword'])->name('customer.profile.password');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('customer.profile.photo');
 
     // E-Books
     Route::get('/my-library', [EbookController::class, 'library'])->name('customer.ebooks.library');
@@ -88,4 +95,18 @@ Route::middleware('auth:customer')->group(function () {
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist.index');
     Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('customer.wishlist.toggle');
+
+    // Authors
+    Route::get('/authors', [AuthorController::class, 'index'])->name('authors.index');
+    Route::get('/authors/{author}', [AuthorController::class, 'show'])->name('authors.show');
+
+    // Categories
+    Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('categories.show');
+    Route::delete('/search-history/{index}', [BookController::class, 'deleteSearchHistory'])->name('search.history.delete');
+    Route::delete('/search-history/clear', [BookController::class, 'clearSearchHistory'])->name('search.history.clear');
+    // Rating
+    Route::post('/books/{book}/rate', [RatingController::class, 'store'])->name('books.rate');
+    Route::delete('/ratings/{rating}', [RatingController::class, 'destroy'])->name('ratings.destroy');
+    Route::post('/ratings/{rating}/helpful', [RatingController::class, 'toggleHelpful'])->name('ratings.helpful');
+    Route::get('/books/{book}/reviews', [RatingController::class, 'bookReviews'])->name('books.reviews');
 });

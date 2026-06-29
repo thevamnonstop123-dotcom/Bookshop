@@ -34,36 +34,39 @@ class CategoryController extends Controller
         return view('admin.categories.create');
     }
 
-    /**
-     * Store a new category.
-     */
     public function store(CategoryRequest $request)
     {
-        $this->categoryService->create($request->validated());
+        $data = $request->validated();
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image');
+        }
+        $this->categoryService->store($data);
 
         return redirect()
             ->route('admin.categories.index')
             ->with('success', 'Category created successfully.');
     }
 
+    public function update(CategoryRequest $request, Category $category)
+    {
+        $data = $request->validated();
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image');
+        }
+        $this->categoryService->update($category, $data);
+
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', 'Category updated successfully.');
+    }
+
+    
     /**
      * Show edit form.
      */
     public function edit(Category $category)
     {
         return view('admin.categories.edit', compact('category'));
-    }
-
-    /**
-     * Update a category.
-     */
-    public function update(CategoryRequest $request, Category $category)
-    {
-        $this->categoryService->update($category, $request->validated());
-
-        return redirect()
-            ->route('admin.categories.index')
-            ->with('success', 'Category updated successfully.');
     }
 
     /**

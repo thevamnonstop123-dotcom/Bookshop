@@ -152,4 +152,26 @@ public function discountPercentage(): int
     {
         return (bool) $this->is_ebook;
     }
+
+    // In the relationships section:
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class)->where('status', 'active');
+    }
+
+    // Helper for rating distribution
+    public function ratingDistribution(): array
+    {
+        $distribution = [];
+        for ($i = 5; $i >= 1; $i--) {
+            $count = $this->ratings()->where('rating', $i)->count();
+            $distribution[$i] = [
+                'count' => $count,
+                'percentage' => $this->rating_count > 0
+                    ? round(($count / $this->rating_count) * 100)
+                    : 0,
+            ];
+        }
+        return $distribution;
+    }
 }

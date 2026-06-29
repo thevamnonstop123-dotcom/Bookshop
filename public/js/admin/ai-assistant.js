@@ -1,3 +1,6 @@
+/**
+ * Bookshop AI Assistant — Chat Interactions
+ */
 (function () {
     "use strict";
 
@@ -9,12 +12,12 @@
     let isTyping = false;
     let chatHistory = [];
 
-    // Initialize System Lifecycle
+    // ========== INIT ==========
     document.addEventListener("DOMContentLoaded", function () {
         loadChatHistory();
     });
 
-    // ========== STATE MANAGEMENT & LOCAL STORAGE ==========
+    // ========== STORAGE ==========
     function loadChatHistory() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
@@ -36,8 +39,6 @@
     function updateUiLayoutState() {
         const wrapper = document.getElementById("aiSuggestionsWrapper");
         if (!wrapper) return;
-
-        // Mutate UI layout state based on message count parameters
         if (chatHistory.length > 0) {
             wrapper.classList.add("has-history");
         } else {
@@ -45,20 +46,18 @@
         }
     }
 
-    // ========== DOM RENDER PIPELINE ==========
+    // ========== RENDER ==========
     function renderHistoryDOM() {
         const body = document.getElementById("aiChatBody");
         if (!body) return;
 
-        // Base Welcome Layout
-        body.innerHTML = `
-            <div class="ai-message ai-message-bot">
-                <div class="ai-message-avatar"><i class="fas fa-robot"></i></div>
-                <div class="ai-message-bubble">
-                    <p>Hello! I am your AI assistant. I can help you with books, orders, customers, revenue, and more. Try asking me something!</p>
-                </div>
-            </div>
-        `;
+        body.innerHTML =
+            '<div class="ai-message ai-message-bot">' +
+                '<div class="ai-message-avatar"><i class="fas fa-robot"></i></div>' +
+                '<div class="ai-message-bubble">' +
+                    '<p>Hello! I am your AI assistant. I can help you with books, orders, customers, revenue, and more. Try asking me something!</p>' +
+                '</div>' +
+            '</div>';
 
         chatHistory.forEach(function (msg) {
             appendMessageDOM(msg.content, msg.role, false);
@@ -68,11 +67,10 @@
         scrollToBottom();
     }
 
-    // ========== TOGGLE PANEL INTERACTION ==========
+    // ========== TOGGLE PANEL ==========
     window.toggleAiChat = function () {
         const panel = document.getElementById("aiChatPanel");
         const overlay = document.getElementById("aiChatOverlay");
-        const btn = document.getElementById("aiFloatingBtn");
         if (!panel) return;
 
         isOpen = !isOpen;
@@ -82,7 +80,8 @@
             panel.setAttribute("aria-hidden", "false");
             if (overlay) overlay.classList.add("show");
             document.body.style.overflow = "hidden";
-            document.getElementById("aiChatInput")?.focus();
+            const input = document.getElementById("aiChatInput");
+            if (input) input.focus();
             scrollToBottom();
         } else {
             panel.classList.remove("open");
@@ -92,7 +91,7 @@
         }
     };
 
-    // ========== CONVERSATION DISPATCH ENGINE ==========
+    // ========== SEND MESSAGE ==========
     window.sendMessage = function () {
         const input = document.getElementById("aiChatInput");
         if (!input || isTyping) return;
@@ -110,20 +109,17 @@
     };
 
     function executeSequence(text) {
-        // 1. Commit and persist User Input
         chatHistory.push({ role: "user", content: text });
         appendMessageDOM(text, "user", true);
         saveChatHistory();
 
-        // 2. State shift UI and invoke worker animation
         showTypingIndicator();
         scrollToBottom();
 
-        // 3. Dispatch to internal proxy routes
         fetchAIResponse(text);
     }
 
-    // ========== NETWORK CLIENT ==========
+    // ========== API CALL ==========
     function fetchAIResponse(message) {
         isTyping = true;
 
@@ -132,34 +128,34 @@
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": csrf,
-                Accept: "application/json",
+                "Accept": "application/json",
             },
             body: JSON.stringify({ message: message }),
         })
-            .then(function (res) {
-                if (!res.ok) throw new Error("Server communication fault.");
-                return res.json();
-            })
-            .then(function (data) {
-                removeTypingIndicator();
-                const reply = data.response || "No data payload returned from interface handler.";
-                
-                chatHistory.push({ role: "bot", content: reply });
-                appendMessageDOM(reply, "bot", true);
-                saveChatHistory();
-                
-                isTyping = false;
-                scrollToBottom();
-            })
-            .catch(function (err) {
-                removeTypingIndicator();
-                appendMessageDOM("System fault encountered: Unable to resolve data engine.", "bot", false);
-                isTyping = false;
-                scrollToBottom();
-            });
+        .then(function (res) {
+            if (!res.ok) throw new Error("Server communication fault.");
+            return res.json();
+        })
+        .then(function (data) {
+            removeTypingIndicator();
+            const reply = data.response || "No data payload returned from interface handler.";
+
+            chatHistory.push({ role: "bot", content: reply });
+            appendMessageDOM(reply, "bot", true);
+            saveChatHistory();
+
+            isTyping = false;
+            scrollToBottom();
+        })
+        .catch(function () {
+            removeTypingIndicator();
+            appendMessageDOM("System fault encountered: Unable to resolve data engine.", "bot", false);
+            isTyping = false;
+            scrollToBottom();
+        });
     }
 
-    // ========== ATOMIC DOM MANIPULATION HELPMATES ==========
+    // ========== DOM HELPERS ==========
     function appendMessageDOM(content, role, animate) {
         const body = document.getElementById("aiChatBody");
         if (!body) return;
@@ -174,7 +170,7 @@
 
         const bubble = document.createElement("div");
         bubble.className = "ai-message-bubble";
-        bubble.innerHTML = "<p>" + formatMarkdownParser(content) + "</p>";
+        bubble.innerHTML = "<p>" + formatMarkdown(content) + "</p>";
 
         wrapper.appendChild(avatar);
         wrapper.appendChild(bubble);
@@ -188,13 +184,11 @@
         const typing = document.createElement("div");
         typing.className = "ai-message ai-message-bot ai-message-typing";
         typing.id = "aiTypingIndicator";
-
-        typing.innerHTML = `
-            <div class="ai-message-avatar"><i class="fas fa-robot"></i></div>
-            <div class="ai-message-bubble">
-                <span class="ai-typing-dot"></span><span class="ai-typing-dot"></span><span class="ai-typing-dot"></span>
-            </div>
-        `;
+        typing.innerHTML =
+            '<div class="ai-message-avatar"><i class="fas fa-robot"></i></div>' +
+            '<div class="ai-message-bubble">' +
+                '<span class="ai-typing-dot"></span><span class="ai-typing-dot"></span><span class="ai-typing-dot"></span>' +
+            '</div>';
         body.appendChild(typing);
     }
 
@@ -216,13 +210,15 @@
         }
     }
 
-    function formatMarkdownParser(text) {
+    function formatMarkdown(text) {
         return text
             .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
             .replace(/\n/g, "<br>");
     }
 
+    // ========== ESCAPE KEY ==========
     document.addEventListener("keydown", function (e) {
         if (e.key === "Escape" && isOpen) toggleAiChat();
     });
+
 })();

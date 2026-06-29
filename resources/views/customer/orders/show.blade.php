@@ -153,6 +153,54 @@
             </div>
         </div>
 
+
+        {{-- Review Section --}}
+        @if($order->status === 'delivered')
+            <div class="order-detail-card" style="margin-top: var(--space-3);">
+                <div class="order-detail-card-header">
+                    <div class="order-detail-card-icon order-detail-icon-info">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="order-detail-card-title">Your Reviews</h3>
+                </div>
+                <div class="order-detail-body">
+                    @foreach($order->items as $item)
+                        @if($item->book)
+                            @php
+                                $existingReview = \App\Models\Rating::where('customer_id', auth('customer')->id())
+                                    ->where('book_id', $item->book->id)
+                                    ->first();
+                            @endphp
+                            <div class="order-review-item">
+                                <div class="order-review-item-book">
+                                    <img src="{{ $item->book->image && $item->book->image !== 'default.png' ? asset('storage/'.$item->book->image) : 'https://placehold.co/48x62/F1F5F9/1E3A8A?text='.urlencode(substr($item->book->title,0,2)) }}"
+                                        alt="{{ $item->book->title }}"
+                                        class="order-review-item-cover">
+                                    <div>
+                                        <a href="{{ route('books.show', $item->book->slug) }}" class="order-detail-link">
+                                            {{ $item->book->title }}
+                                        </a>
+                                        @if($existingReview)
+                                            <div class="order-review-existing-stars">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i class="fas fa-star{{ $i <= $existingReview->rating ? '' : '-empty' }}"></i>
+                                                @endfor
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                <a href="{{ route('books.show', $item->book->slug) }}#reviewsSection"
+                                class="profile-btn profile-btn-outline profile-btn-sm">
+                                    <i class="fas fa-{{ $existingReview ? 'pen' : 'star' }}"></i>
+                                    {{ $existingReview ? 'Edit Review' : 'Write Review' }}
+                                </a>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
     </div>
 </div>
 

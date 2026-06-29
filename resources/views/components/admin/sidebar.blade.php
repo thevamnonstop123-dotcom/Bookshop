@@ -62,7 +62,8 @@
                 $managementOpen = request()->routeIs('admin.customers.*') 
                     || request()->routeIs('admin.orders.*') 
                     || request()->routeIs('admin.payments.*') 
-                    || request()->routeIs('admin.promotions.*');
+                    || request()->routeIs('admin.promotions.*')
+                    || request()->routeIs('admin.reviews.*');
             @endphp
 
             <div class="admin-sidebar-section-label">Management</div>
@@ -111,6 +112,13 @@
                                 </a>
                             </li>
                         @endif
+
+                        <li>
+                            <a href="{{ route('admin.reviews.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.reviews.*') ? 'admin-sidebar-link-active' : '' }}">
+                                <i class="fas fa-star"></i>
+                                <span>Reviews</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -154,7 +162,7 @@
 
     {{-- Footer --}}
     <div class="admin-sidebar-footer">
-        <i class="fas fa-circle" style="font-size:6px;color:#10B981;margin-right:6px;"></i>
+        <i class="fas fa-circle admin-footer-status-dot"></i>
         &copy; {{ date('Y') }} Bookshop v1.0
     </div>
 </aside>

@@ -16,7 +16,6 @@
         const imageHint = imageField ? imageField.querySelector('.admin-form-image-hint') : null;
 
         if (checkbox.checked) {
-            // E-book mode
             if (ebookFields) ebookFields.style.display = 'block';
             if (stockField) stockField.style.opacity = '0.5';
             if (stockInput) {
@@ -27,7 +26,6 @@
             if (imageRequired) imageRequired.style.display = 'none';
             if (imageHint) imageHint.textContent = 'Optional for e-books. JPG, JPEG, PNG. Max 2MB.';
         } else {
-            // Physical book mode
             if (ebookFields) ebookFields.style.display = 'none';
             if (stockField) stockField.style.opacity = '1';
             if (stockInput) {
@@ -49,7 +47,9 @@
         const loader = document.getElementById('aiDescLoading');
 
         if (!title || title.value.trim().length < 3) {
-            alert('Please enter a book title first (minimum 3 characters).');
+            if (typeof App !== 'undefined' && App.toast) {
+                App.toast('Please enter a book title first (minimum 3 characters).', 'warning');
+            }
             if (title) title.focus();
             return;
         }
@@ -130,8 +130,10 @@
 
             const data = await resp.json();
             if (result) {
-                result.innerHTML = '<div class="admin-alert admin-alert-success"><i class="fas fa-circle-check"></i> ' +
-                    data.message + '</div>';
+                result.innerHTML =
+                    '<div class="admin-alert admin-alert-success">' +
+                        '<i class="fas fa-circle-check"></i> ' + data.message +
+                    '</div>';
             }
 
             setTimeout(function () {
@@ -140,8 +142,10 @@
         } catch (err) {
             console.error('AI Bulk Create error:', err);
             if (result) {
-                result.innerHTML = '<div class="admin-alert admin-alert-error" style="background:#FEF2F2;color:#991B1B;border-color:#FECACA;">' +
-                    '<i class="fas fa-circle-exclamation"></i> Failed to generate books. Please try again.</div>';
+                result.innerHTML =
+                    '<div class="admin-alert admin-alert-error">' +
+                        '<i class="fas fa-circle-exclamation"></i> Failed to generate books. Please try again.' +
+                    '</div>';
             }
         }
 

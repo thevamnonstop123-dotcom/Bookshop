@@ -13,12 +13,10 @@
             modal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
 
-            // Reset to login form view and clear all forms
             window.switchToLogin();
             resetAllForms();
             clearAllErrors();
 
-            // Check for error in URL
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('error')) {
                 const errorEl = document.getElementById('loginError');
@@ -43,7 +41,6 @@
         }
         document.body.style.overflow = '';
 
-        // Reset all forms when modal closes
         resetAllForms();
         clearAllErrors();
     };
@@ -56,7 +53,6 @@
         if (loginForm) loginForm.reset();
         if (registerForm) registerForm.reset();
 
-        // Reset password toggle icons back to eye
         const modalToggleIcon = document.getElementById('modalToggleIcon');
         const modalRegToggleIcon = document.getElementById('modalRegToggleIcon');
         const loginPassField = document.querySelector('#modalLoginForm input[name="password"]');
@@ -73,14 +69,12 @@
         if (loginPassField) loginPassField.type = 'password';
         if (regPassField) regPassField.type = 'password';
 
-        // Reset password strength meter
         const container = document.getElementById('passwordStrength');
         if (container) container.innerHTML = '';
     }
 
     function clearAllErrors() {
-        const errorEls = ['loginError', 'registerError', 'loginSuccess'];
-        errorEls.forEach(function (id) {
+        ['loginError', 'registerError', 'loginSuccess'].forEach(function (id) {
             const el = document.getElementById(id);
             if (el) {
                 el.style.display = 'none';
@@ -95,22 +89,16 @@
         const loginForm = document.getElementById('loginFormContent');
         const registerForm = document.getElementById('registerFormContent');
         const loginFormEl = document.getElementById('modalLoginForm');
-        const registerFormEl = document.getElementById('modalRegisterForm');
 
         if (loginForm) loginForm.style.display = 'none';
         if (registerForm) registerForm.style.display = 'block';
 
-        // Reset login form when switching away
         if (loginFormEl) loginFormEl.reset();
         clearAllErrors();
 
-        // Reset password toggle
         const icon = document.getElementById('modalToggleIcon');
         const passField = document.querySelector('#modalLoginForm input[name="password"]');
-        if (icon) {
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
+        if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
         if (passField) passField.type = 'password';
     };
 
@@ -123,41 +111,32 @@
         if (registerForm) registerForm.style.display = 'none';
         if (loginForm) loginForm.style.display = 'block';
 
-        // Reset register form when switching away
         if (registerFormEl) registerFormEl.reset();
         clearAllErrors();
 
-        // Reset password toggle
         const icon = document.getElementById('modalRegToggleIcon');
         const passField = document.querySelector('#modalRegisterForm input[name="password"]');
-        if (icon) {
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
+        if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
         if (passField) passField.type = 'password';
 
-        // Reset password strength meter
         const container = document.getElementById('passwordStrength');
         if (container) container.innerHTML = '';
     };
 
-    // Close on overlay click
     document.addEventListener('click', function (e) {
         const modal = document.getElementById('loginModal');
         if (modal && e.target === modal) window.closeLoginModal();
     });
 
-    // Close on Escape
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') window.closeLoginModal();
     });
 
-    // ========== MODAL PASSWORD TOGGLES ==========
+    // ========== PASSWORD TOGGLES ==========
     window.toggleModalPass = function () {
         const field = document.querySelector('#modalLoginForm input[name="password"]');
         const icon = document.getElementById('modalToggleIcon');
         if (!field || !icon) return;
-
         if (field.type === 'password') {
             field.type = 'text';
             icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -171,7 +150,6 @@
         const field = document.querySelector('#modalRegisterForm input[name="password"]');
         const icon = document.getElementById('modalRegToggleIcon');
         if (!field || !icon) return;
-
         if (field.type === 'password') {
             field.type = 'text';
             icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -181,19 +159,29 @@
         }
     };
 
-    // ========== PASSWORD STRENGTH METER ==========
+    window.toggleResetPassword = function (fieldId) {
+        const field = document.getElementById(fieldId);
+        const wrapper = field.closest('.password-wrapper');
+        const icon = wrapper?.querySelector('.password-toggle i');
+        if (field && icon) {
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+    };
+
+    // ========== PASSWORD STRENGTH ==========
     function updatePasswordStrength() {
         const password = document.getElementById('password');
         if (!password) return;
-
         const value = password.value;
         const hasMinLength = value.length >= 8;
         const hasLetter = /[a-zA-Z]/.test(value);
         const hasNumber = /[0-9]/.test(value);
-
-        let strengthText = '';
-        let strengthColor = '';
-        let width = '0%';
 
         if (value.length === 0) {
             const container = document.getElementById('passwordStrength');
@@ -201,17 +189,18 @@
             return;
         }
 
+        let strengthText, strengthColor, width;
         if (!hasMinLength) {
             strengthText = '✗ Weak (need 8+ characters)';
-            strengthColor = '#EF4444';
+            strengthColor = 'var(--color-danger)';
             width = '33%';
-        } else if (hasMinLength && (!hasLetter || !hasNumber)) {
+        } else if (!hasLetter || !hasNumber) {
             strengthText = '⚠ Medium (add letters & numbers)';
-            strengthColor = '#F59E0B';
+            strengthColor = 'var(--color-accent)';
             width = '66%';
         } else {
             strengthText = '✓ Strong password!';
-            strengthColor = '#10B981';
+            strengthColor = 'var(--color-success)';
             width = '100%';
         }
 
@@ -226,25 +215,17 @@
         }
     }
 
-    // Initialize strength meter
     document.addEventListener('DOMContentLoaded', function () {
         const passwordField = document.getElementById('password');
-        if (passwordField) {
-            passwordField.addEventListener('input', updatePasswordStrength);
-        }
-    });
+        if (passwordField) passwordField.addEventListener('input', updatePasswordStrength);
 
-    // ========== AUTO-OPEN MODAL ON PAGE LOAD ==========
-    document.addEventListener('DOMContentLoaded', function () {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('login') || urlParams.has('login=open') || urlParams.has('login-open')) {
-            setTimeout(function () {
-                openLoginModal();
-            }, 100);
+            setTimeout(function () { openLoginModal(); }, 100);
         }
     });
 
-    // ========== LOGIN FORM HANDLER ==========
+    // ========== LOGIN HANDLER ==========
     window.handleLogin = async function (e) {
         e.preventDefault();
         const form = e.target;
@@ -274,7 +255,6 @@
             if (resp.redirected) {
                 window.location.href = resp.url;
             } else if (resp.ok) {
-                // Reset form before reload
                 form.reset();
                 window.location.reload();
             } else {
@@ -294,7 +274,7 @@
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Sign In'; }
     };
 
-    // ========== REGISTER FORM HANDLER ==========
+    // ========== REGISTER HANDLER ==========
     window.handleRegister = async function (e) {
         e.preventDefault();
         const form = e.target;
@@ -326,9 +306,7 @@
             if (resp.redirected) {
                 window.location.href = resp.url;
             } else if (resp.ok) {
-                // Reset form before reload
                 form.reset();
-                // Clear password strength meter
                 const container = document.getElementById('passwordStrength');
                 if (container) container.innerHTML = '';
                 window.location.reload();

@@ -50,6 +50,7 @@
     @include('admin.ai-assistant')
 
     {{-- Scripts --}}
+    <script src="{{ asset('js/ajax.js') }}"></script>
     <script src="{{ asset('js/admin/layout.js') }}"></script>
     <script src="{{ asset('js/admin/ai-assistant.js') }}"></script>
     <script src="{{ asset('js/admin/ai-assistant.js?v=' . time()) }}"></script>

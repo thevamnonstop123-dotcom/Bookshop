@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\AiController;
 use App\Http\Controllers\Admin\AiAssistantController;
+use App\Http\Controllers\Admin\ReviewController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -64,11 +65,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('promotions', [PromotionController::class, 'index'])->name('promotions.index');
         Route::post('promotions/send', [PromotionController::class, 'send'])->name('promotions.send');
 
-        // AI Tools
-        Route::post('/ai/generate-description', [AiController::class, 'generateDescription'])->name('ai.generate-description');
-        Route::post('/ai/bulk-create', [AiController::class, 'bulkCreate'])->name('ai.bulk-create');
-        Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->name('ai-assistant.chat');
-        Route::post('/ai/ask', [AiAssistantController::class, 'chat'])->name('ai.ask');
+        // AI Tools — Super Admin only
+        Route::middleware('permission:can_manage_users')->group(function () {
+            Route::post('/ai/generate-description', [AiController::class, 'generateDescription'])->name('ai.generate-description');
+            Route::post('/ai/bulk-create', [AiController::class, 'bulkCreate'])->name('ai.bulk-create');
+            Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->name('ai-assistant.chat');
+            Route::post('/ai/ask', [AiAssistantController::class, 'chat'])->name('ai.ask');
+        });
+
+        Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+        Route::patch('/reviews/{rating}/status', [ReviewController::class, 'updateStatus'])->name('reviews.status');
+        Route::delete('/reviews/{rating}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     });
 
 });

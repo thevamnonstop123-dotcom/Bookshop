@@ -606,3 +606,46 @@
         gap: 6px;
     }
 }
+
+/* =============================================
+   ORDER REVIEW ITEMS
+   ============================================= */
+.order-review-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border-light);
+    gap: var(--space-2);
+}
+
+.order-review-item:last-child {
+    border-bottom: none;
+}
+
+.order-review-item-book {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.order-review-item-cover {
+    width: 48px;
+    height: 62px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-xs);
+}
+
+.order-review-existing-stars {
+    display: flex;
+    gap: 1px;
+    color: var(--color-accent);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.order-review-existing-stars .fa-star-empty {
+    color: var(--color-border);
+}

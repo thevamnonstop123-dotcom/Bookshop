@@ -18,6 +18,7 @@ class CategoryRequest extends FormRequest
         return [
             'name'        => 'required|string|max:100|unique:categories,name,' . $categoryId,
             'description' => 'nullable|string|max:500',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status'      => 'required|in:active,inactive',
         ];
     }

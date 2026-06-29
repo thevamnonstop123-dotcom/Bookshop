@@ -1,83 +1,133 @@
 /**
- * Bookshop Book Detail — Interactions
- * Quantity selector, Buy Now flow and format switch (UI-only)
+ * Book Detail Page — Interactions
  */
 (function () {
     'use strict';
 
     // ========== QUANTITY SELECTOR ==========
-    window.changeQuantity = function (amount) {
-        const input = document.getElementById('quantity');
+    window.changeQuantity = function (delta) {
+        var input = document.getElementById('quantity');
         if (!input) return;
-
-        let value = parseInt(input.value) + amount;
-        const max = parseInt(input.getAttribute('max')) || 99;
-        if (value < 1) value = 1;
-        if (value > max) value = max;
-        input.value = value;
+        var val = parseInt(input.value) || 1;
+        var max = parseInt(input.max) || 99;
+        var newVal = val + delta;
+        if (newVal < 1) newVal = 1;
+        if (newVal > max) newVal = max;
+        input.value = newVal;
     };
 
-    // ========== FORMAT SWITCH (UI-only) ==========
-    function initFormatSwitcher() {
-        const switcher = document.querySelector('.detail-format-switch');
-        if (!switcher) return;
-        const options = switcher.querySelectorAll('.format-option');
-        options.forEach(opt => {
-            opt.addEventListener('click', function () {
-                if (this.classList.contains('active')) return;
-                options.forEach(o => o.classList.remove('active'));
-                this.classList.add('active');
-                const format = this.dataset.format;
+    // ========== STICKY MOBILE BAR ==========
+    function initMobileBar() {
+        var bar = document.getElementById('bookMobileBar');
+        if (!bar) return;
 
-                // Update visible format tag
-                const tag = document.querySelector('.detail-format-tag');
-                if (tag) {
-                    if (format === 'ebook') {
-                        tag.classList.remove('detail-format-physical');
-                        tag.classList.add('detail-format-ebook');
-                        tag.innerHTML = '<i class="fas fa-bolt"></i> E-Book';
-                    } else {
-                        tag.classList.remove('detail-format-ebook');
-                        tag.classList.add('detail-format-physical');
-                        tag.innerHTML = '<i class="fas fa-book"></i> Physical';
-                    }
-                }
+        var purchaseCard = document.querySelector('.book-hero-purchase');
+        if (!purchaseCard) return;
 
-                // Update stock hint
-                const stock = document.querySelector('.detail-stock');
-                if (stock) {
-                    if (format === 'ebook') {
-                        stock.className = 'detail-stock detail-stock-ebook';
-                        stock.innerHTML = '<i class="fas fa-infinity"></i> Instant access — read anytime';
-                    } else {
-                        // leave server-provided stock text if present; fallback to generic
-                        if (stock.dataset.physicalText) {
-                            stock.innerHTML = stock.dataset.physicalText;
-                        } else {
-                            stock.className = 'detail-stock detail-stock-in';
-                            stock.innerHTML = '<i class="fas fa-check-circle"></i> In stock';
-                        }
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    bar.style.display = 'none';
+                } else {
+                    if (window.innerWidth <= 768) {
+                        bar.style.display = 'flex';
                     }
                 }
             });
+        }, { threshold: 0 });
+
+        observer.observe(purchaseCard);
+
+        // Hide on desktop
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                bar.style.display = 'none';
+            }
         });
     }
 
     // ========== BUY NOW ==========
-    document.addEventListener('DOMContentLoaded', function () {
-        const buyNowBtn = document.getElementById('buyNowBtn');
-        if (!buyNowBtn) return;
+    function initBuyNow() {
+        var btn = document.getElementById('buyNowBtn');
+        if (!btn) return;
 
-        buyNowBtn.addEventListener('click', function () {
-            const addToCartBtn = document.querySelector('.btn-add-cart');
-            if (addToCartBtn) {
-                addToCartBtn.click();
-            }
-            setTimeout(function () {
+        btn.addEventListener('click', async function () {
+            var bookId = document.querySelector('.btn-add-cart')?.dataset?.bookId;
+            if (!bookId) return;
+
+            var qty = document.getElementById('quantity')?.value || 1;
+
+            try {
+                await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ book_id: bookId, quantity: parseInt(qty) }),
+                });
                 window.location.href = '/checkout';
-            }, 500);
+            } catch (err) {
+                console.error('Buy now error:', err);
+            }
         });
+    }
 
-        initFormatSwitcher();
+    // ========== LOAD REVIEWS (AJAX) ==========
+    window.loadReviews = async function (bookId, sort) {
+        var list = document.getElementById('reviewsList');
+        if (!list) return;
+
+        list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--color-text-muted);"><i class="fas fa-spinner fa-spin"></i></div>';
+
+        try {
+            var resp = await fetch('/books/' + bookId + '/reviews?sort=' + sort);
+            var data = await resp.json();
+            var reviews = data.data;
+
+            if (reviews.length === 0) {
+                list.innerHTML = '<div class="book-reviews-empty"><i class="fas fa-star-half-stroke"></i><h4>No reviews yet</h4><p>Be the first person to review this book.</p></div>';
+            } else {
+                list.innerHTML = reviews.map(function (r) {
+                    var stars = '';
+                    for (var i = 1; i <= 5; i++) {
+                        stars += '<i class="fas fa-star' + (i <= r.rating ? '' : '-empty') + '"></i>';
+                    }
+                    var date = new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    var avatar = r.customer?.image_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(r.customer?.name || 'User') + '&background=1E3A8A&color=fff&size=80';
+                    return '<div class="review-card" data-review-id="' + r.id + '">' +
+                        '<div class="review-card-header">' +
+                            '<div class="review-card-user">' +
+                                '<img src="' + avatar + '" alt="' + (r.customer?.name || '') + '" class="review-card-avatar" loading="lazy">' +
+                                '<div class="review-card-user-info">' +
+                                    '<span class="review-card-name">' + (r.customer?.name || 'Anonymous') + '</span>' +
+                                    '<span class="review-card-badge"><i class="fas fa-check-circle"></i> Verified Purchase</span>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="review-card-meta">' +
+                                '<div class="review-card-stars">' + stars + '</div>' +
+                                '<span class="review-card-date">' + date + '</span>' +
+                            '</div>' +
+                        '</div>' +
+                        (r.review ? '<p class="review-card-text">' + r.review + '</p>' : '') +
+                        '<div class="review-card-footer">' +
+                            '<button class="review-card-helpful" data-review-id="' + r.id + '" onclick="toggleHelpful(' + r.id + ', this)">' +
+                                '<i class="fas fa-thumbs-up"></i> Helpful <span class="review-card-helpful-count">(' + (r.helpful_count || 0) + ')</span>' +
+                            '</button>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+            }
+        } catch (err) {
+            list.innerHTML = '<p style="text-align:center;color:var(--color-text-muted);">Failed to load reviews.</p>';
+        }
+    };
+
+    // ========== INIT ==========
+    document.addEventListener('DOMContentLoaded', function () {
+        initMobileBar();
+        initBuyNow();
     });
+
 })();

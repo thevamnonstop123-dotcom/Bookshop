@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ asset('css/customer/auth.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customer/footer.css') }}">
     <link rel="stylesheet" href="{{ asset('css/pagination.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer/author.css') }}">
     @stack('styles')
 </head>
 <body>
@@ -38,9 +39,6 @@
         @include('components.customer.footer')
 
     </div> {{-- End app-glass-container --}}
-
-
-    {{-- Functional Overlays (Kept outside to prevent layout clipping and positioning bugs) --}}
     
     {{-- Bottom Navigation (Mobile) --}}
     @include('components.customer.bottom-nav')
@@ -56,6 +54,7 @@
 
 
     {{-- Core Scripts --}}
+    <script src="{{ asset('js/ajax.js') }}"></script>
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/customer/auth.js') }}"></script>
     <script src="{{ asset('js/customer/navbar.js') }}"></script>

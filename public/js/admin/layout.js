@@ -4,12 +4,12 @@
 (function () {
     'use strict';
 
-    const sidebar = document.getElementById('adminSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const hamburger = document.getElementById('mobileHamburger');
-    const collapseToggle = document.getElementById('sidebarCollapseToggle');
+    var sidebar = document.getElementById('adminSidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    var hamburger = document.getElementById('mobileHamburger');
+    var collapseToggle = document.getElementById('sidebarCollapseToggle');
 
-    // ========== MOBILE MENU SYSTEM ==========
+    // ========== MOBILE MENU ==========
     function openSidebar() {
         if (!sidebar) return;
         sidebar.classList.add('open');
@@ -41,62 +41,66 @@
     // ========== TABLET COLLAPSE TOGGLE ==========
     if (collapseToggle) {
         collapseToggle.addEventListener('click', function () {
-            sidebar.classList.toggle('open');
+            if (sidebar) sidebar.classList.toggle('open');
         });
     }
 
-    // ========== RESPONSIVE CLOSURE VIA LINKS ==========
-    const sidebarLinks = sidebar ? sidebar.querySelectorAll('.admin-sidebar-link') : [];
-    sidebarLinks.forEach(function (link) {
-        link.addEventListener('click', function () {
-            if (window.innerWidth <= 768) {
-                closeSidebar();
-            }
+    // ========== CLOSE ON LINK CLICK (mobile) ==========
+    if (sidebar) {
+        var sidebarLinks = sidebar.querySelectorAll('.admin-sidebar-link');
+        sidebarLinks.forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
+                }
+            });
         });
-    });
+    }
 
-    // ========== SUBMENU CONTROLS & EVENT MANAGEMENT ==========
-    const parentItems = sidebar ? sidebar.querySelectorAll('.admin-sidebar-parent') : [];
-    
-    parentItems.forEach(function (listItem) {
-        const btn = listItem.querySelector('.admin-sidebar-parent-toggle');
-        const submenu = listItem.querySelector('.admin-sidebar-submenu');
-        if (!btn || !submenu) return;
+    // ========== SUBMENU ACCORDION + HOVER FLYOUT ==========
+    if (sidebar) {
+        var parentItems = sidebar.querySelectorAll('.admin-sidebar-parent');
 
-        // Inline Accordion Trigger (Active when Expanded)
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            
-            // Layout Guard: Bypass click accordion modifications if collapsed on tablet
-            if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
-                return; 
-            }
+        parentItems.forEach(function (listItem) {
+            var btn = listItem.querySelector('.admin-sidebar-parent-toggle');
+            var submenu = listItem.querySelector('.admin-sidebar-submenu');
+            if (!btn || !submenu) return;
 
-            submenu.classList.toggle('open');
-            const icon = btn.querySelector('.admin-sidebar-dropdown-icon');
-            if (icon) icon.classList.toggle('open');
+            // Click — accordion toggle
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Skip accordion behavior in collapsed tablet mode
+                if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
+                    return;
+                }
+
+                submenu.classList.toggle('open');
+                var icon = btn.querySelector('.admin-sidebar-dropdown-icon');
+                if (icon) icon.classList.toggle('open');
+            });
+
+            // Hover — flyout in collapsed tablet mode
+            listItem.addEventListener('mouseenter', function () {
+                if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
+                    submenu.classList.add('flyout-active');
+                }
+            });
+
+            listItem.addEventListener('mouseleave', function () {
+                submenu.classList.remove('flyout-active');
+            });
         });
+    }
 
-        // Hover Class Bindings for Stable Flyout Transitions
-        listItem.addEventListener('mouseenter', function () {
-            if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
-                submenu.classList.add('flyout-active');
-            }
-        });
-
-        listItem.addEventListener('mouseleave', function () {
-            submenu.classList.remove('flyout-active');
-        });
-    });
-
-    // ========== ACCESSIBILITY KEYBOARD TRIGGERS ==========
+    // ========== ESCAPE KEY ==========
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open') && window.innerWidth <= 768) {
             closeSidebar();
         }
     });
 
-    // ========== WINDOW WINDOW RESIZE EVENT CLEANUP ==========
+    // ========== RESIZE CLEANUP ==========
     window.addEventListener('resize', function () {
         if (window.innerWidth > 768 && sidebar && sidebar.classList.contains('open') && overlay && overlay.classList.contains('show')) {
             closeSidebar();

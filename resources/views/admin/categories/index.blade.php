@@ -31,6 +31,7 @@
                 <thead>
                     <tr>
                         <th style="width: 60px;">#</th>
+                        <th style="width: 70px;">Image</th>
                         <th>Name</th>
                         <th>Description</th>
                         <th style="width: 80px;">Books</th>
@@ -42,6 +43,15 @@
                     @forelse ($categories as $category)
                         <tr>
                             <td class="admin-table-index">{{ $loop->iteration }}</td>
+                            <td>
+                                @if($category->image && $category->image !== 'default.png')
+                                    <img src="{{ asset('storage/'.$category->image) }}" alt="{{ $category->name }}" class="admin-table-thumb" style="width:60px;height:45px;object-fit:cover;">
+                                @else
+                                    <div style="width:60px;height:45px;background:var(--color-bg);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);font-size:18px;">
+                                        <i class="fas fa-layer-group"></i>
+                                    </div>
+                                @endif
+                            </td>
                             <td>
                                 <div class="admin-table-name">{{ $category->name }}</div>
                             </td>
@@ -59,7 +69,7 @@
                                         <i class="fas fa-pen-to-square"></i>
                                     </a>
                                     <form action="{{ route('admin.categories.destroy', $category) }}" method="POST"
-                                          onsubmit="return confirm('Delete this category? Books in this category will NOT be deleted.')">
+                                        onsubmit="return confirm('Delete this category? Books in this category will NOT be deleted.')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="admin-action-btn admin-action-delete" title="Delete">
@@ -71,7 +81,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="admin-table-empty">
                                     <div class="admin-table-empty-icon">
                                         <i class="fas fa-layer-group"></i>

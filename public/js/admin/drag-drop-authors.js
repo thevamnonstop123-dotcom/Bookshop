@@ -16,10 +16,7 @@
 
         if (!zone || !inputsContainer) return;
 
-        // Clear existing chips in zone
         zone.querySelectorAll('.selected-author-chip').forEach(function (el) { el.remove(); });
-
-        // Clear hidden inputs
         inputsContainer.innerHTML = '';
 
         if (selected.length === 0) {
@@ -46,7 +43,6 @@
             });
         }
 
-        // Update chip active states
         document.querySelectorAll('.author-chip').forEach(function (chip) {
             const chipId = parseInt(chip.dataset.authorId);
             chip.classList.toggle('author-chip-selected', selected.includes(chipId));

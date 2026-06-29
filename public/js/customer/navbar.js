@@ -17,13 +17,15 @@
         initSidebar();
         initUserDropdown();
         initAuthButtons();
-        initCartButton();
-        initSearchOverlay();
+        initCartButtons();
         initNotificationBell();
         initMobileMore();
+        initDesktopSearchDropdown();
+        initMobileSearchEnter();
         loadUnreadCount();
     });
 
+    // ========== SCROLL ==========
     function initScrollDetection() {
         const navbar = document.getElementById("navbar");
         if (!navbar) return;
@@ -32,6 +34,7 @@
         }, { passive: true });
     }
 
+    // ========== SIDEBAR ==========
     function initSidebar() {
         const toggle = document.getElementById("navbarMobileToggle");
         const sidebar = document.getElementById("sidebar");
@@ -59,6 +62,7 @@
         if (sidebar) sidebar.querySelectorAll("a").forEach(function (link) { link.addEventListener("click", close); });
     }
 
+    // ========== USER DROPDOWN ==========
     function initUserDropdown() {
         const user = document.getElementById("navbarUser");
         if (!user) return;
@@ -68,43 +72,80 @@
         document.addEventListener("click", function (e) { if (!user.contains(e.target)) user.classList.remove("open"); });
     }
 
+    // ========== AUTH BUTTONS ==========
     function initAuthButtons() {
         const signIn = document.getElementById("navbarSignInBtn");
         if (signIn) signIn.addEventListener("click", function (e) { e.preventDefault(); if (typeof openLoginModal === "function") openLoginModal(); });
+
         const register = document.getElementById("navbarRegisterBtn");
         if (register) {
             register.addEventListener("click", function (e) {
                 e.preventDefault();
-                if (typeof openLoginModal === "function") { openLoginModal(); setTimeout(function () { if (typeof switchToRegister === "function") switchToRegister(new Event("click")); }, 200); }
+                if (typeof openLoginModal === "function") {
+                    openLoginModal();
+                    setTimeout(function () {
+                        if (typeof switchToRegister === "function") switchToRegister(new Event("click"));
+                    }, 200);
+                }
+            });
+        }
+
+        const mobileSignIn = document.querySelector(".navbar-mobile-actions .navbar-auth-btn");
+        if (mobileSignIn) {
+            mobileSignIn.addEventListener("click", function (e) {
+                e.preventDefault();
+                if (typeof openLoginModal === "function") openLoginModal();
             });
         }
     }
 
-    function initCartButton() {
-        const cartBtn = document.getElementById("navbarCartBtn");
-        if (!cartBtn) return;
-        cartBtn.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); if (typeof Cart !== "undefined" && Cart.toggle) Cart.toggle(); });
+    // ========== CART BUTTONS ==========
+    function initCartButtons() {
+        const desktopCartBtn = document.getElementById("navbarCartBtn");
+        if (desktopCartBtn) {
+            desktopCartBtn.addEventListener("click", function (e) {
+                e.preventDefault(); e.stopPropagation();
+                if (typeof Cart !== "undefined" && Cart.toggle) Cart.toggle();
+            });
+        }
+
+        const mobileCartBtn = document.getElementById("mobileCartBtn");
+        if (mobileCartBtn) {
+            mobileCartBtn.addEventListener("click", function (e) {
+                e.preventDefault(); e.stopPropagation();
+                if (typeof Cart !== "undefined" && Cart.toggle) Cart.toggle();
+            });
+        }
+
+        window.addEventListener('cartUpdated', function (e) { updateCartBadges(e.detail.count); });
+        window.updateCartCount = function (count) { updateCartBadges(count); };
     }
 
-    function initSearchOverlay() {
-        const toggle = document.getElementById("navbarSearchToggle");
-        const overlay = document.getElementById("navbarSearchOverlay");
-        const back = document.getElementById("navbarSearchBack");
-        const input = overlay ? overlay.querySelector("input") : null;
-        if (!toggle || !overlay) return;
-        toggle.addEventListener("click", function () { overlay.classList.add("open"); if (input) input.focus(); document.body.style.overflow = "hidden"; });
-        if (back) back.addEventListener("click", function () { overlay.classList.remove("open"); document.body.style.overflow = ""; });
+    function updateCartBadges(count) {
+        document.querySelectorAll('#cartCount, #mobileCartCount').forEach(function (badge) {
+            if (!badge) return;
+            if (count > 0) { badge.textContent = count; badge.style.display = 'flex'; }
+            else { badge.style.display = 'none'; }
+        });
     }
 
+    // ========== NOTIFICATIONS ==========
     function initNotificationBell() {
-        const btn = document.getElementById("navbarNotificationBtn");
-        if (!btn) return;
-        btn.addEventListener("click", function (e) { e.stopPropagation(); toggleNotifications(); });
+        const desktopBtn = document.getElementById("navbarNotificationBtn");
+        const mobileBtn = document.getElementById("mobileNotificationBtn");
+        function handleClick(e) { e.stopPropagation(); toggleNotifications(); }
+        if (desktopBtn) desktopBtn.addEventListener("click", handleClick);
+        if (mobileBtn) mobileBtn.addEventListener("click", handleClick);
     }
 
     function loadUnreadCount() {
-        fetch("/notifications", { headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" } })
-            .then(r => r.json()).then(data => { const b = document.getElementById("notificationBadge"); if (b && data.unread_count > 0) { b.textContent = data.unread_count; b.style.display = "flex"; } }).catch(() => {});
+        fetch("/notifications", {
+            headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" }
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            document.querySelectorAll('#notificationBadge, #mobileNotificationBadge').forEach(function (b) {
+                if (b && data.unread_count > 0) { b.textContent = data.unread_count; b.style.display = "flex"; }
+            });
+        }).catch(function () {});
     }
 
     window.toggleNotifications = function () {
@@ -115,38 +156,52 @@
     };
 
     window.markAllRead = function () {
-        fetch("/notifications/read-all", { method: "PATCH", headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" } })
-            .then(() => { const b = document.getElementById("notificationBadge"); if (b) b.style.display = "none"; loadNotifications(); });
+        fetch("/notifications/read-all", {
+            method: "PATCH",
+            headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" }
+        }).then(function () {
+            document.querySelectorAll('#notificationBadge, #mobileNotificationBadge').forEach(function (b) { if (b) b.style.display = "none"; });
+            loadNotifications();
+        });
     };
 
     function loadNotifications() {
-        fetch("/notifications", { headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" } })
-            .then(r => r.json()).then(data => {
-                const list = document.getElementById("notificationList");
-                if (!list) return;
-                list.innerHTML = data.notifications.length === 0
-                    ? '<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>'
-                    : data.notifications.map(n => `<div class="notification-item ${n.read_at ? '' : 'unread'}" onclick="markRead(${n.id})"><div class="notification-item-icon promotion"><i class="fas fa-tag"></i></div><div class="notification-item-content"><div class="notification-item-title">${n.title}</div><div class="notification-item-message">${n.message}</div><div class="notification-item-time">${n.created_at}</div></div></div>`).join('');
-            }).catch(() => {});
+        fetch("/notifications", {
+            headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" }
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            const list = document.getElementById("notificationList");
+            if (!list) return;
+            if (data.notifications.length === 0) {
+                list.innerHTML = '<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>';
+            } else {
+                list.innerHTML = data.notifications.map(function (n) {
+                    return '<div class="notification-item ' + (n.read_at ? '' : 'unread') + '" onclick="markRead(' + n.id + ')"><div class="notification-item-icon promotion"><i class="fas fa-tag"></i></div><div class="notification-item-content"><div class="notification-item-title">' + n.title + '</div><div class="notification-item-message">' + n.message + '</div><div class="notification-item-time">' + n.created_at + '</div></div></div>';
+                }).join('');
+            }
+        }).catch(function () {});
     }
 
-    function markRead(id) {
-        fetch(`/notifications/${id}/read`, { method: "PATCH", headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" } }).then(() => loadNotifications());
-    }
+    window.markRead = function (id) {
+        fetch("/notifications/" + id + "/read", {
+            method: "PATCH",
+            headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" }
+        }).then(function () { loadNotifications(); });
+    };
 
     document.addEventListener("click", function (e) {
         const panel = document.getElementById("notificationPanel");
-        const btn = document.getElementById("navbarNotificationBtn");
-        if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) panel.classList.remove("open");
+        const desktopBtn = document.getElementById("navbarNotificationBtn");
+        const mobileBtn = document.getElementById("mobileNotificationBtn");
+        if (panel && !panel.contains(e.target) && !(desktopBtn && desktopBtn.contains(e.target)) && !(mobileBtn && mobileBtn.contains(e.target))) {
+            panel.classList.remove("open");
+        }
     });
 
+    // ========== MOBILE MORE ==========
     function initMobileMore() {
         const btn = document.getElementById("navbarMoreBtn");
         if (!btn) return;
-        btn.addEventListener("click", function (e) {
-            e.preventDefault(); e.stopPropagation();
-            toggleMobileMore();
-        });
+        btn.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); toggleMobileMore(); });
     }
 
     window.toggleMobileMore = function () {
@@ -154,14 +209,115 @@
         const overlay = document.getElementById("mobileMoreOverlay");
         if (!panel || !overlay) return;
         if (panel.classList.contains("open")) {
-            panel.classList.remove("open");
-            overlay.classList.remove("show");
-            document.body.style.overflow = "";
+            panel.classList.remove("open"); overlay.classList.remove("show"); document.body.style.overflow = "";
         } else {
-            panel.classList.add("open");
-            overlay.classList.add("show");
-            document.body.style.overflow = "hidden";
+            panel.classList.add("open"); overlay.classList.add("show"); document.body.style.overflow = "hidden";
         }
     };
+
+    window.toggleMorePanel = function () {
+        const panel = document.getElementById('morePanel');
+        const overlay = document.getElementById('morePanelOverlay');
+        if (!panel || !overlay) return;
+        if (panel.classList.contains('open')) {
+            panel.classList.remove('open'); overlay.classList.remove('show'); document.body.style.overflow = '';
+        } else {
+            panel.classList.add('open'); overlay.classList.add('show'); document.body.style.overflow = 'hidden';
+        }
+    };
+
+    // ========== MOBILE SEARCH ==========
+    window.openMobileSearch = function () {
+        const overlay = document.getElementById('navbarSearchOverlay');
+        if (!overlay) return;
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        const input = document.getElementById('mobileSearchInput');
+        if (input) setTimeout(function () { input.focus(); }, 150);
+    };
+
+    window.closeMobileSearch = function () {
+        const overlay = document.getElementById('navbarSearchOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    };
+
+    function initMobileSearchEnter() {
+        const input = document.getElementById('mobileSearchInput');
+        const form = document.getElementById('mobileSearchForm');
+        if (input && form) {
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.value.trim()) form.submit();
+                }
+            });
+        }
+    }
+
+    // ========== DESKTOP SEARCH DROPDOWN ==========
+    function initDesktopSearchDropdown() {
+        const input = document.getElementById('desktopSearchInput');
+        const dropdown = document.getElementById('desktopSearchDropdown');
+        if (!input || !dropdown) return;
+
+        input.addEventListener('focus', function () { dropdown.style.display = 'block'; });
+
+        document.addEventListener('click', function (e) {
+            const wrap = document.getElementById('desktopSearchWrap');
+            if (wrap && !wrap.contains(e.target)) dropdown.style.display = 'none';
+        });
+    }
+
+    // ========== SEARCH HISTORY ==========
+    window.clearSearchHistory = async function () {
+        try {
+            await fetch('/search-history/clear', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+            document.querySelectorAll('.navbar-search-dropdown-section, .navbar-search-suggestions-section').forEach(function (el) {
+                if (el.querySelector('.navbar-search-dropdown-title, .navbar-search-suggestions-title')?.textContent.includes('Recent')) {
+                    el.remove();
+                }
+            });
+        } catch (err) {}
+    };
+
+    window.deleteSearchHistory = async function (index) {
+        try {
+            await fetch('/search-history/' + index, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+            // Remove item from both desktop and mobile DOM
+            document.querySelectorAll('.navbar-search-suggestion-item-wrap').forEach(function (el, i) {
+                if (i === index) el.remove();
+            });
+            // Hide section if empty
+            document.querySelectorAll('.navbar-search-dropdown-section, .navbar-search-suggestions-section').forEach(function (section) {
+                if (!section.querySelector('.navbar-search-suggestion-item-wrap') && section.querySelector('.navbar-search-dropdown-title, .navbar-search-suggestions-title')?.textContent.includes('Recent')) {
+                    section.remove();
+                }
+            });
+        } catch (err) {}
+    };
+
+    // ========== ESCAPE KEY ==========
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            const morePanel = document.getElementById('morePanel');
+            if (morePanel && morePanel.classList.contains('open')) window.toggleMorePanel();
+            const mobileMorePanel = document.getElementById('mobileMorePanel');
+            if (mobileMorePanel && mobileMorePanel.classList.contains('open')) window.toggleMobileMore();
+        }
+    });
 
 })();

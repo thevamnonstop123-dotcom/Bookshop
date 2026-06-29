@@ -11,11 +11,7 @@ class Category extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'description',
-        'status',
-        'created_by',
-        'updated_by',
+        'name', 'description', 'image', 'status', 'created_by', 'updated_by',
     ];
 
     /*
@@ -32,6 +28,14 @@ class Category extends Model
         return $this->hasMany(Book::class);
     }
 
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->image && $this->image !== 'default.png') {
+            return asset('storage/' . $this->image);
+        }
+        return 'https://placehold.co/400x300/F1F5F9/1E3A8A?text=' . urlencode($this->name);
+    }
+
     /**
      * The staff member who created this category.
      */
@@ -46,5 +50,10 @@ class Category extends Model
     public function updatedBy()
     {
         return $this->belongsTo(Staff::class, 'updated_by');
+    }
+
+    public function getIconAttribute(): string
+    {
+        return $this->attributes['icon'] ?? 'layer-group';
     }
 }

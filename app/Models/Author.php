@@ -48,4 +48,12 @@ class Author extends Model
     {
         return $this->belongsTo(Staff::class, 'updated_by');
     }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->image && $this->image !== 'default.png') {
+            return asset('storage/' . $this->image);
+        }
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=1E3A8A&color=fff&size=120';
+    }
 }

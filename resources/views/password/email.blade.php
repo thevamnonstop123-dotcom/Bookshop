@@ -13,11 +13,8 @@
             <span class="auth-brand-text">Book<span class="auth-brand-accent">shop</span></span>
         </a>
 
-        <div class="auth-icon-circle auth-icon-circle-help">
-        </div>
-
         <h1 class="auth-title">Forgot Password</h1>
-        <p class="auth-subtitle">Enter your email address and we will send you a reset link</p>
+        <p class="auth-subtitle">Enter your email address and we'll send you a reset link.</p>
 
         @if (session('status'))
             <div class="auth-alert auth-alert-success">
@@ -37,9 +34,8 @@
             <div class="auth-form-group">
                 <label for="email" class="auth-label">Email Address</label>
                 <div class="auth-input-wrapper">
-                    <i class="fas fa-envelope auth-input-icon"></i>
                     <input type="email" id="email" name="email"
-                           class="auth-input @error('email') auth-input-error @enderror"
+                           class="auth-form-input @error('email') auth-input-error @enderror"
                            placeholder="you@example.com" value="{{ old('email') }}" required autofocus>
                 </div>
                 @error('email') <span class="auth-error-text">{{ $message }}</span> @enderror
@@ -50,7 +46,6 @@
             </button>
         </form>
 
-        {{-- Back to Sign In — opens modal on homepage --}}
         <p class="auth-switch-text">
             <a href="{{ route('login') }}" class="auth-switch-link">
                 <i class="fas fa-arrow-left"></i> Back to Sign In

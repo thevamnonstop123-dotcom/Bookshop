@@ -1,161 +1,174 @@
-/* =============================================
-   Bookshop - Global AJAX Setup
-   Reusable for all features
-   ============================================= */
+/**
+ * Bookshop — Global App Utilities
+ * Reusable toast, loading, AJAX, currency, debounce
+ */
+(function () {
+    'use strict';
 
-const App = {
-    /**
-     * Get CSRF token from meta tag.
-     */
-    getCSRF() {
-        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    },
+    window.App = {
+        /**
+         * Get CSRF token from meta tag.
+         */
+        getCSRF: function () {
+            var meta = document.querySelector('meta[name="csrf-token"]');
+            return meta ? meta.getAttribute('content') : '';
+        },
 
-    /**
-     * Show a toast notification.
-     * @param {string} message
-     * @param {string} type - 'success' | 'error' | 'warning'
-     */
-    toast(message, type = 'success') {
-        // Remove existing toasts
-        document.querySelectorAll('.app-toast').forEach(el => el.remove());
+        /**
+         * Show a toast notification.
+         * @param {string} message
+         * @param {string} type - 'success' | 'error' | 'warning'
+         */
+        toast: function (message, type) {
+            type = type || 'success';
 
-        const toast = document.createElement('div');
-        toast.className = `app-toast app-toast-${type}`;
-        toast.innerHTML = message;
-        document.body.appendChild(toast);
+            // Remove existing toasts
+            document.querySelectorAll('.app-toast').forEach(function (el) { el.remove(); });
 
-        // Show
-        setTimeout(() => toast.classList.add('show'), 10);
+            var toast = document.createElement('div');
+            toast.className = 'app-toast app-toast-' + type;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
 
-        // Hide after 3s
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    },
+            // Show
+            setTimeout(function () { toast.classList.add('show'); }, 10);
 
-    /**
-     * Show/hide loading overlay.
-     */
-    loading(show = true) {
-        let loader = document.getElementById('app-loader');
-        if (show) {
-            if (!loader) {
-                loader = document.createElement('div');
-                loader.id = 'app-loader';
-                loader.innerHTML = '<div class="loader-spinner"></div>';
-                document.body.appendChild(loader);
+            // Hide after 3s
+            setTimeout(function () {
+                toast.classList.remove('show');
+                setTimeout(function () { toast.remove(); }, 300);
+            }, 3000);
+        },
+
+        /**
+         * Show/hide loading overlay.
+         */
+        loading: function (show) {
+            show = show !== false;
+            var loader = document.getElementById('app-loader');
+            if (show) {
+                if (!loader) {
+                    loader = document.createElement('div');
+                    loader.id = 'app-loader';
+                    loader.innerHTML = '<div class="loader-spinner"></div>';
+                    document.body.appendChild(loader);
+                }
+                loader.style.display = 'flex';
+            } else {
+                if (loader) loader.style.display = 'none';
             }
-            loader.style.display = 'flex';
-        } else {
-            if (loader) loader.style.display = 'none';
-        }
-    },
+        },
 
-    /**
-     * AJAX request helper.
-     * @param {string} url
-     * @param {object} options - { method, data, headers }
-     * @returns {Promise}
-     */
-    async request(url, options = {}) {
-        const config = {
-            method: options.method || 'POST',
-            headers: {
-                'X-CSRF-TOKEN': this.getCSRF(),
-                'Accept': 'application/json',
-                ...options.headers,
+        /**
+         * AJAX request helper.
+         */
+        request: async function (url, options) {
+            options = options || {};
+            var config = {
+                method: options.method || 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': this.getCSRF(),
+                    'Accept': 'application/json',
+                },
+            };
+
+            // Merge custom headers
+            if (options.headers) {
+                for (var key in options.headers) {
+                    config.headers[key] = options.headers[key];
+                }
+            }
+
+            if (options.data) {
+                config.headers['Content-Type'] = 'application/json';
+                config.body = JSON.stringify(options.data);
+            }
+
+            try {
+                var response = await fetch(url, config);
+                var json = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(json.message || 'Something went wrong.');
+                }
+
+                return json;
+            } catch (error) {
+                this.toast(error.message, 'error');
+                throw error;
+            }
+        },
+
+        /**
+         * Shorthand AJAX methods.
+         */
+        ajax: {
+            get: function (url) {
+                return App.request(url, { method: 'GET' });
             },
-        };
+            post: function (url, data) {
+                return App.request(url, { method: 'POST', data: data });
+            },
+            put: function (url, data) {
+                return App.request(url, { method: 'PUT', data: data });
+            },
+            delete: function (url) {
+                return App.request(url, { method: 'DELETE' });
+            },
+        },
 
-        if (options.data) {
-            config.headers['Content-Type'] = 'application/json';
-            config.body = JSON.stringify(options.data);
-        }
+        /**
+         * Format number as currency (MMK).
+         */
+        formatCurrency: function (amount) {
+            return new Intl.NumberFormat('en-MM').format(amount) + ' MMK';
+        },
+
+        /**
+         * Debounce function for search inputs.
+         */
+        debounce: function (func, delay) {
+            delay = delay || 300;
+            var timer;
+            return function () {
+                var context = this;
+                var args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    func.apply(context, args);
+                }, delay);
+            };
+        },
+    };
+
+    // ========== WISHLIST TOGGLE ==========
+    window.toggleWishlist = async function (btn, bookId) {
+        if (!btn || !bookId) return;
 
         try {
-            const response = await fetch(url, config);
-            const json = await response.json();
+            var resp = await fetch('/wishlist/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ book_id: bookId })
+            });
+            var data = await resp.json();
 
-            if (!response.ok) {
-                throw new Error(json.message || 'Something went wrong.');
+            if (data.added) {
+                btn.classList.add('wishlisted');
+                if (btn.querySelector('i')) btn.querySelector('i').className = 'fas fa-heart';
+            } else {
+                btn.classList.remove('wishlisted');
+                if (btn.querySelector('i')) btn.querySelector('i').className = 'far fa-heart';
             }
 
-            return json;
-        } catch (error) {
-            this.toast(error.message, 'error');
-            throw error;
+            App.toast(data.message, data.added ? 'success' : 'warning');
+        } catch (e) {
+            console.error('Wishlist error:', e);
         }
-    },
+    };
 
-    /**
-     * Shorthand methods.
-     */
-    ajax: {
-        get(url) {
-            return App.request(url, { method: 'GET' });
-        },
-        post(url, data) {
-            return App.request(url, { method: 'POST', data });
-        },
-        put(url, data) {
-            return App.request(url, { method: 'PUT', data });
-        },
-        delete(url) {
-            return App.request(url, { method: 'DELETE' });
-        },
-    },
-
-    /**
-     * Format number as currency (MMK).
-     */
-    formatCurrency(amount) {
-        return new Intl.NumberFormat('en-MM').format(amount) + ' MMK';
-    },
-
-    /**
-     * Debounce function for search inputs.
-     */
-    debounce(func, delay = 300) {
-        let timer;
-        return function (...args) {
-            clearTimeout(timer);
-            timer = setTimeout(() => func.apply(this, args), delay);
-        };
-    },
-};
-
-
-
-/**
- * Toggle wishlist heart.
- */
-window.toggleWishlist = async function (btn, bookId) {
-    if (!btn || !bookId) return;
-
-    try {
-        const resp = await fetch('/wishlist/toggle', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ book_id: bookId })
-        });
-        const data = await resp.json();
-
-        if (data.added) {
-            btn.classList.add('wishlisted');
-            btn.querySelector('i').className = 'fas fa-heart';
-        } else {
-            btn.classList.remove('wishlisted');
-            btn.querySelector('i').className = 'far fa-heart';
-        }
-
-        App.toast(data.message, data.added ? 'success' : 'warning');
-    } catch (e) {
-        console.error('Wishlist error:', e);
-    }
-};
+})();
