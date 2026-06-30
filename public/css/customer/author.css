@@ -125,8 +125,25 @@
     padding: var(--space-8) 0;
 }
 
+/* Section heading row */
+.author-books-section .section-heading-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-4);
+    position: relative;
+}
+
+/* === STICKY SORT DROPDOWN - THIS IS THE FIX === */
 .author-sort-wrapper {
-    flex-shrink: 0;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 80px; /* 68px navbar + 12px gap */
+    z-index: 50;
+    background-color: var(--color-bg, #F1F5F9);
+    padding: 4px 0;
+    isolation: isolate;
+    pointer-events: auto !important; /* ADDED: Ensure clickable */
 }
 
 .author-sort-select {
@@ -143,6 +160,8 @@
     background-repeat: no-repeat;
     background-position: right 12px center;
     transition: border-color var(--transition-fast);
+    box-shadow: var(--shadow-xs);
+    pointer-events: auto !important; /* ADDED: Ensure clickable */
 }
 
 .author-sort-select:focus {
@@ -156,6 +175,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: var(--space-3);
+    transition: opacity 0.2s ease-in-out;
+}
+
+.author-books-grid.loading {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .author-books-empty {
@@ -358,6 +383,10 @@
         grid-template-columns: repeat(2, 1fr);
         gap: var(--space-2);
     }
+
+    .author-sort-wrapper {
+        top: 68px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -378,5 +407,9 @@
     .author-books-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
+    }
+
+    .author-sort-wrapper {
+        top: 60px;
     }
 }

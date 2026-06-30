@@ -806,3 +806,22 @@
         font-size: 22px;
     }
 }
+/* Center the tabs */
+.profile-tabs-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.profile-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+}
+
+/* When sticky, center the container too */
+.profile-tabs-wrapper[style*="position: fixed"] {
+    display: flex;
+    justify-content: center;
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+}

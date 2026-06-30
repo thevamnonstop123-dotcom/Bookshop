@@ -24,9 +24,7 @@
 </head>
 <body>
 
-    {{-- Main UI Glass Window Envelope --}}
     <div class="app-glass-container">
-
         {{-- Navigation --}}
         @include('components.customer.navbar')
 
@@ -38,7 +36,7 @@
         {{-- Footer --}}
         @include('components.customer.footer')
 
-    </div> {{-- End app-glass-container --}}
+    </div>
     
     {{-- Bottom Navigation (Mobile) --}}
     @include('components.customer.bottom-nav')

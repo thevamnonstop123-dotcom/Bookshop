@@ -59,7 +59,7 @@
     color: var(--color-text-secondary);
     line-height: 1.5;
     max-width: 65ch;
-    margin: 0;
+    margin: 0 auto;
 }
 
 .section-view-all {

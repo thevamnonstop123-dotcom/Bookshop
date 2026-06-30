@@ -250,7 +250,7 @@
             input.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (this.value.trim()) form.submit();
+                    if (this.value.trim()) { window.location.href = "'/books?search=" + encodeURIComponent(this.value.trim()); }
                 }
             });
         }

@@ -97,7 +97,7 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="category-filter-apply">
+                    <button type="submit" onclick="event.preventDefault(); document.getElementById(`categoryFilterForm`).dispatchEvent(new Event(`submit`))" class="category-filter-apply">
                         <i class="fas fa-check"></i> Apply Filters
                     </button>
 
@@ -122,7 +122,7 @@
                         <button class="category-filter-toggle" onclick="toggleCategoryFilters()">
                             <i class="fas fa-sliders"></i> Filters
                         </button>
-                        <select class="category-sort-select" name="sort" form="categoryFilterForm" onchange="document.getElementById('categoryFilterForm').submit()">
+                        <select class="category-sort-select" name="sort" form="categoryFilterForm" onchange="window.sortCategoryBooks(this.value)">
                             <option value="latest" {{ ($filters['sort'] ?? '') === 'latest' ? 'selected' : '' }}>Newest</option>
                             <option value="popular" {{ ($filters['sort'] ?? '') === 'popular' ? 'selected' : '' }}>Most Popular</option>
                             <option value="bestseller" {{ ($filters['sort'] ?? '') === 'bestseller' ? 'selected' : '' }}>Best Selling</option>

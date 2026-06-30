@@ -67,7 +67,7 @@
                     },
                     body: JSON.stringify({ book_id: bookId, quantity: parseInt(qty) }),
                 });
-                window.location.href = '/checkout';
+                window.location.href = '/checkout'; // Keep redirect for checkout flow
             } catch (err) {
                 console.error('Buy now error:', err);
             }

@@ -16,9 +16,6 @@ class CategoryController extends Controller
         $this->categoryService = $categoryService;
     }
 
-    /**
-     * Display category with filtered books.
-     */
     public function show(int $categoryId, Request $request)
     {
         $category = $this->categoryService->getCategory($categoryId);
@@ -31,6 +28,17 @@ class CategoryController extends Controller
         if (auth('customer')->check()) {
             $wishlistedIds = app(WishlistService::class)
                 ->getWishlistedIds(auth('customer')->id());
+        }
+
+        // AJAX response
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'html' => view('customer.categories.partials.books-grid', compact('books', 'wishlistedIds'))->render(),
+                'count' => $books->total(),
+                'hasPages' => $books->hasPages(),
+                'pagination' => $books->hasPages() ? $books->appends($request->query())->links('vendor.pagination.default')->render() : '',
+                'filters' => $filters,
+            ]);
         }
 
         return view('customer.categories.show', compact(

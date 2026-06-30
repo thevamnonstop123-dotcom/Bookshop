@@ -31,6 +31,19 @@ class AuthorController extends Controller
                 ->getWishlistedIds(auth('customer')->id());
         }
 
+        // If AJAX request, return only the books grid HTML
+        if ($request->ajax() || $request->wantsJson()) {
+            $html = view('customer.authors.partials.books-grid', compact('author', 'books', 'filters', 'wishlistedIds'))->render();
+            
+            return response()->json([
+                'html' => $html,
+                'hasPages' => $books->hasPages(),
+                'pagination' => $books->hasPages() ? $books->appends(request()->query())->links('vendor.pagination.default')->render() : '',
+                'currentSort' => $filters['sort'] ?? 'latest',
+                'booksCount' => $books->total()
+            ]);
+        }
+
         return view('customer.authors.show', compact('author', 'books', 'filters', 'wishlistedIds'));
     }
 

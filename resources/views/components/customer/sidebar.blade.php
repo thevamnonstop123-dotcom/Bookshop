@@ -1,4 +1,3 @@
-{{-- W3Schools-style Sidebar Navigation --}}
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
