@@ -41,21 +41,45 @@ class AuthorService
         return Author::create($data);
     }
 
-    /**
-     * Update an author.
-     */
+    public function store(array $data): Author
+    {
+        $genres = $data['genres'] ?? [];
+        unset($data['genres']);
+
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            $data['image'] = $data['image']->store('authors', 'public');
+        }
+
+        $data['created_by'] = auth('staff')->id();
+        $data['updated_by'] = auth('staff')->id();
+
+        $author = Author::create($data);
+
+        if (!empty($genres)) {
+            $author->genres()->sync($genres);
+        }
+
+        return $author;
+    }
+
     public function update(Author $author, array $data): Author
     {
-        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
-            if ($author->image) {
-                Storage::disk('public')->delete($author->image);
+        $genres = $data['genres'] ?? [];
+        unset($data['genres']);
+
+        if (isset($data['image']) && $data['image'] instanceof \Illuminate\Http\UploadedFile) {
+            if ($author->image && $author->image !== 'default.png') {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($author->image);
             }
-            $data['image'] = $this->uploadImage($data['image']);
+            $data['image'] = $data['image']->store('authors', 'public');
         }
 
         $data['updated_by'] = auth('staff')->id();
-
         $author->update($data);
+
+        if (!empty($genres)) {
+            $author->genres()->sync($genres);
+        }
 
         return $author;
     }

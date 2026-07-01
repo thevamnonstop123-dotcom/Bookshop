@@ -16,6 +16,9 @@ use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\AiController;
 use App\Http\Controllers\Admin\AiAssistantController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\GenreController;
+use App\Http\Controllers\Admin\CountryController;
+
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -34,6 +37,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('categories', CategoryController::class)->except(['show']);
             Route::resource('authors', AuthorController::class)->except(['show']);
             Route::resource('books', BookController::class)->except(['show']);
+
+            Route::get('genres', [GenreController::class, 'index'])->name('genres.index');
+            Route::post('genres', [GenreController::class, 'store'])->name('genres.store');
+            Route::put('genres/{genre}', [GenreController::class, 'update'])->name('genres.update');
+            Route::delete('genres/{genre}', [GenreController::class, 'destroy'])->name('genres.destroy');
+
+            Route::get('countries', [CountryController::class, 'index'])->name('countries.index');
+            Route::post('countries', [CountryController::class, 'store'])->name('countries.store');
+            Route::put('countries/{country}', [CountryController::class, 'update'])->name('countries.update');
+            Route::delete('countries/{country}', [CountryController::class, 'destroy'])->name('countries.destroy');
         });
 
         // Customers — requires can_manage_users

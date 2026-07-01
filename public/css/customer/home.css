@@ -22,11 +22,22 @@
 }
 
 .section-heading-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+    text-align: center;
     margin-bottom: var(--space-3);
-    gap: var(--space-2);
+}
+
+.section-heading-row .heading-text-group {
+    min-width: 0;
+}
+
+.section-heading-row .section-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-heading-row .section-view-all {
+    display: inline-flex;
+    margin-top: var(--space-1);
 }
 
 .heading-text-group {

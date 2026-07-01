@@ -27,18 +27,6 @@
         </h3>
         <p class="book-card-author">{{ $book->authors->first()->name ?? 'Unknown Author' }}</p>
         
-        {{-- Rating --}}
-        @if($book->rating_count > 0)
-            <div class="book-card-rating">
-                <span class="book-card-stars">
-                    @for($i = 1; $i <= 5; $i++)
-                        <i class="fas fa-star{{ $i <= round($book->rating) ? '' : '-empty' }}"></i>
-                    @endfor
-                </span>
-                <span class="book-card-rating-value">{{ number_format($book->rating, 1) }}</span>
-                <span class="book-card-rating-count">({{ number_format($book->rating_count) }})</span>
-            </div>
-        @endif
 
         <div class="book-card-footer">
             <div class="book-card-price">

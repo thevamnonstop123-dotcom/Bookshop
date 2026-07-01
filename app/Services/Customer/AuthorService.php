@@ -4,62 +4,104 @@ namespace App\Services\Customer;
 
 use App\Models\Author;
 use App\Models\Book;
+use Illuminate\Database\Eloquent\Builder;
 
 class AuthorService
 {
     /**
-     * Get author by ID with relationships.
+     * Base author query (single source of truth)
+     */
+    private function baseAuthorQuery(): Builder
+    {
+        return Author::query()
+            ->where('status', 'active');
+    }
+
+    /**
+     * Get author by ID with relations
      */
     public function getAuthor(int $authorId): Author
     {
-        return Author::withCount('books')
-            ->where('status', 'active')
+        return $this->baseAuthorQuery()
+            ->withCount('books')
+            ->with(['genres'])
             ->findOrFail($authorId);
     }
 
     /**
-     * Get author's books with sorting.
+     * Get author's books with filters
      */
     public function getAuthorBooks(int $authorId, array $filters = [])
     {
-        return Book::with(['authors', 'category'])
+        $query = Book::query()
+            ->with(['authors', 'category'])
             ->where('status', 'active')
-            ->whereHas('authors', function ($query) use ($authorId) {
-                $query->where('authors.id', $authorId);
-            })
-            ->when(isset($filters['sort']), function ($query) use ($filters) {
-                match ($filters['sort']) {
-                    'bestseller' => $query->withCount('orderItems')->orderByDesc('order_items_count'),
-                    'rated'      => $query->orderByDesc('rating'),
-                    'price_asc'  => $query->orderBy('price', 'asc'),
-                    'price_desc' => $query->orderBy('price', 'desc'),
-                    'latest'     => $query->latest(),
-                    default      => $query->latest(),
-                };
-            }, function ($query) {
+            ->whereHas('authors', function ($q) use ($authorId) {
+                $q->where('authors.id', $authorId);
+            });
+
+        // ----------------------------
+        // PRICE FILTER
+        // ----------------------------
+        if (!empty($filters['price_min'])) {
+            $query->where('price', '>=', $filters['price_min']);
+        }
+
+        if (!empty($filters['price_max'])) {
+            $query->where('price', '<=', $filters['price_max']);
+        }
+
+        // ----------------------------
+        // SORTING (clean switch, not match)
+        // ----------------------------
+        $sort = $filters['sort'] ?? 'latest';
+
+        switch ($sort) {
+
+            case 'bestseller':
+                $query->withCount('orderItems')
+                      ->orderByDesc('order_items_count');
+                break;
+
+            case 'rated':
+                $query->orderByDesc('rating');
+                break;
+
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+
+            case 'latest':
+            default:
                 $query->latest();
-            })
-            ->paginate(12);
+                break;
+        }
+
+        return $query->paginate(12);
     }
 
     /**
-     * Get all active authors for listing.
+     * Get all active authors
      */
-    public function getAuthors()
+    public function getAuthors(): \Illuminate\Database\Eloquent\Collection
     {
-        return Author::withCount('books')
-            ->where('status', 'active')
+        return $this->baseAuthorQuery()
+            ->withCount('books')
             ->orderBy('name')
             ->get();
     }
 
     /**
-     * Get top authors by book count.
+     * Top authors by books count
      */
     public function getTopAuthors(int $limit = 8)
     {
-        return Author::withCount('books')
-            ->where('status', 'active')
+        return $this->baseAuthorQuery()
+            ->withCount('books')
             ->orderByDesc('books_count')
             ->limit($limit)
             ->get();

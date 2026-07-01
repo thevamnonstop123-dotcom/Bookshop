@@ -17,6 +17,11 @@ class AuthorRequest extends FormRequest
             'name'   => 'required|string|max:100',
             'bio'    => 'nullable|string|max:1000',
             'status' => 'required|in:active,inactive',
+            'country_id'  => 'nullable|exists:countries,id',
+            'genres'      => 'nullable|array',
+            'genres.*'    => 'exists:genres,id',
+            'website'     => 'nullable|url|max:255',
+            'joined_date' => 'nullable|date',
         ];
 
         if ($this->isMethod('post')) {

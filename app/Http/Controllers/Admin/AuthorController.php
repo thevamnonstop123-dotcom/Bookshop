@@ -29,9 +29,11 @@ class AuthorController extends Controller
     /**
      * Show create form.
      */
-    public function create()
+   public function create()
     {
-        return view('admin.authors.create');
+        $countries = \App\Models\Country::orderBy('name')->get();
+        $genres = \App\Models\Genre::orderBy('name')->get();
+        return view('admin.authors.create', compact('countries', 'genres'));
     }
 
     /**
@@ -51,7 +53,9 @@ class AuthorController extends Controller
      */
     public function edit(Author $author)
     {
-        return view('admin.authors.edit', compact('author'));
+        $countries = \App\Models\Country::orderBy('name')->get();
+        $genres = \App\Models\Genre::orderBy('name')->get();
+        return view('admin.authors.edit', compact('author', 'countries', 'genres'));
     }
 
     /**

@@ -141,4 +141,6 @@
     } else {
         initSticky();
     }
+
+    window.bookEngine = engine;
 })();

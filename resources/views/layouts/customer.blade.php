@@ -7,7 +7,8 @@
     <title>@yield('title', 'Bookshop')</title>
 
     {{-- Font Awesome --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     {{-- Design System Variables & Base Glass Reset --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -57,6 +58,7 @@
     <script src="{{ asset('js/customer/auth.js') }}"></script>
     <script src="{{ asset('js/customer/navbar.js') }}"></script>
     <script src="{{ asset('js/customer/cart.js') }}"></script>
+     <script src="{{ asset('js/ux-engine.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

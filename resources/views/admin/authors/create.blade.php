@@ -45,6 +45,55 @@
                     @enderror
                 </div>
 
+                {{-- Country --}}
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Country</label>
+                    <select name="country_id" class="admin-form-input admin-form-select">
+                        <option value="">Select Country</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country->id }}" {{ old('country_id', $author->country_id ?? '') == $country->id ? 'selected' : '' }}>
+                                {{ $country->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Genres --}}
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Genres</label>
+                    <div class="admin-multi-select" id="genreSelect">
+                        <button type="button" class="admin-multi-select-trigger" onclick="document.getElementById('genreDropdown').classList.toggle('open')">
+                            <span id="genreSelectedText">Select genres</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="admin-multi-select-dropdown" id="genreDropdown">
+                            @foreach($genres as $genre)
+                                <label class="admin-multi-select-option">
+                                    <input type="checkbox" name="genres[]" value="{{ $genre->id }}"
+                                        {{ isset($author) && $author->genres->contains($genre->id) ? 'checked' : '' }}
+                                        onchange="updateGenreSelect()">
+                                    <span class="admin-multi-select-check"></span>
+                                    {{ $genre->name }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Website --}}
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Website</label>
+                    <input type="url" name="website" class="admin-form-input" 
+                        value="{{ old('website', $author->website ?? '') }}" placeholder="https://">
+                </div>
+
+                {{-- Joined Date --}}
+                <div class="admin-form-group">
+                    <label class="admin-form-label">Joined Date</label>
+                    <input type="date" name="joined_date" class="admin-form-input" 
+                        value="{{ old('joined_date', isset($author) ? $author->joined_date?->format('Y-m-d') : '') }}">
+                </div>
+
                 {{-- Status --}}
                 <div class="admin-form-group">
                     <label for="status" class="admin-form-label">Status</label>

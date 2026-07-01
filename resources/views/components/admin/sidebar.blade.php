@@ -47,6 +47,21 @@
                         <span>Authors</span>
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{ route('admin.genres.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.genres.*') ? 'admin-sidebar-link-active' : '' }}">
+                        <i class="fas fa-tags"></i>
+                        <span>Genres</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('admin.countries.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.countries.*') ? 'admin-sidebar-link-active' : '' }}">
+                        <i class="fas fa-globe-asia"></i>
+                        <span>Countries</span>
+                    </a>
+                </li>
+                
                 <li>
                     <a href="{{ route('admin.books.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.books.*') ? 'admin-sidebar-link-active' : '' }}">
                         <i class="fas fa-book-open"></i>

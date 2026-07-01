@@ -185,14 +185,11 @@
         <section class="section">
             <div class="container">
                 <div class="section-heading section-heading-row">
-                    <div>
+                    <div class="heading-text-group">
                         <span class="section-eyebrow">Popular</span>
                         <h2 class="section-title">Best Sellers</h2>
                         <p class="section-subtitle">What everyone is reading this month</p>
                     </div>
-                    <a href="{{ route('books.index') }}" class="section-view-all">
-                        View All <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
                 <div class="carousel-wrapper">
                     <button class="carousel-arrow carousel-arrow-left" id="bestSellersPrev" aria-label="Previous books">
@@ -208,6 +205,11 @@
                     <button class="carousel-arrow carousel-arrow-right" id="bestSellersNext" aria-label="Next books">
                         <i class="fas fa-chevron-right"></i>
                     </button>
+                </div>
+                 <div class="section-view-all-wrapper">
+                    <a href="{{ route('books.index') }}" class="section-view-all">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </section>
@@ -261,9 +263,6 @@
                         <h2 class="section-title">New Arrivals</h2>
                         <p class="section-subtitle">Just added to our shelves</p>
                     </div>
-                    <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="section-view-all">
-                        View All <i class="fas fa-arrow-right"></i>
-                    </a>
                 </div>
                 <div class="carousel-wrapper">
                     <button class="carousel-arrow carousel-arrow-left" id="newArrivalsPrev" aria-label="Previous books">
@@ -279,6 +278,11 @@
                     <button class="carousel-arrow carousel-arrow-right" id="newArrivalsNext" aria-label="Next books">
                         <i class="fas fa-chevron-right"></i>
                     </button>
+                </div>
+                <div class="section-view-all-wrapper">
+                    <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="section-view-all">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
             </div>
         </section>
