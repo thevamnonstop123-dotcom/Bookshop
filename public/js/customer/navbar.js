@@ -227,21 +227,43 @@
     };
 
     // ========== MOBILE SEARCH ==========
-    window.openMobileSearch = function () {
-        const overlay = document.getElementById('navbarSearchOverlay');
+   window.openMobileSearch = function () {
+        const overlay = document.getElementById("navbarSearchOverlay");
         if (!overlay) return;
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
-        const input = document.getElementById('mobileSearchInput');
+        if (overlay.classList.contains("open")) { closeMobileSearch(); return; }
+
+        overlay.classList.add("open");
+        document.body.style.overflow = "hidden";
+
+        // Defer listener attachment so the button click that opened it 
+        // doesn't immediately trigger the close logic
+        setTimeout(function() {
+            document.addEventListener("click", handleSearchOutsideClick);
+        }, 0);
+
+        const input = document.getElementById("mobileSearchInput");
         if (input) setTimeout(function () { input.focus(); }, 150);
     };
 
+    function handleSearchOutsideClick(e) {
+        const overlay = document.getElementById("navbarSearchOverlay");
+        // If the click is outside the overlay, close it
+        if (overlay && !overlay.contains(e.target)) {
+            closeMobileSearch();
+        }
+    }
+
+    // Search your entire JS file and delete ALL other instances of this function.
     window.closeMobileSearch = function () {
-        const overlay = document.getElementById('navbarSearchOverlay');
-        if (!overlay) return;
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
+        const overlay = document.getElementById("navbarSearchOverlay");
+        if (overlay) overlay.classList.remove("open");
+        
+        document.body.style.overflow = "";
+        
+        // This MUST execute to prevent the bug.
+        document.removeEventListener("click", handleSearchOutsideClick);
     };
+
 
     function initMobileSearchEnter() {
         const input = document.getElementById('mobileSearchInput');
@@ -250,11 +272,13 @@
             input.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (this.value.trim()) { window.location.href = "'/books?search=" + encodeURIComponent(this.value.trim()); }
+                    if (this.value.trim()) { window.location.href = "/books?search=" + encodeURIComponent(this.value.trim()); }
                 }
             });
         }
     }
+
+    
 
     // ========== DESKTOP SEARCH DROPDOWN ==========
     function initDesktopSearchDropdown() {

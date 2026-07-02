@@ -1149,3 +1149,105 @@
         font-size: var(--font-size-sm);
     }
 }
+/* Mobile carousel — swipe without arrows */
+@media (max-width: 768px) {
+    .carousel-wrapper {
+        position: relative;
+    }
+
+    .carousel-arrow {
+        display: none !important;
+    }
+
+    .carousel-track-wrapper {
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .carousel-track-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    .carousel-track {
+        gap: 12px;
+    }
+
+    .carousel-track .book-card {
+        flex: 0 0 160px;
+        max-width: 160px;
+        scroll-snap-align: start;
+    }
+}
+
+/* Mobile carousel cards — shorter */
+@media (max-width: 768px) {
+    .carousel-track .book-card {
+        flex: 0 0 150px;
+        max-width: 150px;
+    }
+
+    .carousel-track .book-card-cover {
+        aspect-ratio: 3/4;
+    }
+
+    .carousel-track .book-card-body {
+        padding: 8px;
+    }
+
+    .carousel-track .book-card-title {
+        font-size: 11px;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .carousel-track .book-card-author {
+        font-size: 10px;
+    }
+
+    .carousel-track .book-card-price .price-regular,
+    .carousel-track .book-card-price .price-sale {
+        font-size: 12px;
+    }
+
+    .carousel-track .book-card-cart {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Carousel card footer */
+@media (max-width: 768px) {
+    .carousel-track .book-card-footer {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+
+    .carousel-track .book-card-price {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+}
+
+/* Carousel cards — match book card style */
+@media (max-width: 768px) {
+    .carousel-track .book-card {
+        flex: 0 0 150px;
+        max-width: 150px;
+        border-radius: 14px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 6px 12px rgba(0,0,0,0.04);
+    }
+    
+    .carousel-track .book-card-body { padding: 10px; gap: 3px; }
+    .carousel-track .book-card-title { font-size: 11px; min-height: 2.4em; }
+    .carousel-track .book-card-author { font-size: 10px; }
+    .carousel-track .book-card-footer { padding-top: 6px; }
+    .carousel-track .price-regular, 
+    .carousel-track .price-sale { font-size: 12px; }
+    .carousel-track .book-card-cart { width: 28px; height: 28px; min-width: 28px; }
+}
