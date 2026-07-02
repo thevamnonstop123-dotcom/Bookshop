@@ -1,15 +1,46 @@
-/**
- * Bookshop Admin Layout — Sidebar & Topbar Interactions
- */
 (function () {
     'use strict';
 
-    var sidebar = document.getElementById('adminSidebar');
-    var overlay = document.getElementById('sidebarOverlay');
-    var hamburger = document.getElementById('mobileHamburger');
-    var collapseToggle = document.getElementById('sidebarCollapseToggle');
+    const sidebar = document.getElementById('adminSidebar');
+    // Explicitly target the element that actually contains the scrollbar
+    const scrollContainer = sidebar ? sidebar.querySelector('.admin-sidebar-nav') : null;
+    
+    const overlay = document.getElementById('sidebarOverlay');
+    const hamburger = document.getElementById('mobileHamburger');
+    const collapseToggle = document.getElementById('sidebarCollapseToggle');
+    const scrollStorageKey = 'admin_sidebar_scroll';
 
-    // ========== MOBILE MENU ==========
+    // ========== SCROLL STATE PERSISTENCE ==========
+    function saveScroll() {
+        if (scrollContainer) {
+            sessionStorage.setItem(scrollStorageKey, scrollContainer.scrollTop);
+        }
+    }
+
+    function restoreScroll() {
+        if (!scrollContainer) return;
+        const saved = sessionStorage.getItem(scrollStorageKey);
+        if (saved) {
+            // Dual requestAnimationFrame ensures the DOM layout calculation is complete
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    scrollContainer.scrollTop = parseInt(saved, 10);
+                });
+            });
+        }
+    }
+
+    restoreScroll();
+
+    // Bind scroll saving exclusively to anchor links inside the menu
+    if (sidebar) {
+        sidebar.addEventListener('click', function (e) {
+            if (e.target.closest('a')) saveScroll();
+        });
+    }
+    window.addEventListener('beforeunload', saveScroll);
+
+    // ========== MOBILE MENU SYSTEM ==========
     function openSidebar() {
         if (!sidebar) return;
         sidebar.classList.add('open');
@@ -41,59 +72,54 @@
     // ========== TABLET COLLAPSE TOGGLE ==========
     if (collapseToggle) {
         collapseToggle.addEventListener('click', function () {
-            if (sidebar) sidebar.classList.toggle('open');
+            sidebar.classList.toggle('open');
         });
     }
 
-    // ========== CLOSE ON LINK CLICK (mobile) ==========
-    if (sidebar) {
-        var sidebarLinks = sidebar.querySelectorAll('.admin-sidebar-link');
-        sidebarLinks.forEach(function (link) {
-            link.addEventListener('click', function () {
-                if (window.innerWidth <= 768) {
-                    closeSidebar();
-                }
-            });
+    // ========== RESPONSIVE CLOSURE VIA LINKS ==========
+    const sidebarLinks = sidebar ? sidebar.querySelectorAll('.admin-sidebar-link') : [];
+    sidebarLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
         });
-    }
+    });
 
-    // ========== SUBMENU ACCORDION + HOVER FLYOUT ==========
-    if (sidebar) {
-        var parentItems = sidebar.querySelectorAll('.admin-sidebar-parent');
+    // ========== SUBMENU CONTROLS ==========
+    const parentItems = sidebar ? sidebar.querySelectorAll('.admin-sidebar-parent') : [];
+    
+    parentItems.forEach(function (listItem) {
+        const btn = listItem.querySelector('.admin-sidebar-parent-toggle');
+        const submenu = listItem.querySelector('.admin-sidebar-submenu');
+        if (!btn || !submenu) return;
 
-        parentItems.forEach(function (listItem) {
-            var btn = listItem.querySelector('.admin-sidebar-parent-toggle');
-            var submenu = listItem.querySelector('.admin-sidebar-submenu');
-            if (!btn || !submenu) return;
-
-            // Click — accordion toggle
-            btn.addEventListener('click', function (e) {
+        btn.addEventListener('click', function (e) {
+            if (btn.tagName === 'BUTTON' || btn.getAttribute('href') === '#') {
                 e.preventDefault();
+            }
+            
+            if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
+                return; 
+            }
 
-                // Skip accordion behavior in collapsed tablet mode
-                if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
-                    return;
-                }
-
-                submenu.classList.toggle('open');
-                var icon = btn.querySelector('.admin-sidebar-dropdown-icon');
-                if (icon) icon.classList.toggle('open');
-            });
-
-            // Hover — flyout in collapsed tablet mode
-            listItem.addEventListener('mouseenter', function () {
-                if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
-                    submenu.classList.add('flyout-active');
-                }
-            });
-
-            listItem.addEventListener('mouseleave', function () {
-                submenu.classList.remove('flyout-active');
-            });
+            submenu.classList.toggle('open');
+            const icon = btn.querySelector('.admin-sidebar-dropdown-icon');
+            if (icon) icon.classList.toggle('open');
         });
-    }
 
-    // ========== ESCAPE KEY ==========
+        listItem.addEventListener('mouseenter', function () {
+            if (window.innerWidth > 768 && window.innerWidth <= 1200 && !sidebar.classList.contains('open')) {
+                submenu.classList.add('flyout-active');
+            }
+        });
+
+        listItem.addEventListener('mouseleave', function () {
+            submenu.classList.remove('flyout-active');
+        });
+    });
+
+    // ========== KEYBOARD ==========
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open') && window.innerWidth <= 768) {
             closeSidebar();

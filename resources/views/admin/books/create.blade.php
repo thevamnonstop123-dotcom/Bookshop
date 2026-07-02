@@ -167,6 +167,20 @@
                     @enderror
                 </div>
 
+                {{-- Availability Status --}}
+                <div class="admin-form-group">
+                    <label for="availability_status" class="admin-form-label">Availability Status</label>
+                    <select id="availability_status" name="availability_status"
+                            class="admin-form-input admin-form-select">
+                        @foreach($availabilityOptions as $value => $label)
+                            <option value="{{ $value }}" {{ old("availability_status", "in_stock") == $value ? "selected" : "" }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error("availability_status")
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
                 {{-- Status --}}
                 <div class="admin-form-group">
                     <label for="status" class="admin-form-label">Status</label>

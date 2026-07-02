@@ -27,6 +27,7 @@ class BookService
             ->when(!empty($filters['rating']), fn($q) => $q->where('rating', '>=', $filters['rating']))
             ->when(!empty($filters['language']), fn($q) => $q->where('language', $filters['language']))
             ->when(!empty($filters['in_stock']), fn($q) => $q->where('stock_quantity', '>', 0))
+            ->when(!empty($filters['availability']), fn($q) => $q->whereIn('availability_status', explode(',', $filters['availability'])))
             ->when(!empty($filters['on_sale']), function ($q) {
                 $q->whereNotNull('sale_price')->where('sale_price', '<', \DB::raw('price'))
                   ->where(fn($q) => $q->whereNull('sale_ends_at')->orWhere('sale_ends_at', '>=', now()));
@@ -78,10 +79,11 @@ class BookService
     public function getFilterGroups(array $filters = []): array
     {
         return [
-            ['key' => 'category', 'label' => 'Category', 'isActive' => !empty($filters['category'])],
-            ['key' => 'author',   'label' => 'Author',   'isActive' => !empty($filters['author'])],
-            ['key' => 'price',    'label' => 'Price',    'isActive' => !empty($filters['min_price']) || !empty($filters['max_price'])],
-            ['key' => 'rating',   'label' => 'Rating',   'isActive' => !empty($filters['rating'])],
+            ["key" => "category", "label" => "Category", "isActive" => !empty($filters["category"])],
+            ["key" => "author",   "label" => "Author",   "isActive" => !empty($filters["author"])],
+            ["key" => "price",    "label" => "Price",    "isActive" => !empty($filters["min_price"]) || !empty($filters["max_price"])],
+            ["key" => "rating",   "label" => "Rating",   "isActive" => !empty($filters["rating"])],
+            ["key" => "availability", "label" => "Availability", "isActive" => !empty($filters["availability"])],
         ];
     }
 

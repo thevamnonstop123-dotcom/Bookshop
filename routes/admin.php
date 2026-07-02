@@ -37,6 +37,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('categories', CategoryController::class)->except(['show']);
             Route::resource('authors', AuthorController::class)->except(['show']);
             Route::resource('books', BookController::class)->except(['show']);
+            Route::post('/books/bulk-update', [BookController::class, 'bulkUpdate'])->name('books.bulk-update');
 
             Route::get('genres', [GenreController::class, 'index'])->name('genres.index');
             Route::post('genres', [GenreController::class, 'store'])->name('genres.store');

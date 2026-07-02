@@ -57,35 +57,20 @@
         isUpdating = true;
 
         try {
-            // =========================
-            // 1. ENTER LOADING STATE
-            // =========================
             const grid = c.querySelector(".book-grid");
             if (grid) {
                 grid.classList.add("is-loading");
                 grid.classList.remove("is-ready");
             }
 
-            // =========================
-            // 2. SHOW SKELETON (only if not silent)
-            // =========================
             if (!silent && grid) {
                 grid.innerHTML = Array(8)
                     .fill(
-                        `
-                <div class="skeleton-card">
-                    <div class="skeleton skeleton-image"></div>
-                    <div class="skeleton skeleton-title"></div>
-                    <div class="skeleton skeleton-text"></div>
-                </div>
-            `,
+                        '<div class="skeleton-card"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div></div>'
                     )
                     .join("");
             }
 
-            // =========================
-            // 3. FETCH DATA
-            // =========================
             const resp = await fetch(buildUrl(filters), {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
@@ -94,43 +79,27 @@
             });
 
             if (!resp.ok) throw new Error("Status " + resp.status);
-
             const data = await resp.json();
 
-            // =========================
-            // 4. FADE OUT BEFORE REPLACE
-            // =========================
             if (grid) {
                 grid.style.opacity = "0.2";
                 grid.style.transform = "translateY(4px)";
             }
 
-            // small delay = UX smoothness (important trick)
             await new Promise((r) => setTimeout(r, 80));
 
-            // =========================
-            // 5. REPLACE CONTENT
-            // =========================
             c.innerHTML = data.html;
 
             const newGrid = c.querySelector(".book-grid");
-
-            // =========================
-            // 6. FADE IN NEW CONTENT
-            // =========================
             if (newGrid) {
                 newGrid.classList.remove("is-loading");
                 newGrid.classList.add("is-ready");
-
                 requestAnimationFrame(() => {
                     newGrid.style.opacity = "1";
                     newGrid.style.transform = "translateY(0)";
                 });
             }
 
-            // =========================
-            // 7. UPDATE COUNT
-            // =========================
             const cnt = $("#booksCount");
             if (cnt && data.count !== undefined) {
                 cnt.textContent =
@@ -140,37 +109,26 @@
                     " found";
             }
 
-            // =========================
-            // 8. ACTIVE FILTERS
-            // =========================
             if (data.activeFilters) {
                 const af = $("#activeFilters");
                 if (af) {
                     let h = data.activeFilters
                         .map(
                             (c) =>
-                                `<span class="filter-chip" data-remove="${c.param}">
-                        ${c.label} &times;
-                    </span>`,
+                                '<span class="filter-chip" data-remove="' + c.param + '">' + c.label + ' &times;</span>'
                         )
                         .join("");
-
                     if (data.activeFilters.length > 1) {
-                        h +=
-                            '<button class="filter-chip-clear" id="clearAllChips">Clear All</button>';
+                        h += '<button class="filter-chip-clear" id="clearAllChips">Clear All</button>';
                     }
-
                     af.innerHTML = h;
                 }
             }
 
-            // =========================
-            // 9. BADGE UPDATE
-            // =========================
             if (data.filterGroups) {
                 for (const g of data.filterGroups) {
                     const btn = document.querySelector(
-                        `.filter-bar-btn[data-dropdown-type="${g.key}"]`,
+                        '.filter-bar-btn[data-dropdown-type="' + g.key + '"]'
                     );
                     if (btn) btn.classList.toggle("is-active", !!g.isActive);
                 }
@@ -180,40 +138,27 @@
             if (badge) {
                 const f2 = data.filters || filters;
                 let count = 0;
-
                 if (f2.category) count++;
                 if (f2.author) count++;
                 if (f2.rating) count++;
                 if (f2.min_price || f2.max_price) count++;
-
                 badge.textContent = count;
                 badge.style.display = count > 0 ? "flex" : "none";
             }
 
-            // =========================
-            // 10. URL STATE
-            // =========================
             const newUrl = buildUrl(filters).toString();
             if (window.location.href !== newUrl) {
                 ignorePopState = true;
                 window.history.pushState({ filters }, "", newUrl);
             }
 
-            // =========================
-            // 11. REINIT CARDS
-            // =========================
             if (typeof window.initBookCards === "function") {
                 setTimeout(window.initBookCards, 100);
             }
         } catch (e) {
             console.error("Fetch error:", e);
-            if (!silent) {
-                const c = $("#booksContainer");
-                if (c) c.innerHTML = "<p>Error loading books.</p>";
-            }
         } finally {
             isUpdating = false;
-
             const grid = $("#booksContainer")?.querySelector(".book-grid");
             if (grid) {
                 grid.classList.remove("is-loading");
@@ -265,26 +210,13 @@
         );
     }
 
-    // Encapsulated Layout Composition Strategies
     const DropdownTemplates = {
         category(data, f) {
             let h =
                 '<div style="padding:4px">' +
-                makeItemHTML(
-                    "category",
-                    "",
-                    "All Categories",
-                    null,
-                    !f.category,
-                );
+                makeItemHTML("category", "", "All Categories", null, !f.category);
             for (const c of data.categories)
-                h += makeItemHTML(
-                    "category",
-                    c.id,
-                    c.name,
-                    c.books_count || null,
-                    f.category == c.id,
-                );
+                h += makeItemHTML("category", c.id, c.name, c.books_count || null, f.category == c.id);
             return h + "</div>";
         },
         author(data, f) {
@@ -292,13 +224,7 @@
                 '<div style="max-height:240px;overflow-y:auto;padding:4px">' +
                 makeItemHTML("author", "", "All Authors", null, !f.author);
             for (const a of data.authors)
-                h += makeItemHTML(
-                    "author",
-                    a.id,
-                    a.name,
-                    a.books_count || null,
-                    f.author == a.id,
-                );
+                h += makeItemHTML("author", a.id, a.name, a.books_count || null, f.author == a.id);
             return h + "</div>";
         },
         price(data, f) {
@@ -326,13 +252,23 @@
                 '<div style="padding:4px">' +
                 makeItemHTML("rating", "", "Any Rating", null, !f.rating);
             for (let s = 4; s >= 2; s--)
-                h += makeItemHTML(
-                    "rating",
-                    s,
-                    Array(s + 1).join("★") + " & Up",
-                    null,
-                    f.rating == s,
-                );
+                h += makeItemHTML("rating", s, Array(s + 1).join("★") + " & Up", null, f.rating == s);
+            return h + "</div>";
+        },
+        availability(data, f) {
+            const options = [
+                { value: "in_stock", label: "In Stock" },
+                { value: "low_stock", label: "Low Stock" },
+                { value: "out_of_stock", label: "Out of Stock" },
+                { value: "coming_soon", label: "Coming Soon" },
+                { value: "pre_order", label: "Pre-order" },
+            ];
+            const selected = (f.availability || "").split(",").filter(Boolean);
+            let h = '<div style="padding:4px">';
+            for (const o of options) {
+                const isChecked = selected.includes(o.value);
+                h += '<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;color:#475569;' + (isChecked ? "background:#f1f5f9;font-weight:600;" : "") + '" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'' + (isChecked ? "#f1f5f9" : "transparent") + '\'"><input type="checkbox" class="availability-cb" value="' + o.value + '" ' + (isChecked ? "checked" : "") + '> <span>' + o.label + "</span></label>";
+            }
             return h + "</div>";
         },
         all(data, f) {
@@ -346,6 +282,9 @@
                 "</details>" +
                 '<details><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Price</summary>' +
                 DropdownTemplates.price(data, f) +
+                "</details>" +
+                '<details><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Availability</summary>' +
+                DropdownTemplates.availability(data, f) +
                 "</details>" +
                 '<details><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Rating</summary>' +
                 DropdownTemplates.rating(data, f) +
@@ -401,6 +340,18 @@
             if (item) {
                 applyFilter(item.dataset.name, item.dataset.value);
                 closeDropdown();
+                return;
+            }
+            const availCb = e.target.closest(".availability-cb");
+            if (availCb) {
+                const checked = [];
+                e.target.closest("#activeDropdownPanel").querySelectorAll(".availability-cb:checked").forEach(function(cb) { checked.push(cb.value); });
+                const f2 = getFilters();
+                delete f2.page;
+                if (checked.length > 0) f2.availability = checked.join(",");
+                else delete f2.availability;
+                if (!f2.sort) f2.sort = ($("#bookSortSelect") && $("#bookSortSelect").value) || "featured";
+                fetchBooks(f2);
                 return;
             }
             const priceBtn = e.target.closest(".dd-apply-price");
@@ -517,18 +468,4 @@
         if (e.key === "Escape") closeDropdown();
     });
 
-    // Re-initialize on Turbo navigation
-    document.addEventListener("turbo:load", function () {
-        const sortSel = document.getElementById("bookSortSelect");
-        if (sortSel) {
-            sortSel.addEventListener("change", function () {
-                const f = getFilters();
-                f.sort = this.value;
-                delete f.page;
-                fetchBooks(f);
-            });
-        }
-        updateActiveStates();
-    });
-    window.bookEngine = engine;
 })();

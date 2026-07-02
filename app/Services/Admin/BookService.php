@@ -11,9 +11,10 @@ class BookService
     /**
      * Get all books with relationships.
      */
-    public function getAll()
+    public function getAll(array $filters = [])
     {
         return Book::with(['category', 'authors'])
+            ->when(!empty($filters["availability"]), fn($q) => $q->whereIn("availability_status", explode(",", $filters["availability"])))
             ->latest()
             ->paginate(20);  // Changed from ->get() to ->paginate(20)
     }

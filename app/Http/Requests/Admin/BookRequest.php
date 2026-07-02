@@ -32,6 +32,7 @@ class BookRequest extends FormRequest
             'isbn'           => 'required|string|max:50|unique:books,isbn,' . $bookId,
             'price'          => 'required|numeric|min:0',
             'stock_quantity' => 'nullable|integer|min:0',
+            'availability_status' => 'nullable|string|in:in_stock,low_stock,out_of_stock,coming_soon,pre_order,discontinued',
             'language'       => 'required|string|max:50',
             'published_date' => 'required|date',
             'description'    => 'nullable|string|max:5000',

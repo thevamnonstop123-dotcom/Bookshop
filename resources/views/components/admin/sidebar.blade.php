@@ -22,48 +22,48 @@
         <div class="admin-sidebar-section-label">Main Menu</div>
         <ul class="admin-sidebar-menu">
             <li>
-                <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-link {{ request()->routeIs('admin.dashboard') ? 'admin-sidebar-link-active' : '' }}">
-                    <i class="fas fa-th-large"></i>
-                    <span>Dashboard</span>
+                <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-link {{ request()->routeIs('admin.dashboard') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Dashboard">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
                 </a>
             </li>
 
             @if (Auth::guard('staff')->user()->canManageBooks())
                 <li>
-                    <a href="{{ route('admin.banners.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.banners.*') ? 'admin-sidebar-link-active' : '' }}">
+                    <a href="{{ route('admin.banners.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.banners.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Banners">
                         <i class="fas fa-image"></i>
                         <span>Banners</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.categories.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.categories.*') ? 'admin-sidebar-link-active' : '' }}">
+                    <a href="{{ route('admin.categories.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.categories.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Categories">
                         <i class="fas fa-layer-group"></i>
                         <span>Categories</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.authors.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.authors.*') ? 'admin-sidebar-link-active' : '' }}">
+                    <a href="{{ route('admin.authors.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.authors.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Authors">
                         <i class="fas fa-feather"></i>
                         <span>Authors</span>
                     </a>
                 </li>
 
                 <li>
-                    <a href="{{ route('admin.genres.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.genres.*') ? 'admin-sidebar-link-active' : '' }}">
+                    <a href="{{ route('admin.genres.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.genres.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Genres">
                         <i class="fas fa-tags"></i>
                         <span>Genres</span>
                     </a>
                 </li>
 
                 <li>
-                    <a href="{{ route('admin.countries.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.countries.*') ? 'admin-sidebar-link-active' : '' }}">
+                    <a href="{{ route('admin.countries.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.countries.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Countries">
                         <i class="fas fa-globe-asia"></i>
                         <span>Countries</span>
                     </a>
                 </li>
                 
                 <li>
-                    <a href="{{ route('admin.books.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.books.*') ? 'admin-sidebar-link-active' : '' }}">
+                    <a href="{{ route('admin.books.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.books.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Books">
                         <i class="fas fa-book-open"></i>
                         <span>Books</span>
                     </a>
@@ -85,7 +85,7 @@
 
             <ul class="admin-sidebar-menu">
                 <li class="admin-sidebar-parent">
-                    <button class="admin-sidebar-link admin-sidebar-parent-toggle" aria-expanded="{{ $managementOpen ? 'true' : 'false' }}">
+                    <button class="admin-sidebar-link admin-sidebar-parent-toggle {{ $managementOpen ? 'active' : '' }}" aria-expanded="{{ $managementOpen ? 'true' : 'false' }}">
                         <i class="fas fa-briefcase"></i>
                         <span>Management</span>
                         <i class="fas fa-chevron-down admin-sidebar-dropdown-icon {{ $managementOpen ? 'open' : '' }}"></i>
@@ -94,44 +94,44 @@
                     <ul class="admin-sidebar-submenu {{ $managementOpen ? 'open' : '' }}">
                         @if (Auth::guard('staff')->user()->canManageUsers())
                             <li>
-                                <a href="{{ route('admin.customers.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.customers.*') ? 'admin-sidebar-link-active' : '' }}">
-                                    <i class="fas fa-users"></i>
-                                    <span>Customers</span>
+                                <a href="{{ route('admin.customers.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.customers.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Customers">
+                        <i class="fas fa-users"></i>
+                        <span>Customers</span>
                                 </a>
                             </li>
                         @endif
 
                         @if (Auth::guard('staff')->user()->canManageOrders())
                             <li>
-                                <a href="{{ route('admin.orders.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.orders.*') ? 'admin-sidebar-link-active' : '' }}">
-                                    <i class="fas fa-receipt"></i>
-                                    <span>Orders</span>
+                                <a href="{{ route('admin.orders.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.orders.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Orders">
+                        <i class="fas fa-receipt"></i>
+                        <span>Orders</span>
                                 </a>
                             </li>
                         @endif
 
                         @if (Auth::guard('staff')->user()->canViewReports())
                             <li>
-                                <a href="{{ route('admin.payments.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.payments.*') ? 'admin-sidebar-link-active' : '' }}">
-                                    <i class="fas fa-credit-card"></i>
-                                    <span>Payments</span>
+                                <a href="{{ route('admin.payments.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.payments.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Payments">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Payments</span>
                                 </a>
                             </li>
                         @endif
 
                         @if (Auth::guard('staff')->user()->canManageUsers())
                             <li>
-                                <a href="{{ route('admin.promotions.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.promotions.*') ? 'admin-sidebar-link-active' : '' }}">
-                                    <i class="fas fa-bullhorn"></i>
-                                    <span>Promotions</span>
+                                <a href="{{ route('admin.promotions.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.promotions.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Promotions">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Promotions</span>
                                 </a>
                             </li>
                         @endif
 
                         <li>
-                            <a href="{{ route('admin.reviews.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.reviews.*') ? 'admin-sidebar-link-active' : '' }}">
-                                <i class="fas fa-star"></i>
-                                <span>Reviews</span>
+                            <a href="{{ route('admin.reviews.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.reviews.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Reviews">
+                        <i class="fas fa-star"></i>
+                        <span>Reviews</span>
                             </a>
                         </li>
                     </ul>
@@ -149,7 +149,7 @@
 
             <ul class="admin-sidebar-menu">
                 <li class="admin-sidebar-parent">
-                    <button class="admin-sidebar-link admin-sidebar-parent-toggle" aria-expanded="{{ $systemOpen ? 'true' : 'false' }}">
+                    <button class="admin-sidebar-link admin-sidebar-parent-toggle {{ $systemOpen ? 'active' : '' }}" aria-expanded="{{ $systemOpen ? 'true' : 'false' }}">
                         <i class="fas fa-cogs"></i>
                         <span>System</span>
                         <i class="fas fa-chevron-down admin-sidebar-dropdown-icon {{ $systemOpen ? 'open' : '' }}"></i>
@@ -157,15 +157,15 @@
 
                     <ul class="admin-sidebar-submenu {{ $systemOpen ? 'open' : '' }}">
                         <li>
-                            <a href="{{ route('admin.staff.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.staff.*') ? 'admin-sidebar-link-active' : '' }}">
-                                <i class="fas fa-user-shield"></i>
-                                <span>Staff</span>
+                            <a href="{{ route('admin.staff.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.staff.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Staff">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Staff</span>
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.roles.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.roles.*') ? 'admin-sidebar-link-active' : '' }}">
-                                <i class="fas fa-key"></i>
-                                <span>Roles</span>
+                            <a href="{{ route('admin.roles.index') }}" class="admin-sidebar-link {{ request()->routeIs('admin.roles.*') ? 'admin-sidebar-link-active' : '' }}" data-tooltip="Roles">
+                        <i class="fas fa-key"></i>
+                        <span>Roles</span>
                             </a>
                         </li>
                     </ul>

@@ -102,19 +102,16 @@
                             @endif
                         </div>
 
-                        {{-- Stock --}}
-                        <div class="book-purchase-stock">
-                            @if($book->isEbook())
-                                <span class="purchase-stock purchase-stock-ebook"><i class="fas fa-infinity"></i> Instant access</span>
-                            @elseif($book->isInStock())
-                                <span class="purchase-stock purchase-stock-in"><i class="fas fa-check-circle"></i> In Stock</span>
-                            @else
-                                <span class="purchase-stock purchase-stock-out"><i class="fas fa-times-circle"></i> Out of Stock</span>
-                            @endif
+                        {{-- Availability --}}
+                        @php $avail = $book->availability; @endphp
+                        <div class="book-purchase-availability">
+                            <span class="purchase-availability-badge" style="background:{{ $avail["bg"] }};color:{{ $avail["text"] }};">
+                                <i class="fas {{ $avail["icon"] }}"></i> {{ $avail["label"] }}
+                            </span>
                         </div>
 
                         {{-- Quantity --}}
-                        @if(!$book->isEbook() && $book->isInStock())
+                        @if(!$book->isEbook() && $book->isPurchasable())
                             <div class="book-purchase-qty">
                                 <button type="button" class="purchase-qty-btn" onclick="changeQuantity(-1)"><i class="fas fa-minus"></i></button>
                                 <input type="number" id="quantity" class="purchase-qty-input" value="1" min="1" max="{{ $book->stock_quantity }}" readonly>
@@ -123,7 +120,7 @@
                         @endif
 
                         {{-- Buttons --}}
-                        @if($book->isEbook() || $book->isInStock())
+                        @if($book->isEbook() || $book->isPurchasable())
                             <button class="purchase-btn purchase-btn-cart btn-add-cart" data-book-id="{{ $book->id }}">
                                 <i class="fas fa-shopping-bag"></i> Add to Cart
                             </button>
@@ -139,8 +136,18 @@
                             @endauth
                         @else
                             <button class="purchase-btn purchase-btn-disabled" disabled>
-                                <i class="fas fa-ban"></i> Out of Stock
+                                <i class="fas {{ $avail["icon"] }}"></i> {{ $avail["label"] }}
                             </button>
+                            @auth("customer")
+                                <button class="purchase-btn purchase-btn-wishlist {{ in_array($book->id, $wishlistedIds) ? "wishlisted" : "" }}"
+                                        data-book-id="{{ $book->id }}" onclick="toggleWishlist(this, {{ $book->id }})">
+                                    <i class="{{ in_array($book->id, $wishlistedIds) ? "fas" : "far" }} fa-heart"></i>
+                                    <span>Add to Wishlist</span>
+                                </button>
+                                <button class="purchase-btn purchase-btn-notify">
+                                    <i class="fas fa-bell"></i> Notify Me
+                                </button>
+                            @endauth
                         @endif
 
                         {{-- Trust Badges --}}
@@ -316,7 +323,7 @@
     <div class="book-mobile-bar-price">
         <span>{{ number_format($book->isOnSale() ? $book->sale_price : $book->price) }} MMK</span>
     </div>
-    @if($book->isEbook() || $book->isInStock())
+    @if($book->isEbook() || $book->isPurchasable())
         <button class="book-mobile-bar-cart btn-add-cart" data-book-id="{{ $book->id }}">
             <i class="fas fa-shopping-bag"></i> Add to Cart
         </button>

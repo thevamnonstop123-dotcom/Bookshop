@@ -898,3 +898,59 @@
         font-size: 22px;
     }
 }
+/* Availability Badge */
+.book-purchase-availability {
+    margin-bottom: var(--space-2);
+}
+
+.purchase-availability-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Disabled button */
+.purchase-btn-disabled {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-btn);
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: not-allowed;
+    opacity: 0.6;
+    background: var(--color-border-light);
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Notify Me button */
+.purchase-btn-notify {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-btn);
+    border: 1.5px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all var(--transition-fast);
+}
+
+.purchase-btn-notify:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-bg);
+}

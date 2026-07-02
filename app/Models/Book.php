@@ -28,6 +28,7 @@ class Book extends Model
         'updated_by',
         'category_id', 'title', 'slug', 'isbn', 'price', 'sale_price',
         'sale_starts_at', 'sale_ends_at', 'stock_quantity', 'language',
+        'availability_status',
         'published_date', 'description', 'image', 'status',
         'created_by', 'updated_by',
     ];
@@ -173,5 +174,29 @@ public function discountPercentage(): int
             ];
         }
         return $distribution;
+    }
+
+    const AVAILABILITY = [
+        "in_stock" => ["label" => "In Stock", "icon" => "fa-circle-check", "color" => "#16A34A", "bg" => "#F0FDF4", "text" => "#166534"],
+        "low_stock" => ["label" => "Only :count Left", "icon" => "fa-circle-exclamation", "color" => "#F59E0B", "bg" => "#FFFBEB", "text" => "#92400E"],
+        "out_of_stock" => ["label" => "Out of Stock", "icon" => "fa-circle-xmark", "color" => "#DC2626", "bg" => "#FEF2F2", "text" => "#991B1B"],
+        "coming_soon" => ["label" => "Coming Soon", "icon" => "fa-clock", "color" => "#2563EB", "bg" => "#EFF6FF", "text" => "#1E40AF"],
+        "pre_order" => ["label" => "Pre-order", "icon" => "fa-cart-arrow-down", "color" => "#7C3AED", "bg" => "#F5F3FF", "text" => "#5B21B6"],
+        "discontinued" => ["label" => "Discontinued", "icon" => "fa-ban", "color" => "#6B7280", "bg" => "#F9FAFB", "text" => "#374151"],
+    ];
+
+    public function getAvailabilityAttribute(): array
+    {
+        $status = $this->availability_status ?? "in_stock";
+        $config = self::AVAILABILITY[$status] ?? self::AVAILABILITY["in_stock"];
+        if ($status === "low_stock") {
+            $config["label"] = "Only " . ($this->stock_quantity ?? 0) . " Left";
+        }
+        return array_merge($config, ["status" => $status]);
+    }
+
+    public function isPurchasable(): bool
+    {
+        return in_array($this->availability_status, ["in_stock", "low_stock", "pre_order"]);
     }
 }

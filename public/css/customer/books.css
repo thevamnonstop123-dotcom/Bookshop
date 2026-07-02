@@ -684,3 +684,113 @@
 #filterData {
     display: none !important;
 }
+
+/* =============================================
+   AVAILABILITY BADGES & EFFECTS
+   ============================================= */
+
+/* Unavailable book - grayscale + opacity */
+.book-card-unavailable .book-card-cover {
+    opacity: 0.7;
+}
+
+.book-card-unavailable .book-card-img {
+    filter: grayscale(0.4);
+}
+
+/* Availability badges */
+.book-card-badge-out_of_stock,
+.book-card-badge-coming_soon,
+.book-card-badge-pre_order,
+.book-card-badge-discontinued {
+    left: 10px;
+    right: auto;
+}
+
+.book-card-badge-low-stock {
+    background: var(--color-accent) !important;
+    color: #111 !important;
+    left: 10px;
+    right: auto;
+}
+
+/* Disabled cart button */
+.book-card-cart-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--color-border-light) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text-muted) !important;
+}
+
+/* Pre-order button */
+.book-card-cart-preorder {
+    background: var(--color-accent) !important;
+    color: #111 !important;
+    border-color: var(--color-accent) !important;
+}
+
+/* In stock indicator */
+.book-card-stock-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-bottom: 6px;
+}
+
+.book-card-stock-indicator.in_stock {
+    background: #F0FDF4;
+    color: #166534;
+}
+
+.book-card-stock-indicator.low_stock {
+    background: #FFFBEB;
+    color: #92400E;
+}
+
+/* In Stock / Low Stock indicator */
+.book-card-stock-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    margin-bottom: 4px;
+}
+
+.book-card-stock-indicator.in_stock {
+    background: #F0FDF4;
+    color: #166534;
+}
+
+.book-card-stock-indicator.low_stock {
+    background: #FFFBEB;
+    color: #92400E;
+}
+
+.stock-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.book-card-stock-indicator.in_stock .stock-dot {
+    background: #16A34A;
+}
+
+.book-card-stock-indicator.low_stock .stock-dot {
+    background: #F59E0B;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}

@@ -19,6 +19,7 @@
     @stack('styles')
 </head>
 <body>
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
 
     @auth('staff')
         <div class="admin-layout">
@@ -30,7 +31,7 @@
             @include('components.admin.sidebar')
 
             {{-- Main Area --}}
-            <div class="admin-main">
+            <div class="admin-main" id="main-content">
 
                 {{-- Topbar --}}
                 @include('components.admin.topbar')
@@ -53,6 +54,17 @@
     <script src="{{ asset('js/admin/layout.js') }}"></script>
     <script src="{{ asset('js/admin/ai-assistant.js') }}"></script>
     <script src="{{ asset('js/admin/ai-assistant.js?v=' . time()) }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sidebar = document.getElementById("adminSidebar");
+    if (!sidebar) return;
+    const saved = sessionStorage.getItem("adminSidebarScroll");
+    if (saved) sidebar.scrollTop = parseInt(saved, 10);
+    window.addEventListener("beforeunload", function () {
+        sessionStorage.setItem("adminSidebarScroll", sidebar.scrollTop);
+    });
+});
+</script>
     @stack('scripts')
 </body>
 </html>

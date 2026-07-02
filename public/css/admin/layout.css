@@ -507,3 +507,80 @@
     .admin-sidebar { width: var(--admin-sidebar-width) !important; transform: translateX(0) !important; }
     .admin-main { margin-left: var(--admin-sidebar-width) !important; }
 }
+/* Parent toggle active state */
+.admin-sidebar-parent-toggle.active {
+    background: rgba(255, 255, 255, 0.06);
+    color: #FBBF24;
+    border-left: 3px solid #FBBF24;
+}
+
+.admin-sidebar-parent-toggle.active i {
+    color: #FBBF24;
+}
+
+/* Main Menu Tooltips (Tablet Collapsed) */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .admin-sidebar:not(.open) .admin-sidebar-menu > li:not(.admin-sidebar-parent) > .admin-sidebar-link {
+        position: relative;
+    }
+
+    .admin-sidebar:not(.open) .admin-sidebar-menu > li:not(.admin-sidebar-parent) > .admin-sidebar-link::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: calc(100% + 12px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: #1E293B;
+        color: #F1F5F9;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.15s ease;
+        z-index: 300;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .admin-sidebar:not(.open) .admin-sidebar-menu > li:not(.admin-sidebar-parent) > .admin-sidebar-link:hover::after {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+/* Accessibility — Focus states */
+.admin-sidebar-link:focus-visible,
+.admin-action-btn:focus-visible,
+.admin-btn:focus-visible,
+.admin-form-input:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.admin-topbar-hamburger:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* Skip to main content link */
+.skip-to-main {
+    position: absolute;
+    top: -100px;
+    left: 16px;
+    background: var(--color-primary);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    z-index: 9999;
+    font-weight: 600;
+    font-size: 13px;
+    transition: top 0.2s;
+}
+
+.skip-to-main:focus {
+    top: 0;
+}
