@@ -583,9 +583,26 @@
 }
 
 .newsletter-icon {
-    font-size: 24px;
     color: #FFFFFF;
     margin-bottom: var(--space-1);
+}
+.hero-countdown-label {
+    font-size: var(--font-size-xs);
+    color: rgba(255, 255, 255, 0.75);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
+.hero-countdown-timer {
+    color: #FFFFFF;
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+
 }
 
 .newsletter-card h2 {

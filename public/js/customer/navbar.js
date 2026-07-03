@@ -175,7 +175,8 @@
                 list.innerHTML = '<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>';
             } else {
                 list.innerHTML = data.notifications.map(function (n) {
-                    return '<div class="notification-item ' + (n.read_at ? '' : 'unread') + '" onclick="markRead(' + n.id + ')"><div class="notification-item-icon promotion"><i class="fas fa-tag"></i></div><div class="notification-item-content"><div class="notification-item-title">' + n.title + '</div><div class="notification-item-message">' + n.message + '</div><div class="notification-item-time">' + n.created_at + '</div></div></div>';
+                    var clickUrl = n.type === "order_status" ? "/orders/" + n.notifiable_id : null;
+                    return '<div class="notification-item ' + (n.read_at ? '' : 'unread') + '" onclick="markRead(' + n.id + ')"><div class="notification-item-icon ' + (n.type === "order_status" ? "order" : "promotion") + '"><i class="fas ' + (n.type === "order_status" ? "fa-box" : "fa-tag") + '"></i></div><div class="notification-item-content"><div class="notification-item-title">' + n.title + '</div><div class="notification-item-message">' + n.message + '</div><div class="notification-item-time">' + n.created_at + '</div></div></div>';
                 }).join('');
             }
         }).catch(function () {});

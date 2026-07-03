@@ -35,6 +35,7 @@
 
                 {{-- Topbar --}}
                 @include('components.admin.topbar')
+    <div class="admin-notification-panel" id="adminNotificationPanel"><div class="admin-notification-header"><strong>Notifications</strong><button onclick="markAllAdminNotificationsRead()">Mark all read</button></div><div class="admin-notification-list" id="adminNotificationList"><div class="admin-notification-empty">No notifications</div></div></div>
 
                 {{-- Content --}}
                 <main class="admin-content">
@@ -65,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+    <script src="{{ asset('js/admin/notifications.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

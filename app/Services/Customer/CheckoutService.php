@@ -4,6 +4,7 @@ namespace App\Services\Customer;
 
 use App\Models\Cart;
 use App\Models\Order;
+use App\Services\NotificationService;
 use App\Models\OrderItem;
 use App\Models\OrderShippingAddress;
 use App\Models\Payment;
@@ -108,6 +109,7 @@ class CheckoutService
                 'price'    => $price,
             ]);
             $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
+            $this->checkStockAlert($cartItem->book);
         }
 
         OrderShippingAddress::create([
@@ -158,6 +160,8 @@ class CheckoutService
                 'price'    => $price,
             ]);
             if (!$cartItem->book->is_ebook) {
+                $this->checkStockAlert($cartItem->book);
+                $this->checkStockAlert($cartItem->book);
                 $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
             }
         }
@@ -178,6 +182,16 @@ class CheckoutService
         ]);
 
         $cart->items()->delete();
+        NotificationService::send(NotificationService::orderRoles(), "new_order", "New Order #" . $order->order_number, $order->customer->name . " placed an order for " . number_format($order->total_amount) . " MMK", $order);
         return $order;
+    }
+
+    private function checkStockAlert($book): void
+    {
+        if ($book->stock_quantity <= 0) {
+            NotificationService::send(NotificationService::bookRoles(), "out_of_stock", "\"{$book->title}\" is out of stock", "Stock reached 0. Please restock.", $book);
+        } elseif ($book->stock_quantity <= 5) {
+            NotificationService::send(NotificationService::bookRoles(), "low_stock", "\"{$book->title}\" is low in stock", "Only {$book->stock_quantity} left.", $book);
+        }
     }
 }

@@ -19,7 +19,7 @@ class DashboardService
             'total_sales'    => Payment::where('status', 'completed')->sum('amount'),
             'total_orders'   => Order::count(),
             'total_customers'=> Customer::count(),
-            'low_stock'      => Book::where('stock_quantity', '<', 5)->where('stock_quantity', '>', 0)->count(),
+            'low_stock'      => Book::where('stock_quantity', '<=', 5)->where('stock_quantity', '>', 0)->count(),
         ];
     }
 

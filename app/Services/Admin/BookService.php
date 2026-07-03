@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Models\Book;
+use App\Services\NotificationService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -74,6 +75,10 @@ class BookService
 
         $book->update($data);
 
+        if ($book->wasChanged("stock_quantity")) {
+            $this->checkStockAlert($book);
+        }
+
         // Sync authors
         if (!empty($authorIds)) {
             $book->authors()->sync($authorIds);
@@ -103,5 +108,14 @@ class BookService
     private function uploadImage(UploadedFile $file): string
     {
         return $file->store('books', 'public');
+    }
+
+    private function checkStockAlert($book): void
+    {
+        if ($book->stock_quantity <= 0) {
+            NotificationService::send(NotificationService::bookRoles(), "out_of_stock", '"' . $book->title . '" is out of stock', "Stock reached 0. Please restock.", $book);
+        } elseif ($book->stock_quantity <= 5) {
+            NotificationService::send(NotificationService::bookRoles(), "low_stock", '"' . $book->title . '" is low in stock', "Only {$book->stock_quantity} left.", $book);
+        }
     }
 }

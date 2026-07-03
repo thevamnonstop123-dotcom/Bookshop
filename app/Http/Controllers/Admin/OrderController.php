@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Services\Admin\OrderService;
 use Illuminate\Http\Request;
@@ -48,6 +50,16 @@ class OrderController extends Controller
         ]);
 
         $this->orderService->updateStatus($order, $request->status);
+        \App\Models\Notification::create([
+            "recipient_type" => "App\\Models\\Customer",
+            "recipient_id" => $order->customer_id,
+            "type" => "order_status",
+            "title" => "Order #" . $order->order_number . " is " . ucfirst($request->status),
+            "message" => "Your order has been " . ucfirst($request->status) . ".",
+            "notifiable_type" => "App\\Models\\Order",
+            "notifiable_id" => $order->id,
+        ]);
+        // Notify customer about status change
 
         return redirect()
             ->route('admin.orders.show', $order)

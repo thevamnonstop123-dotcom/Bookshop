@@ -8,16 +8,26 @@ use App\Models\Notification;
 class NotificationController extends Controller
 {
     /**
-     * Get unread notifications for the logged-in customer.
+     * Get notifications for the logged-in customer.
      */
     public function index()
     {
-        $notifications = Notification::where('customer_id', auth('customer')->id())
+        $customerId = auth('customer')->id();
+        
+        $notifications = Notification::where(function ($q) use ($customerId) {
+                $q->where('recipient_type', 'App\\Models\\Customer')
+                  ->where('recipient_id', $customerId);
+            })
+            ->orWhere('customer_id', $customerId) // backward compatibility
             ->latest()
             ->limit(10)
             ->get();
 
-        $unreadCount = Notification::where('customer_id', auth('customer')->id())
+        $unreadCount = Notification::where(function ($q) use ($customerId) {
+                $q->where('recipient_type', 'App\\Models\\Customer')
+                  ->where('recipient_id', $customerId);
+            })
+            ->orWhere('customer_id', $customerId)
             ->whereNull('read_at')
             ->count();
 
@@ -32,9 +42,7 @@ class NotificationController extends Controller
      */
     public function markRead($id)
     {
-        $notification = Notification::where('customer_id', auth('customer')->id())
-            ->findOrFail($id);
-        
+        $notification = Notification::findOrFail($id);
         $notification->markAsRead();
 
         return response()->json(['success' => true]);
@@ -45,7 +53,13 @@ class NotificationController extends Controller
      */
     public function markAllRead()
     {
-        Notification::where('customer_id', auth('customer')->id())
+        $customerId = auth('customer')->id();
+        
+        Notification::where(function ($q) use ($customerId) {
+                $q->where('recipient_type', 'App\\Models\\Customer')
+                  ->where('recipient_id', $customerId);
+            })
+            ->orWhere('customer_id', $customerId)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 

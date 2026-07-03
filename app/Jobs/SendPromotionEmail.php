@@ -40,6 +40,8 @@ class SendPromotionEmail implements ShouldQueue
         // Create notification
         Notification::create([
             'customer_id' => $this->customer->id,
+            'recipient_type' => 'App\Models\Customer',
+            'recipient_id' => $this->customer->id,
             'type' => 'promotion',
             'title' => $this->subject,
             'message' => $this->message,

@@ -30,6 +30,11 @@
             </div>
         </div>
 
+        {{-- Notification Bell --}}
+        <button class="admin-topbar-action-solid" id="adminNotificationBell" onclick="toggleAdminNotifications()" style="position:relative" aria-label="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="admin-notification-badge" id="adminNotificationBadge" style="display:none">0</span>
+        </button>
         {{-- Solid High-Action Logout Button --}}
         <form action="{{ route('admin.logout') }}" method="POST" class="admin-topbar-logout-form" data-tooltip="Sign Out">
             @csrf

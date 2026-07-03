@@ -18,6 +18,8 @@ use App\Http\Controllers\Admin\AiAssistantController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\GenreController;
 use App\Http\Controllers\Admin\CountryController;
+use App\Http\Controllers\Admin\NotificationController;
+
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -30,6 +32,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('auth:staff')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::get('/notifications/count', [NotificationController::class, 'count']);
+        Route::patch('/notifications/read-all', [NotificationController::class, 'markAllRead']);
 
         // Banners — requires can_manage_books
         Route::middleware('permission:can_manage_books')->group(function () {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Services\NotificationService;
 use App\Services\Customer\RatingService;
 use Illuminate\Http\Request;
 
@@ -40,6 +41,7 @@ class RatingController extends Controller
             $request->rating,
             $request->review
         );
+        NotificationService::send(NotificationService::reviewRoles(), "new_review", "New Review on " . $rating->book->title, $rating->customer->name . " left a " . $rating->rating . "-star review", $rating);
 
         return response()->json([
             'message' => 'Review submitted successfully!',
