@@ -4,6 +4,7 @@
 @section('page_title', 'Order #' . $order->order_number)
 
 @push('styles')
+    <link rel="stylesheet" href="{{ asset('css/admin/form.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/order-detail.css') }}">
 @endpush
@@ -248,7 +249,7 @@
         </div>
     </div>
 
-    <a href="{{ route('admin.orders.index') }}" class="admin-btn admin-btn-ghost" style="margin-top: 20px;">
+    <a href="{{ route('admin.orders.index') }}" class="admin-form-back" style="margin-top:20px">
         <i class="fas fa-arrow-left"></i> Back to Orders
     </a>
 

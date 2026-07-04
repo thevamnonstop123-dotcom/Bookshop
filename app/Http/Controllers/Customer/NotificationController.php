@@ -7,27 +7,37 @@ use App\Models\Notification;
 
 class NotificationController extends Controller
 {
-    /**
-     * Get notifications for the logged-in customer.
-     */
+    private function customerQuery($customerId)
+    {
+        return Notification::where(function ($q) use ($customerId) {
+            $q->where(function ($sq) use ($customerId) {
+                $sq->where('recipient_type', 'App\\Models\\Customer')
+                   ->where('recipient_id', $customerId);
+            })->orWhere('customer_id', $customerId);
+        });
+    }
+
     public function index()
     {
         $customerId = auth('customer')->id();
         
-        $notifications = Notification::where(function ($q) use ($customerId) {
-                $q->where('recipient_type', 'App\\Models\\Customer')
-                  ->where('recipient_id', $customerId);
-            })
-            ->orWhere('customer_id', $customerId) // backward compatibility
+        $notifications = $this->customerQuery($customerId)
             ->latest()
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(function ($n) {
+                return [
+                    'id' => $n->id,
+                    'type' => $n->type,
+                    'title' => $n->title,
+                    'message' => $n->message,
+                    'url' => $n->url,
+                    'read_at' => $n->read_at,
+                    'created_at' => $n->created_at->diffForHumans(),
+                ];
+            });
 
-        $unreadCount = Notification::where(function ($q) use ($customerId) {
-                $q->where('recipient_type', 'App\\Models\\Customer')
-                  ->where('recipient_id', $customerId);
-            })
-            ->orWhere('customer_id', $customerId)
+        $unreadCount = $this->customerQuery($customerId)
             ->whereNull('read_at')
             ->count();
 
@@ -37,29 +47,17 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Mark a notification as read.
-     */
     public function markRead($id)
     {
-        $notification = Notification::findOrFail($id);
-        $notification->markAsRead();
-
+        Notification::findOrFail($id)->markAsRead();
         return response()->json(['success' => true]);
     }
 
-    /**
-     * Mark all notifications as read.
-     */
     public function markAllRead()
     {
         $customerId = auth('customer')->id();
         
-        Notification::where(function ($q) use ($customerId) {
-                $q->where('recipient_type', 'App\\Models\\Customer')
-                  ->where('recipient_id', $customerId);
-            })
-            ->orWhere('customer_id', $customerId)
+        $this->customerQuery($customerId)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 

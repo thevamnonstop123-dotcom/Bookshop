@@ -55,10 +55,19 @@ class Notification extends Model
 
         $type = ltrim($this->notifiable_type, '\\');
         
+        // For staff recipients, use admin routes
+        if ($this->recipient_type === 'App\\Models\\Staff' || $this->recipient_type === 'App\Models\Staff') {
+            return match ($type) {
+                'App\Models\Order' => route('admin.orders.show', $this->notifiable_id),
+                'App\Models\Book' => route('admin.books.edit', $this->notifiable_id),
+                'App\Models\Rating' => route('admin.reviews.index'),
+                default => null,
+            };
+        }
+        
+        // For customer recipients, use customer routes
         return match ($type) {
-            'App\Models\Order' => route('admin.orders.show', $this->notifiable_id),
-            'App\Models\Book' => route('admin.books.edit', $this->notifiable_id),
-            'App\Models\Rating' => route('admin.reviews.index'),
+            'App\Models\Order' => route('customer.orders.show', $this->notifiable_id),
             default => null,
         };
     }

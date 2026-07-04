@@ -45,13 +45,13 @@
         function open() {
             sidebar.classList.add("open");
             if (overlay) overlay.classList.add("show");
-            if (toggle) toggle.setAttribute("aria-expanded", "true");
+            toggle.setAttribute("aria-expanded", "true");
             document.body.style.overflow = "hidden";
         }
         function close() {
             sidebar.classList.remove("open");
             if (overlay) overlay.classList.remove("show");
-            if (toggle) toggle.setAttribute("aria-expanded", "false");
+            toggle.setAttribute("aria-expanded", "false");
             document.body.style.overflow = "";
         }
 
@@ -168,25 +168,48 @@
     function loadNotifications() {
         fetch("/notifications", {
             headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" }
-        }).then(function (r) { return r.json(); }).then(function (data) {
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
             const list = document.getElementById("notificationList");
             if (!list) return;
+            list.innerHTML = "";
             if (data.notifications.length === 0) {
                 list.innerHTML = '<div class="notification-empty"><i class="fas fa-bell-slash"></i><p>No notifications yet</p></div>';
-            } else {
-                list.innerHTML = data.notifications.map(function (n) {
-                    var clickUrl = n.type === "order_status" ? "/orders/" + n.notifiable_id : null;
-                    return '<div class="notification-item ' + (n.read_at ? '' : 'unread') + '" onclick="markRead(' + n.id + ')"><div class="notification-item-icon ' + (n.type === "order_status" ? "order" : "promotion") + '"><i class="fas ' + (n.type === "order_status" ? "fa-box" : "fa-tag") + '"></i></div><div class="notification-item-content"><div class="notification-item-title">' + n.title + '</div><div class="notification-item-message">' + n.message + '</div><div class="notification-item-time">' + n.created_at + '</div></div></div>';
-                }).join('');
+                return;
             }
-        }).catch(function () {});
+            data.notifications.forEach(function (n) {
+                const item = document.createElement("div");
+                item.className = "notification-item " + (n.read_at ? "" : "unread");
+                item.onclick = function () { markRead(n.id, n.url); };
+                const iconClass = n.type === "order_status" ? "order" : "promotion";
+                const iconEl = n.type === "order_status" ? "fa-box" : "fa-tag";
+                item.innerHTML = '<div class="notification-item-icon ' + iconClass + '"><i class="fas ' + iconEl + '"></i></div>' +
+                    '<div class="notification-item-content">' +
+                    '<div class="notification-item-title"></div>' +
+                    '<div class="notification-item-message"></div>' +
+                    '<div class="notification-item-time"></div>' +
+                    '</div>';
+                item.querySelector(".notification-item-title").textContent = n.title;
+                item.querySelector(".notification-item-message").textContent = n.message;
+                item.querySelector(".notification-item-time").textContent = n.created_at;
+                list.appendChild(item);
+            });
+        })
+        .catch(function () {});
     }
 
-    window.markRead = function (id) {
+    window.markRead = function (id, url) {
         fetch("/notifications/" + id + "/read", {
             method: "PATCH",
             headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content, "Accept": "application/json" }
-        }).then(function () { loadNotifications(); });
+        })
+        .then(function (response) {
+            if (!response.ok) throw new Error("error");
+            if (url) { window.location.href = url; }
+            else { loadNotifications(); }
+        })
+        .catch(function () {});
     };
 
     document.addEventListener("click", function (e) {
@@ -228,43 +251,28 @@
     };
 
     // ========== MOBILE SEARCH ==========
-   window.openMobileSearch = function () {
+    window.openMobileSearch = function () {
         const overlay = document.getElementById("navbarSearchOverlay");
         if (!overlay) return;
         if (overlay.classList.contains("open")) { closeMobileSearch(); return; }
-
         overlay.classList.add("open");
         document.body.style.overflow = "hidden";
-
-        // Defer listener attachment so the button click that opened it 
-        // doesn't immediately trigger the close logic
-        setTimeout(function() {
-            document.addEventListener("click", handleSearchOutsideClick);
-        }, 0);
-
+        setTimeout(function() { document.addEventListener("click", handleSearchOutsideClick); }, 0);
         const input = document.getElementById("mobileSearchInput");
         if (input) setTimeout(function () { input.focus(); }, 150);
     };
 
     function handleSearchOutsideClick(e) {
         const overlay = document.getElementById("navbarSearchOverlay");
-        // If the click is outside the overlay, close it
-        if (overlay && !overlay.contains(e.target)) {
-            closeMobileSearch();
-        }
+        if (overlay && !overlay.contains(e.target)) { closeMobileSearch(); }
     }
 
-    // Search your entire JS file and delete ALL other instances of this function.
     window.closeMobileSearch = function () {
         const overlay = document.getElementById("navbarSearchOverlay");
         if (overlay) overlay.classList.remove("open");
-        
         document.body.style.overflow = "";
-        
-        // This MUST execute to prevent the bug.
         document.removeEventListener("click", handleSearchOutsideClick);
     };
-
 
     function initMobileSearchEnter() {
         const input = document.getElementById('mobileSearchInput');
@@ -279,16 +287,12 @@
         }
     }
 
-    
-
     // ========== DESKTOP SEARCH DROPDOWN ==========
     function initDesktopSearchDropdown() {
         const input = document.getElementById('desktopSearchInput');
         const dropdown = document.getElementById('desktopSearchDropdown');
         if (!input || !dropdown) return;
-
         input.addEventListener('focus', function () { dropdown.style.display = 'block'; });
-
         document.addEventListener('click', function (e) {
             const wrap = document.getElementById('desktopSearchWrap');
             if (wrap && !wrap.contains(e.target)) dropdown.style.display = 'none';
@@ -300,10 +304,7 @@
         try {
             await fetch('/search-history/clear', {
                 method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' }
             });
             document.querySelectorAll('.navbar-search-dropdown-section, .navbar-search-suggestions-section').forEach(function (el) {
                 if (el.querySelector('.navbar-search-dropdown-title, .navbar-search-suggestions-title')?.textContent.includes('Recent')) {
@@ -317,16 +318,11 @@
         try {
             await fetch('/search-history/' + index, {
                 method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                },
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' }
             });
-            // Remove item from both desktop and mobile DOM
             document.querySelectorAll('.navbar-search-suggestion-item-wrap').forEach(function (el, i) {
                 if (i === index) el.remove();
             });
-            // Hide section if empty
             document.querySelectorAll('.navbar-search-dropdown-section, .navbar-search-suggestions-section').forEach(function (section) {
                 if (!section.querySelector('.navbar-search-suggestion-item-wrap') && section.querySelector('.navbar-search-dropdown-title, .navbar-search-suggestions-title')?.textContent.includes('Recent')) {
                     section.remove();
