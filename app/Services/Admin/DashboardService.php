@@ -26,43 +26,44 @@ class DashboardService
     {
         $cacheKey = "dashboard_stats_{$period}";
         
-        return Cache::remember($cacheKey, $this->cacheTTL, function () use ($period) {
+        $cached = Cache::remember($cacheKey, $this->cacheTTL, function () use ($period) {
             $dateRange = $this->getDateRange($period);
             $previousRange = $this->getPreviousPeriodRange($period);
 
-            // Current period metrics
             $currentMetrics = $this->calculateMetrics($dateRange);
-            
-            // Previous period metrics for trend calculation
             $previousMetrics = $this->calculateMetrics($previousRange);
-            
-            // Calculate trends
             $trends = $this->calculateTrends($currentMetrics, $previousMetrics);
-
-            // Get today's data
-            $todayData = $this->getTodayData();
 
             return [
                 'total_sales' => $currentMetrics['total_sales'],
                 'total_orders' => $currentMetrics['total_orders'],
-                'pending_orders' => $currentMetrics['pending_orders'],
                 'new_customers' => $currentMetrics['new_customers'],
                 'low_stock' => $currentMetrics['low_stock'],
                 'out_of_stock' => $currentMetrics['out_of_stock'],
-                'today_sales' => $todayData['sales'],
-                'today_orders' => $todayData['orders'],
-                'today_avg_order' => $todayData['avg_order'],
                 'average_order_value' => $currentMetrics['average_order_value'],
                 'total_customers' => $currentMetrics['total_customers'],
                 'trends' => $trends,
-                'period' => $period,
-                'period_label' => $dateRange['label'],
             ];
         });
+
+        // Pending orders - ALWAYS REAL-TIME (no cache)
+        $pendingOrders = Order::where('status', 'pending')->count();
+
+        // Today's data - short cache (60 seconds)
+        $todayData = $this->getTodayData();
+
+        return array_merge($cached, [
+            'pending_orders' => $pendingOrders,
+            'today_sales' => $todayData['sales'],
+            'today_orders' => $todayData['orders'],
+            'today_avg_order' => $todayData['avg_order'],
+            'period' => $period,
+            'period_label' => $this->getDateRange($period)['label'],
+        ]);
     }
 
     /**
-     * Get today's data with correct average calculation.
+     * Get today's data with short cache.
      */
     private function getTodayData(): array
     {
@@ -72,8 +73,6 @@ class DashboardService
                 ->sum('amount');
                 
             $todayOrders = Order::whereDate('created_at', Carbon::today())->count();
-            
-            // Average is calculated from today's sales ÷ today's orders
             $todayAvgOrder = $todayOrders > 0 ? $todaySales / $todayOrders : 0;
 
             return [
@@ -95,8 +94,6 @@ class DashboardService
 
         $totalOrders = Order::whereBetween('created_at', [$dateRange['start'], $dateRange['end']])->count();
         
-        $pendingOrders = Order::where('status', 'pending')->count();
-
         $newCustomers = Customer::whereBetween('created_at', [$dateRange['start'], $dateRange['end']])->count();
         
         $totalCustomers = Customer::count();
@@ -113,7 +110,6 @@ class DashboardService
         return [
             'total_sales' => $totalSales,
             'total_orders' => $totalOrders,
-            'pending_orders' => $pendingOrders,
             'new_customers' => $newCustomers,
             'low_stock' => $lowStock,
             'out_of_stock' => $outOfStock,
@@ -123,7 +119,7 @@ class DashboardService
     }
 
     /**
-     * Calculate trend percentages comparing current vs previous period.
+     * Calculate trend percentages.
      */
     private function calculateTrends(array $current, array $previous): array
     {
@@ -154,7 +150,7 @@ class DashboardService
     }
 
     /**
-     * Get enhanced chart data with multiple series.
+     * Get enhanced chart data.
      */
     public function getChartData(string $period = 'week'): array
     {
@@ -206,25 +202,19 @@ class DashboardService
             return [
                 'categories' => $categories,
                 'series' => [
-                    [
-                        'name' => 'Sales (MMK)',
-                        'data' => $salesData,
-                    ],
-                    [
-                        'name' => 'Orders',
-                        'data' => $ordersData,
-                    ],
+                    ['name' => 'Sales (MMK)', 'data' => $salesData],
+                    ['name' => 'Orders', 'data' => $ordersData],
                 ],
             ];
         });
     }
 
     /**
-     * Get recent orders with customer details.
+     * Get recent orders.
      */
     public function getRecentOrders(int $limit = 5): array
     {
-        return Cache::remember("dashboard_recent_orders_{$limit}", 60, function () use ($limit) {
+        return Cache::remember("dashboard_recent_orders_{$limit}", 30, function () use ($limit) {
             return Order::with('customer:id,name')
                 ->select(['id', 'customer_id', 'order_number', 'total_amount', 'status', 'created_at'])
                 ->latest()
@@ -245,16 +235,13 @@ class DashboardService
     }
 
     /**
-     * Get top selling books with performance metrics.
+     * Get top selling books.
      */
     public function getTopSellingBooks(int $limit = 5): array
     {
         return Cache::remember("dashboard_top_books_{$limit}", 300, function () use ($limit) {
             return Book::select(
-                    'books.id', 
-                    'books.title', 
-                    'books.image',
-                    'books.price',
+                    'books.id', 'books.title', 'books.image', 'books.price',
                     DB::raw('COALESCE(SUM(order_items.quantity), 0) as total_sold'),
                     DB::raw('COALESCE(SUM(order_items.quantity * order_items.price), 0) as total_revenue')
                 )
@@ -272,73 +259,39 @@ class DashboardService
     }
 
     /**
-     * Get date range for specified period.
+     * Get date range.
      */
     private function getDateRange(string $period): array
     {
         $now = Carbon::now();
 
         return match ($period) {
-            'month' => [
-                'start' => $now->copy()->startOfMonth(),
-                'end' => $now,
-                'label' => 'This Month',
-            ],
-            'year' => [
-                'start' => $now->copy()->startOfYear(),
-                'end' => $now,
-                'label' => 'This Year',
-            ],
-            default => [
-                'start' => $now->copy()->startOfWeek(),
-                'end' => $now,
-                'label' => 'This Week',
-            ],
+            'month' => ['start' => $now->copy()->startOfMonth(), 'end' => $now, 'label' => 'This Month'],
+            'year' => ['start' => $now->copy()->startOfYear(), 'end' => $now, 'label' => 'This Year'],
+            default => ['start' => $now->copy()->startOfWeek(), 'end' => $now, 'label' => 'This Week'],
         };
     }
 
-    /**
-     * Get previous period range for trend comparison.
-     */
     private function getPreviousPeriodRange(string $period): array
     {
         $now = Carbon::now();
-
         return match ($period) {
-            'month' => [
-                'start' => $now->copy()->subMonth()->startOfMonth(),
-                'end' => $now->copy()->subMonth()->endOfMonth(),
-            ],
-            'year' => [
-                'start' => $now->copy()->subYear()->startOfYear(),
-                'end' => $now->copy()->subYear()->endOfYear(),
-            ],
-            default => [
-                'start' => $now->copy()->subWeek()->startOfWeek(),
-                'end' => $now->copy()->subWeek()->endOfWeek(),
-            ],
+            'month' => ['start' => $now->copy()->subMonth()->startOfMonth(), 'end' => $now->copy()->subMonth()->endOfMonth()],
+            'year' => ['start' => $now->copy()->subYear()->startOfYear(), 'end' => $now->copy()->subYear()->endOfYear()],
+            default => ['start' => $now->copy()->subWeek()->startOfWeek(), 'end' => $now->copy()->subWeek()->endOfWeek()],
         };
     }
 
-    /**
-     * Clear dashboard cache.
-     */
     public function clearCache(): void
     {
-        $periods = ['week', 'month', 'year'];
-        $limits = [5, 10];
-        
-        foreach ($periods as $period) {
+        foreach (['week', 'month', 'year'] as $period) {
             Cache::forget("dashboard_stats_{$period}");
             Cache::forget("dashboard_chart_{$period}");
         }
-        
-        foreach ($limits as $limit) {
+        foreach ([5, 10] as $limit) {
             Cache::forget("dashboard_recent_orders_{$limit}");
             Cache::forget("dashboard_top_books_{$limit}");
         }
-        
         Cache::forget('dashboard_today_data');
-        Cache::forget('dashboard_stock_alerts');
     }
 }

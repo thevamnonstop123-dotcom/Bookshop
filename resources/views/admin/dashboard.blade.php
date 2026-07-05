@@ -25,21 +25,27 @@
     <div class="dashboard-topbar">
         <div class="dashboard-stats-row">
             <div class="stat-pill">
-                <span class="stat-pill-icon">💰</span>
+                <div class="stat-pill-icon" style="background:#dbeafe; color:#2563eb;">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
                 <div>
                     <span class="stat-pill-value">{{ number_format($stats['today_sales']) }} MMK</span>
                     <span class="stat-pill-label">Today's Sales</span>
                 </div>
             </div>
             <div class="stat-pill">
-                <span class="stat-pill-icon">📦</span>
+                <div class="stat-pill-icon" style="background:#dcfce7; color:#16a34a;">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
                 <div>
                     <span class="stat-pill-value">{{ $stats['today_orders'] }}</span>
                     <span class="stat-pill-label">Today's Orders</span>
                 </div>
             </div>
             <div class="stat-pill">
-                <span class="stat-pill-icon">📊</span>
+                <div class="stat-pill-icon" style="background:#f3e8ff; color:#7c3aed;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
                 <div>
                     <span class="stat-pill-value">{{ number_format($stats['today_avg_order']) }} MMK</span>
                     <span class="stat-pill-label">Avg per Order</span>
@@ -54,9 +60,9 @@
         </nav>
     </div>
 
-    {{-- Metrics Cards --}}
+    {{-- Metrics Cards - Consistent Height --}}
     <div class="dashboard-metrics">
-        <div class="metric-card {{ $stats['pending_orders'] > 0 ? 'alert' : '' }}">
+<div class="metric-card">
             <div class="metric-row">
                 <div class="metric-icon" style="background:#dbeafe; color:#2563eb;">
                     <i class="fas fa-coins"></i>
@@ -73,7 +79,7 @@
             </div>
         </div>
 
-        <div class="metric-card">
+<div class="metric-card">
             <div class="metric-row">
                 <div class="metric-icon" style="background:#dcfce7; color:#16a34a;">
                     <i class="fas fa-receipt"></i>
@@ -102,7 +108,7 @@
             </div>
         </div>
 
-        <div class="metric-card">
+<div class="metric-card">
             <div class="metric-row">
                 <div class="metric-icon" style="background:#f3e8ff; color:#7c3aed;">
                     <i class="fas fa-user-plus"></i>
@@ -119,7 +125,7 @@
             </div>
         </div>
 
-        <div class="metric-card">
+<div class="metric-card">
             <div class="metric-row">
                 <div class="metric-icon" style="background:#fef3c7; color:#d97706;">
                     <i class="fas fa-boxes"></i>
@@ -143,8 +149,6 @@
 
     {{-- Recent Orders + Top Selling Side by Side --}}
     <div class="dashboard-split-row">
-        
-        {{-- Recent Orders --}}
         <div class="dashboard-card">
             <div class="card-header">
                 <h3>Recent Orders</h3>
@@ -168,7 +172,6 @@
             </div>
         </div>
 
-        {{-- Top Selling --}}
         <div class="dashboard-card">
             <div class="card-header">
                 <h3>Top Selling Books</h3>
@@ -191,7 +194,6 @@
                 @endforelse
             </div>
         </div>
-
     </div>
 
 @endsection

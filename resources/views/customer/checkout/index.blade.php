@@ -4,6 +4,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/customer/checkout.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 @endpush
 
 @section('content')
@@ -49,13 +50,52 @@
                                 <div class="checkout-card-icon"><i class="fas fa-truck"></i></div>
                                 <div>
                                     <h3 class="checkout-card-title">Shipping Address</h3>
-                                    <p class="checkout-card-subtitle">Select a saved address or enter a new one</p>
+                                    <p class="checkout-card-subtitle">Choose how to provide your address</p>
                                 </div>
                             </div>
 
-                            {{-- Saved Addresses --}}
+                            {{-- Option 1: GPS Auto-Location --}}
+                            <div class="address-gps-section">
+                                <button type="button" class="gps-detect-btn" id="gpsDetectBtn" onclick="detectLocation()">
+                                    <div class="gps-detect-icon">
+                                        <i class="fas fa-location-crosshairs"></i>
+                                    </div>
+                                    <div class="gps-detect-content">
+                                        <span class="gps-detect-title">Use My Current Location</span>
+                                        <span class="gps-detect-desc">Auto-detect your address via GPS</span>
+                                    </div>
+                                    <div class="gps-detect-arrow">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                </button>
+                                
+                                {{-- GPS Result Display --}}
+                                <div class="gps-result" id="gpsResult" style="display:none;">
+                                    <div class="gps-result-header">
+                                        <i class="fas fa-map-pin"></i>
+                                        <span>Detected Address</span>
+                                    </div>
+                                    <div class="gps-result-address" id="gpsAddress"></div>
+                                    <div class="gps-result-map" id="gpsMap" style="height:150px;border-radius:10px;margin-top:8px;"></div>
+                                    <button type="button" class="gps-change-btn" onclick="detectLocation()">
+                                        <i class="fas fa-refresh"></i> Re-detect
+                                    </button>
+                                </div>
+                                
+                                <div class="gps-loading" id="gpsLoading" style="display:none;">
+                                    <i class="fas fa-spinner fa-spin"></i> Detecting your location...
+                                </div>
+                                <div class="gps-error" id="gpsError" style="display:none;"></div>
+                            </div>
+
+                            <div class="checkout-section-divider">
+                                <span>Or choose another option</span>
+                            </div>
+
+                            {{-- Option 2: Saved Addresses --}}
                             @if ($addresses->count() > 0)
                                 <div class="address-saved-list">
+                                    <label class="section-label">Saved Addresses</label>
                                     @foreach ($addresses as $address)
                                         <label class="address-card {{ $loop->first ? 'address-card-selected' : '' }}">
                                             <input type="radio" name="address_id" value="{{ $address->id }}" 
@@ -71,9 +111,9 @@
                                 </div>
                             @endif
 
-                            {{-- New Address Form --}}
+                            {{-- Option 3: New Address Form --}}
                             <div class="checkout-section-divider">
-                                <span>Or enter a new address</span>
+                                <span>Or enter manually</span>
                             </div>
 
                             <div class="checkout-form-grid">
@@ -239,8 +279,145 @@
     </div>
 </div>
 
+{{-- Hidden inputs for GPS data --}}
+<input type="hidden" name="gps_lat" id="gpsLat">
+<input type="hidden" name="gps_lng" id="gpsLng">
+<input type="hidden" name="gps_address" id="gpsAddressInput">
+
 @endsection
 
 @push('scripts')
 <script src="{{ asset('js/customer/checkout.js') }}"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ========== GPS LOCATION DETECTION ==========
+let gpsMap = null;
+let gpsMarker = null;
+
+function detectLocation() {
+    const gpsResult = document.getElementById('gpsResult');
+    const gpsLoading = document.getElementById('gpsLoading');
+    const gpsError = document.getElementById('gpsError');
+    const gpsAddress = document.getElementById('gpsAddress');
+    
+    // Reset
+    gpsResult.style.display = 'none';
+    gpsError.style.display = 'none';
+    gpsLoading.style.display = 'flex';
+    
+    if (!navigator.geolocation) {
+        gpsLoading.style.display = 'none';
+        gpsError.style.display = 'block';
+        gpsError.innerHTML = '<i class="fas fa-exclamation-circle"></i> Geolocation not supported by your browser';
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        // Success
+        async function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            document.getElementById('gpsLat').value = lat;
+            document.getElementById('gpsLng').value = lng;
+            
+            // Reverse geocode using OpenStreetMap Nominatim (free)
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
+                );
+                const data = await response.json();
+                
+                const address = data.display_name || `${lat}, ${lng}`;
+                gpsAddress.textContent = address;
+                document.getElementById('gpsAddressInput').value = address;
+                
+                // Fill the new address field with GPS address
+                const newAddressInput = document.getElementById('newAddress');
+                if (newAddressInput) {
+                    newAddressInput.value = address;
+                }
+                
+                // Fill receiver name from road/suburb if available
+                const road = data.address?.road || '';
+                const suburb = data.address?.suburb || data.address?.city || '';
+                const receiverInput = document.getElementById('newReceiverName');
+                if (receiverInput && !receiverInput.value) {
+                    // Don't overwrite if user already typed
+                }
+                
+                gpsLoading.style.display = 'none';
+                gpsResult.style.display = 'block';
+                
+                // Show mini map
+                setTimeout(function() {
+                    initGpsMap(lat, lng);
+                }, 100);
+                
+                // Deselect saved addresses
+                document.querySelectorAll('.address-card').forEach(c => c.classList.remove('address-card-selected'));
+                document.querySelectorAll('input[name="address_id"]').forEach(r => r.checked = false);
+                
+            } catch (err) {
+                gpsAddress.textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+                document.getElementById('gpsAddressInput').value = `Lat: ${lat}, Lng: ${lng}`;
+                gpsLoading.style.display = 'none';
+                gpsResult.style.display = 'block';
+                setTimeout(function() {
+                    initGpsMap(lat, lng);
+                }, 100);
+            }
+        },
+        // Error
+        function(error) {
+            gpsLoading.style.display = 'none';
+            gpsError.style.display = 'block';
+            
+            let msg = 'Unable to detect location. ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    msg += 'Location permission denied. Please allow location access.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    msg += 'Location information unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    msg += 'Location request timed out.';
+                    break;
+            }
+            gpsError.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+    );
+}
+
+function initGpsMap(lat, lng) {
+    const mapEl = document.getElementById('gpsMap');
+    if (!mapEl) return;
+    
+    if (gpsMap) {
+        gpsMap.remove();
+        gpsMap = null;
+    }
+    
+    gpsMap = L.map('gpsMap').setView([lat, lng], 16);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(gpsMap);
+    
+    gpsMarker = L.marker([lat, lng]).addTo(gpsMap)
+        .bindPopup('📍 Your Location')
+        .openPopup();
+    
+    // Invalidate size after display
+    setTimeout(function() {
+        gpsMap.invalidateSize();
+    }, 200);
+}
+</script>
 @endpush
