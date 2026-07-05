@@ -10,6 +10,7 @@ use App\Models\OrderShippingAddress;
 use App\Models\Payment;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutService
 {
@@ -66,29 +67,50 @@ class CheckoutService
             'payment_method_types' => ['card'],
             'line_items'           => $lineItems,
             'mode'                 => 'payment',
-            'success_url'          => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url'          => route('checkout.stripe-success') . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url'           => route('checkout.cancel'),
             'metadata'             => [
-                'customer_id' => $customerId,
-                'address_id'  => $addressId,
+                'customer_id' => (string) $customerId,
+                'address_id'  => (string) $addressId,
             ],
         ]);
     }
 
     /**
-     * Process successful Stripe payment.
+     * Process successful Stripe payment from callback.
      */
     public function processSuccessfulPayment(string $sessionId): Order
     {
         Stripe::setApiKey(config('services.stripe.secret'));
         $session = Session::retrieve($sessionId);
         $metadata = $session->metadata;
-        $customerId = $metadata->customer_id;
-        $addressId = $metadata->address_id;
+        
+        $customerId = (int) ($metadata->customer_id ?? 0);
+        $addressId = (int) ($metadata->address_id ?? 0);
+
+        if (!$customerId || !$addressId) {
+            Log::error('Stripe callback missing metadata', ['session_id' => $sessionId, 'metadata' => $metadata]);
+            throw new \Exception('Invalid session data.');
+        }
 
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
+        
+        // If cart is empty, the order might already be processed
+        if (!$cart || $cart->items->isEmpty()) {
+            // Check if order already exists for this session
+            $existingPayment = Payment::where('transaction_reference', $session->payment_intent)->first();
+            if ($existingPayment) {
+                return $existingPayment->order;
+            }
+            throw new \Exception('Cart is empty and no existing order found.');
+        }
+
         $address = \App\Models\CustomerAddress::find($addressId);
-        if (!$cart) throw new \Exception('Cart is empty.');
+        if (!$address) {
+            // Fallback: get any address from customer
+            $address = \App\Models\CustomerAddress::where('customer_id', $customerId)->first();
+            if (!$address) throw new \Exception('No shipping address found.');
+        }
 
         $validItems = $this->getValidItems($cart);
         $totalAmount = $validItems->sum(fn($item) => $this->getBookPrice($item->book) * $item->quantity);
@@ -128,7 +150,11 @@ class CheckoutService
             'paid_at'               => now(),
         ]);
 
+        // Clear cart
         $cart->items()->delete();
+        
+        NotificationService::send(NotificationService::orderRoles(), "new_order", "New Order #" . $order->order_number, $order->customer->name . " placed an order for " . number_format($order->total_amount) . " MMK", $order);
+        
         return $order;
     }
 
@@ -160,9 +186,8 @@ class CheckoutService
                 'price'    => $price,
             ]);
             if (!$cartItem->book->is_ebook) {
-                $this->checkStockAlert($cartItem->book);
-                $this->checkStockAlert($cartItem->book);
                 $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
+                $this->checkStockAlert($cartItem->book);
             }
         }
 

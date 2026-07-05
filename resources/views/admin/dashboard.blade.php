@@ -4,7 +4,6 @@
 @section('page_title', 'Dashboard')
 
 @push('styles')
-    {{-- Ensure your CSS file includes the updated variables and fluid grid rules --}}
     <link rel="stylesheet" href="{{ asset('css/admin/dashboard.css') }}">
 @endpush
 
@@ -16,151 +15,183 @@
         </div>
     @endif
 
-    {{-- Top Row: Context & Navigation --}}
-    <div class="dashboard-top-row">
-        <div class="dashboard-welcome">
-            <h2>Welcome back, <span>{{ Auth::guard('staff')->user()->name }}</span></h2>
-            <p>{{ now()->format('l, d F Y') }}</p>
+    @if (session('error'))
+        <div class="dashboard-alert dashboard-alert-error">
+            <i class="fas fa-circle-exclamation"></i> {{ session('error') }}
+        </div>
+    @endif
+
+    {{-- Top Bar: Quick Stats + Period Filter --}}
+    <div class="dashboard-topbar">
+        <div class="dashboard-stats-row">
+            <div class="stat-pill">
+                <span class="stat-pill-icon">💰</span>
+                <div>
+                    <span class="stat-pill-value">{{ number_format($stats['today_sales']) }} MMK</span>
+                    <span class="stat-pill-label">Today's Sales</span>
+                </div>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-pill-icon">📦</span>
+                <div>
+                    <span class="stat-pill-value">{{ $stats['today_orders'] }}</span>
+                    <span class="stat-pill-label">Today's Orders</span>
+                </div>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-pill-icon">📊</span>
+                <div>
+                    <span class="stat-pill-value">{{ number_format($stats['today_avg_order']) }} MMK</span>
+                    <span class="stat-pill-label">Avg per Order</span>
+                </div>
+            </div>
         </div>
         
-        <nav class="dashboard-period-tabs" aria-label="Dashboard time period">
-            <a href="?period=week" class="dashboard-period-tab {{ $period === 'week' ? 'active' : '' }}">Week</a>
-            <a href="?period=month" class="dashboard-period-tab {{ $period === 'month' ? 'active' : '' }}">Month</a>
-            <a href="?period=year" class="dashboard-period-tab {{ $period === 'year' ? 'active' : '' }}">Year</a>
+        <nav class="dashboard-period-tabs">
+            <a href="?period=week" class="period-tab {{ $period === 'week' ? 'active' : '' }}">Week</a>
+            <a href="?period=month" class="period-tab {{ $period === 'month' ? 'active' : '' }}">Month</a>
+            <a href="?period=year" class="period-tab {{ $period === 'year' ? 'active' : '' }}">Year</a>
         </nav>
     </div>
 
-    {{-- Data Layer 1: Core Metrics (Fluid Grid) --}}
-    <div class="dashboard-stats-grid">
-        
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon" style="background-color:#dbeafe; color:#2563eb;">
-                <i class="fas fa-coins"></i>
-            </div>
-            <div class="dashboard-stat-content">
-                <span class="dashboard-stat-value">{{ number_format($stats['total_sales']) }} <small>MMK</small></span>
-                <span class="dashboard-stat-label">Total Sales · {{ $stats['period_label'] }}</span>
-            </div>
-        </div>
-
-        <div class="dashboard-stat-card {{ $stats['pending_orders'] > 0 ? 'alert-border' : '' }}">
-            <div class="dashboard-stat-icon" style="background-color:#fee2e2; color:#dc2626;">
-                <i class="fas fa-box-open"></i>
-            </div>
-            <div class="dashboard-stat-content">
-                <span class="dashboard-stat-value" style="color: {{ $stats['pending_orders'] > 0 ? '#dc2626' : 'inherit' }}">
-                    {{ number_format($stats['pending_orders']) }}
-                </span>
-                <span class="dashboard-stat-label">Pending Orders</span>
+    {{-- Metrics Cards --}}
+    <div class="dashboard-metrics">
+        <div class="metric-card {{ $stats['pending_orders'] > 0 ? 'alert' : '' }}">
+            <div class="metric-row">
+                <div class="metric-icon" style="background:#dbeafe; color:#2563eb;">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-value">{{ number_format($stats['total_sales']) }} <small>MMK</small></span>
+                    <span class="metric-label">Total Sales</span>
+                </div>
+                @if(isset($stats['trends']['total_sales']))
+                    <span class="metric-trend {{ $stats['trends']['total_sales']['is_positive'] ? 'up' : 'down' }}">
+                        {{ $stats['trends']['total_sales']['percentage'] }}%
+                    </span>
+                @endif
             </div>
         </div>
 
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon" style="background-color:#dcfce7; color:#16a34a;">
-                <i class="fas fa-receipt"></i>
-            </div>
-            <div class="dashboard-stat-content">
-                <span class="dashboard-stat-value">{{ number_format($stats['total_orders']) }}</span>
-                <span class="dashboard-stat-label">Orders · {{ $stats['period_label'] }}</span>
-            </div>
-        </div>
-
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon" style="background-color:#f3e8ff; color:#7c3aed;">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="dashboard-stat-content">
-                <span class="dashboard-stat-value">{{ number_format($stats['new_customers']) }}</span>
-                <span class="dashboard-stat-label">New Customers · {{ $stats['period_label'] }}</span>
+        <div class="metric-card">
+            <div class="metric-row">
+                <div class="metric-icon" style="background:#dcfce7; color:#16a34a;">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-value">{{ number_format($stats['total_orders']) }}</span>
+                    <span class="metric-label">Total Orders</span>
+                </div>
+                @if(isset($stats['trends']['total_orders']))
+                    <span class="metric-trend {{ $stats['trends']['total_orders']['is_positive'] ? 'up' : 'down' }}">
+                        {{ $stats['trends']['total_orders']['percentage'] }}%
+                    </span>
+                @endif
             </div>
         </div>
 
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon" style="background-color:#fef3c7; color:#d97706;">
-                <i class="fas fa-triangle-exclamation"></i>
+        <div class="metric-card {{ $stats['pending_orders'] > 0 ? 'alert' : '' }}">
+            <div class="metric-row">
+                <div class="metric-icon" style="background:{{ $stats['pending_orders'] > 0 ? '#fee2e2' : '#f0fdf4' }}; color:{{ $stats['pending_orders'] > 0 ? '#dc2626' : '#16a34a' }};">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-value" style="color:{{ $stats['pending_orders'] > 0 ? '#dc2626' : 'inherit' }}">{{ number_format($stats['pending_orders']) }}</span>
+                    <span class="metric-label">Pending</span>
+                </div>
             </div>
-            <div class="dashboard-stat-content">
-                <span class="dashboard-stat-value">{{ $stats['low_stock'] }} <small>/ {{ $stats['out_of_stock'] }}</small></span>
-                <span class="dashboard-stat-label">Low / Out of Stock</span>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-row">
+                <div class="metric-icon" style="background:#f3e8ff; color:#7c3aed;">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-value">{{ number_format($stats['new_customers']) }}</span>
+                    <span class="metric-label">New Customers</span>
+                </div>
+                @if(isset($stats['trends']['new_customers']))
+                    <span class="metric-trend {{ $stats['trends']['new_customers']['is_positive'] ? 'up' : 'down' }}">
+                        {{ $stats['trends']['new_customers']['percentage'] }}%
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-row">
+                <div class="metric-icon" style="background:#fef3c7; color:#d97706;">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div class="metric-info">
+                    <span class="metric-value">{{ $stats['low_stock'] }} <small>low</small> / {{ $stats['out_of_stock'] }} <small>out</small></span>
+                    <span class="metric-label">Stock</span>
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- Data Layer 2: Visualizations & Lists --}}
-    <div class="dashboard-bottom-layout">
-        
-        {{-- Chart Container (JS Engine target) --}}
-        <div class="dashboard-chart-card">
-            <div class="dashboard-card-header">
-                <h3>Sales Overview</h3>
-                <span class="dashboard-card-badge">{{ $stats['period_label'] }}</span>
-            </div>
-            <div id="salesChart" style="min-height: 300px; width: 100%;">
-                {{-- ApexCharts injects canvas here --}}
-            </div>
+    {{-- Chart --}}
+    <div class="dashboard-card chart-card">
+        <div class="card-header">
+            <h3>Sales & Orders Overview</h3>
+            <span class="card-badge">{{ $stats['period_label'] }}</span>
         </div>
-
-        {{-- Split Grid for Data Lists --}}
-        <div class="dashboard-split-grid">
-            
-            {{-- Panel: Recent Orders --}}
-            <div class="dashboard-data-card">
-                <div class="dashboard-card-header">
-                    <h3>Recent Orders</h3>
-                    <a href="{{ route('admin.orders.index') }}" class="dashboard-view-all">View All &rarr;</a>
-                </div>
-                <div class="dashboard-list">
-                    @forelse($recentOrders as $order)
-                        <a href="{{ route('admin.orders.show', $order['id']) }}" class="dashboard-list-item">
-                            <div class="dashboard-item-left">
-                                <span class="dashboard-item-primary">{{ $order['order_number'] }}</span>
-                                <span class="dashboard-item-secondary">{{ $order['customer_name'] }}</span>
-                            </div>
-                            <div class="dashboard-item-right">
-                                <span class="dashboard-item-bold">{{ number_format($order['total']) }} MMK</span>
-                                <span class="dashboard-status-badge dashboard-status-{{ strtolower($order['status']) }}">
-                                    {{ ucfirst($order['status']) }}
-                                </span>
-                            </div>
-                        </a>
-                    @empty
-                        <div class="dashboard-empty-state">No recent orders found.</div>
-                    @endforelse
-                </div>
-            </div>
-
-            {{-- Panel: Top Selling Books --}}
-            <div class="dashboard-data-card">
-                <div class="dashboard-card-header">
-                    <h3>Top Selling Books</h3>
-                    <a href="{{ route('admin.books.index') }}" class="dashboard-view-all">Inventory &rarr;</a>
-                </div>
-                <div class="dashboard-list">
-                    @forelse($topSellingBooks ?? [] as $book)
-                        <a href="{{ route('admin.books.edit', $book['id']) }}" class="dashboard-list-item">
-                            <div class="dashboard-item-left">
-                                <span class="dashboard-item-primary">{{ Str::limit($book['title'], 40) }}</span>
-                            </div>
-                            <div class="dashboard-item-right">
-                                <span class="dashboard-item-bold">{{ number_format($book['total_sold']) }}</span>
-                                <span class="dashboard-item-secondary">copies</span>
-                            </div>
-                        </a>
-                    @empty
-                        <div class="dashboard-empty-state">No sales data available.</div>
-                    @endforelse
-                </div>
-            </div>
-
-        </div>
+        <div id="salesChart"></div>
     </div>
 
-    {{-- Layer 3: System Actions --}}
-    <div class="dashboard-actions">
-        <a href="{{ route('admin.orders.index') }}" class="dashboard-action-btn"><i class="fas fa-receipt"></i> Orders</a>
-        <a href="{{ route('admin.books.create') }}" class="dashboard-action-btn"><i class="fas fa-plus"></i> Add Book</a>
-        <a href="{{ route('admin.customers.index') }}" class="dashboard-action-btn"><i class="fas fa-users"></i> Customers</a>
-        <a href="{{ route('admin.books.index') }}" class="dashboard-action-btn"><i class="fas fa-book"></i> Books</a>
+    {{-- Recent Orders + Top Selling Side by Side --}}
+    <div class="dashboard-split-row">
+        
+        {{-- Recent Orders --}}
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Recent Orders</h3>
+                <a href="{{ route('admin.orders.index') }}" class="card-link">View All →</a>
+            </div>
+            <div class="list-compact">
+                @forelse($recentOrders as $order)
+                    <a href="{{ route('admin.orders.show', $order['id']) }}" class="list-item">
+                        <div class="list-left">
+                            <span class="list-title">{{ $order['order_number'] }}</span>
+                            <span class="list-sub">{{ $order['customer_name'] }} • {{ $order['created_at'] }}</span>
+                        </div>
+                        <div class="list-right">
+                            <span class="list-amount">{{ number_format($order['total']) }} MMK</span>
+                            <span class="status-badge status-{{ strtolower($order['status']) }}">{{ ucfirst($order['status']) }}</span>
+                        </div>
+                    </a>
+                @empty
+                    <div class="empty">No recent orders</div>
+                @endforelse
+            </div>
+        </div>
+
+        {{-- Top Selling --}}
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>Top Selling Books</h3>
+                <a href="{{ route('admin.books.index') }}" class="card-link">View All →</a>
+            </div>
+            <div class="list-compact">
+                @forelse($topSellingBooks as $book)
+                    <a href="{{ route('admin.books.edit', $book['id']) }}" class="list-item">
+                        <div class="list-left">
+                            <span class="list-title">{{ Str::limit($book['title'], 30) }}</span>
+                            <span class="list-sub">{{ number_format($book['total_revenue'] ?? ($book['total_sold'] * $book['price'])) }} MMK revenue</span>
+                        </div>
+                        <div class="list-right">
+                            <span class="list-amount">{{ number_format($book['total_sold']) }}</span>
+                            <span class="list-label">sold</span>
+                        </div>
+                    </a>
+                @empty
+                    <div class="empty">No sales data</div>
+                @endforelse
+            </div>
+        </div>
+
     </div>
 
 @endsection
@@ -168,52 +199,73 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const rawData = @json($chartData);
-        
-        // Guard clause in case $chartData is empty
-        if (!rawData || rawData.length === 0) return;
+document.addEventListener('DOMContentLoaded', function () {
+    const chartData = @json($chartData);
+    
+    if (!chartData || !chartData.series || chartData.series.length === 0) {
+        document.querySelector('#salesChart').innerHTML = '<div class="empty">No data available</div>';
+        return;
+    }
 
-        const options = {
-            series: [{
-                name: 'Sales (MMK)',
-                data: rawData.map(item => item.total)
-            }],
-            chart: {
-                type: 'bar',
-                height: 300,
-                toolbar: { show: false },
-                fontFamily: 'inherit'
-            },
-            plotOptions: {
-                bar: {
-                    borderRadius: 4,
-                    columnWidth: '50%',
-                }
-            },
+    const options = {
+        series: chartData.series,
+        chart: {
+            type: 'area',
+            height: 300,
+            toolbar: { show: false },
+            fontFamily: 'inherit'
+        },
+        colors: ['#2563eb', '#10b981'],
+        stroke: { curve: 'smooth', width: [2, 2], dashArray: [0, 4] },
+        fill: {
+            type: ['gradient', 'solid'],
+            gradient: { shade: 'light', type: 'vertical', opacityFrom: 0.3, opacityTo: 0 }
+        },
+        dataLabels: { enabled: false },
+        markers: {
+            size: [4, 0],
             colors: ['#2563eb'],
-            dataLabels: { enabled: false },
-            xaxis: {
-                categories: rawData.map(item => item.label),
-                labels: { style: { colors: '#64748b', fontSize: '12px' } },
-                axisBorder: { show: false },
-                axisTicks: { show: false }
-            },
-            yaxis: {
+            strokeColors: '#fff',
+            strokeWidth: 2,
+            hover: { size: 6 }
+        },
+        xaxis: {
+            categories: chartData.categories,
+            labels: { style: { colors: '#64748b', fontSize: '11px' } },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: [
+            {
                 labels: {
-                    formatter: (val) => val.toLocaleString() + " MMK",
-                    style: { colors: '#64748b', fontSize: '12px' }
+                    formatter: (val) => val >= 1000 ? (val/1000).toFixed(0) + 'K' : val,
+                    style: { colors: '#64748b', fontSize: '11px' }
                 }
             },
-            grid: {
-                borderColor: '#f1f5f9',
-                strokeDashArray: 4,
-                yaxis: { lines: { show: true } }
+            {
+                opposite: true,
+                labels: { style: { colors: '#64748b', fontSize: '11px' } }
             }
-        };
+        ],
+        legend: {
+            position: 'top',
+            horizontalAlign: 'right',
+            fontSize: '12px',
+            fontWeight: 600,
+            itemMargin: { horizontal: 12 }
+        },
+        grid: { borderColor: '#f1f5f9', strokeDashArray: 3 },
+        tooltip: {
+            shared: true,
+            theme: 'light',
+            y: [
+                { formatter: (val) => val.toLocaleString() + ' MMK' },
+                { formatter: (val) => val + ' orders' }
+            ]
+        }
+    };
 
-        const chart = new ApexCharts(document.querySelector("#salesChart"), options);
-        chart.render();
-    });
+    new ApexCharts(document.querySelector("#salesChart"), options).render();
+});
 </script>
 @endpush

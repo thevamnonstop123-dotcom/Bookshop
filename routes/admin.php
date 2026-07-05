@@ -98,3 +98,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
 });
+// Dashboard realtime data
+Route::get('/dashboard/realtime', [DashboardController::class, 'realtimeData'])->name('dashboard.realtime');

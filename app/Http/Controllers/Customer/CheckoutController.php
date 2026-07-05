@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Services\Customer\CheckoutService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -18,7 +19,7 @@ class CheckoutController extends Controller
     /**
      * Show checkout page.
      */
-        public function index()
+    public function index()
     {
         $customer = auth('customer')->user();
         $cart = \App\Models\Cart::with('items.book')->where('customer_id', $customer->id)->first();
@@ -29,7 +30,6 @@ class CheckoutController extends Controller
                 ->with('error', 'Your cart is empty.');
         }
 
-        // Filter out items with deleted books
         $validItems = $cart->items->filter(function($item) {
             return $item->book !== null;
         });
@@ -44,18 +44,26 @@ class CheckoutController extends Controller
             return $price * $item->quantity;
         });
 
-        return view('customer.checkout.index', compact('cart', 'addresses', 'total'));
+        $subtotal = $validItems->sum(function($item) {
+            return $item->book->price * $item->quantity;
+        });
+
+        $savings = $subtotal - $total;
+
+        return view('customer.checkout.index', compact('cart', 'addresses', 'total', 'subtotal', 'savings'));
     }
 
     /**
-     * Process checkout and redirect to Stripe.
+     * Process checkout with retry logic.
      */
     public function process(Request $request)
     {
         $customerId = auth('customer')->id();
         $paymentMethod = $request->payment_method ?? 'stripe';
+        $maxRetries = 2;
+        $attempt = 0;
 
-        // Use existing address or create new one
+        // Validate address
         if ($request->address_id) {
             $request->validate(['address_id' => 'required|exists:customer_addresses,id']);
             $addressId = $request->address_id;
@@ -77,25 +85,77 @@ class CheckoutController extends Controller
             $addressId = $address->id;
         }
 
-        try {
-            // For Stripe — redirect to Stripe checkout
-            if ($paymentMethod === 'stripe') {
-                $session = $this->checkoutService->createStripeSession($customerId, $addressId);
-                return redirect($session->url);
+        // Retry loop for payment failures
+        while ($attempt <= $maxRetries) {
+            try {
+                // For Stripe — redirect to Stripe checkout
+                if ($paymentMethod === 'stripe') {
+                    $session = $this->checkoutService->createStripeSession($customerId, $addressId);
+                    return redirect($session->url);
+                }
+
+                // For KPay, Wave, COD — process and REDIRECT to success page
+                $order = $this->checkoutService->processDirectPayment($customerId, $addressId, $paymentMethod);
+
+                // Store order ID in session and redirect
+                session()->flash('order_id', $order->id);
+                return redirect()->route('checkout.success');
+                
+            } catch (\Stripe\Exception\ApiConnectionException $e) {
+                $attempt++;
+                Log::warning('Stripe connection failed, attempt ' . $attempt);
+                
+                if ($attempt > $maxRetries) {
+                    return back()->with('error', 'Payment service is temporarily unavailable. Please try again in a few minutes.');
+                }
+                sleep(1);
+                
+            } catch (\Stripe\Exception\CardException $e) {
+                return back()->with('error', 'Your card was declined. Please try a different card.');
+                
+            } catch (\Stripe\Exception\RateLimitException $e) {
+                return back()->with('error', 'Too many attempts. Please wait a moment and try again.');
+                
+            } catch (\Stripe\Exception\InvalidRequestException $e) {
+                Log::error('Stripe invalid request', ['error' => $e->getMessage()]);
+                return back()->with('error', 'Payment configuration error. Please contact support.');
+                
+            } catch (\Exception $e) {
+                Log::error('Checkout failed', [
+                    'customer_id' => $customerId,
+                    'error' => $e->getMessage()
+                ]);
+                
+                return back()->with('error', 'An unexpected error occurred. Please try again.');
             }
-
-            // For KPay, Wave, COD — process directly
-            $order = $this->checkoutService->processDirectPayment($customerId, $addressId, $paymentMethod);
-
-            return view('customer.checkout.success', compact('order'));
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
         }
     }
+
     /**
-     * Handle successful payment.
+     * Show success page (only with valid session data).
      */
-    public function success(Request $request)
+    public function success()
+    {
+        // Get order ID from session flash data
+        $orderId = session('order_id');
+        
+        if (!$orderId) {
+            return redirect()->route('customer.home');
+        }
+
+        $order = \App\Models\Order::with('payment')->find($orderId);
+        
+        if (!$order) {
+            return redirect()->route('customer.home');
+        }
+
+        return view('customer.checkout.success', compact('order'));
+    }
+
+    /**
+     * Handle Stripe success callback.
+     */
+    public function stripeSuccess(Request $request)
     {
         $sessionId = $request->get('session_id');
 
@@ -105,11 +165,16 @@ class CheckoutController extends Controller
 
         try {
             $order = $this->checkoutService->processSuccessfulPayment($sessionId);
-
-            return view('customer.checkout.success', compact('order'));
+            session()->flash('order_id', $order->id);
+            return redirect()->route('checkout.success');
         } catch (\Exception $e) {
+            Log::error('Payment success handling failed', [
+                'session_id' => $sessionId,
+                'error' => $e->getMessage()
+            ]);
+            
             return redirect()->route('customer.home')
-                ->with('error', 'Something went wrong. Please contact support.');
+                ->with('error', 'Payment was processed but we encountered an issue. Please check your orders or contact support.');
         }
     }
 

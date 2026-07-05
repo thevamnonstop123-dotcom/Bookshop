@@ -8,16 +8,15 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Using PHP 8 constructor property promotion to reduce boilerplate.
-     */
     public function __construct(
         protected DashboardService $dashboardService
     ) {}
 
+    /**
+     * Display the admin dashboard.
+     */
     public function index(Request $request)
     {
-        // Enforce boundary validation
         $period = $request->query('period', 'week');
         
         if (!in_array($period, ['week', 'month', 'year'], true)) {
@@ -27,8 +26,6 @@ class DashboardController extends Controller
         $stats = $this->dashboardService->getStats($period);
         $chartData = $this->dashboardService->getChartData($period);
         $recentOrders = $this->dashboardService->getRecentOrders();
-        
-        // Fetch the new actionable metric
         $topSellingBooks = $this->dashboardService->getTopSellingBooks();
 
         return view('admin.dashboard', compact(
@@ -38,5 +35,26 @@ class DashboardController extends Controller
             'topSellingBooks',
             'period'
         ));
+    }
+
+    /**
+     * API endpoint for real-time dashboard data.
+     */
+    public function realtimeData(Request $request)
+    {
+        $period = $request->query('period', 'week');
+        
+        if (!in_array($period, ['week', 'month', 'year'], true)) {
+            $period = 'week';
+        }
+
+        // Clear cache for real-time data
+        $this->dashboardService->clearCache();
+        
+        return response()->json([
+            'stats' => $this->dashboardService->getStats($period),
+            'recentOrders' => $this->dashboardService->getRecentOrders(),
+            'timestamp' => now()->toISOString(),
+        ]);
     }
 }
