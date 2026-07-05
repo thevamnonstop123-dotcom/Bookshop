@@ -8,8 +8,7 @@
 
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
+    
     {{-- Design System Variables & Base Glass Reset --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
@@ -55,6 +54,7 @@
     {{-- Core Scripts --}}
     <script src="{{ asset('js/ajax.js') }}"></script>
     <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/customer/wishlist.js') }}"></script>
     <script src="{{ asset('js/customer/auth.js') }}"></script>
     <script src="{{ asset('js/customer/navbar.js') }}"></script>
     <script src="{{ asset('js/customer/cart.js') }}"></script>

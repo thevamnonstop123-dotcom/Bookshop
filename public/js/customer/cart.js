@@ -296,52 +296,11 @@
     };
 
     // ========== WISHLIST TOGGLE — Optimistic UI ==========
-    function initWishlistToggle() {
-        document.addEventListener('click', function (e) {
-            const heartBtn = e.target.closest('.wishlist-toggle, .book-card-wishlist, .wishlist-btn');
-            if (!heartBtn) return;
-
-            e.preventDefault();
-
-            const bookId = heartBtn.dataset.bookId;
-            const icon = heartBtn.querySelector('i');
-            const isCurrentlyLiked = heartBtn.classList.contains('active') || (icon && icon.classList.contains('fas'));
-
-            // Optimistic update
-            if (isCurrentlyLiked) {
-                heartBtn.classList.remove('active');
-                if (icon) { icon.classList.remove('fas'); icon.classList.add('far'); }
-            } else {
-                heartBtn.classList.add('active');
-                if (icon) { icon.classList.remove('far'); icon.classList.add('fas'); }
-            }
-
-            // Send to server
-            fetch('/wishlist/toggle', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ book_id: bookId })
-            }).catch(function () {
-                // Revert on error
-                if (isCurrentlyLiked) {
-                    heartBtn.classList.add('active');
-                    if (icon) { icon.classList.add('fas'); icon.classList.remove('far'); }
-                } else {
-                    heartBtn.classList.remove('active');
-                    if (icon) { icon.classList.remove('fas'); icon.classList.add('far'); }
-                }
-            });
-        });
-    }
 
     // ========== INIT ==========
     document.addEventListener('DOMContentLoaded', function () {
         Cart.init();
-        initWishlistToggle();
+        // initWishlistToggle(); // handled by app.js
     });
 
     // Expose Cart globally

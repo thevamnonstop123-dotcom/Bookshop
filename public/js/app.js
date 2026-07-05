@@ -10,7 +10,7 @@
          * Get CSRF token from meta tag.
          */
         getCSRF: function () {
-            var meta = document.querySelector('meta[name="csrf-token"]');
+            const meta = document.querySelector('meta[name="csrf-token"]');
             return meta ? meta.getAttribute('content') : '';
         },
 
@@ -45,7 +45,7 @@
          */
         loading: function (show) {
             show = show !== false;
-            var loader = document.getElementById('app-loader');
+            const loader = document.getElementById('app-loader');
             if (show) {
                 if (!loader) {
                     loader = document.createElement('div');
@@ -64,7 +64,7 @@
          */
         request: async function (url, options) {
             options = options || {};
-            var config = {
+            const config = {
                 method: options.method || 'POST',
                 headers: {
                     'X-CSRF-TOKEN': this.getCSRF(),
@@ -74,7 +74,7 @@
 
             // Merge custom headers
             if (options.headers) {
-                for (var key in options.headers) {
+                for (const key in options.headers) {
                     config.headers[key] = options.headers[key];
                 }
             }
@@ -85,8 +85,8 @@
             }
 
             try {
-                var response = await fetch(url, config);
-                var json = await response.json();
+                const response = await fetch(url, config);
+                const json = await response.json();
 
                 if (!response.ok) {
                     throw new Error(json.message || 'Something went wrong.');
@@ -129,46 +129,16 @@
          */
         debounce: function (func, delay) {
             delay = delay || 300;
-            var timer;
+            const timer;
             return function () {
-                var context = this;
-                var args = arguments;
+                const context = this;
+                const args = arguments;
                 clearTimeout(timer);
                 timer = setTimeout(function () {
                     func.apply(context, args);
                 }, delay);
             };
         },
-    };
-
-    // ========== WISHLIST TOGGLE ==========
-    window.toggleWishlist = async function (btn, bookId) {
-        if (!btn || !bookId) return;
-
-        try {
-            var resp = await fetch('/wishlist/toggle', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ book_id: bookId })
-            });
-            var data = await resp.json();
-
-            if (data.added) {
-                btn.classList.add('wishlisted');
-                if (btn.querySelector('i')) btn.querySelector('i').className = 'fas fa-heart';
-            } else {
-                btn.classList.remove('wishlisted');
-                if (btn.querySelector('i')) btn.querySelector('i').className = 'far fa-heart';
-            }
-
-            App.toast(data.message, data.added ? 'success' : 'warning');
-        } catch (e) {
-            console.error('Wishlist error:', e);
-        }
     };
 
 })();

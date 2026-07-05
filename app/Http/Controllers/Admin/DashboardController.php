@@ -4,24 +4,39 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\Admin\DashboardService;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    protected DashboardService $dashboardService;
-
-    public function __construct(DashboardService $dashboardService)
-    {
-        $this->dashboardService = $dashboardService;
-    }
-
     /**
-     * Show admin dashboard with real statistics.
+     * Using PHP 8 constructor property promotion to reduce boilerplate.
      */
-    public function index()
-    {
-        $stats = $this->dashboardService->getStats();
-        $chartData = $this->dashboardService->getWeeklySales();
+    public function __construct(
+        protected DashboardService $dashboardService
+    ) {}
 
-        return view('admin.dashboard', compact('stats', 'chartData'));
+    public function index(Request $request)
+    {
+        // Enforce boundary validation
+        $period = $request->query('period', 'week');
+        
+        if (!in_array($period, ['week', 'month', 'year'], true)) {
+            $period = 'week';
+        }
+
+        $stats = $this->dashboardService->getStats($period);
+        $chartData = $this->dashboardService->getChartData($period);
+        $recentOrders = $this->dashboardService->getRecentOrders();
+        
+        // Fetch the new actionable metric
+        $topSellingBooks = $this->dashboardService->getTopSellingBooks();
+
+        return view('admin.dashboard', compact(
+            'stats', 
+            'chartData', 
+            'recentOrders', 
+            'topSellingBooks',
+            'period'
+        ));
     }
 }

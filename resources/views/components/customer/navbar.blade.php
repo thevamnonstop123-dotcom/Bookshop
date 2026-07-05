@@ -77,9 +77,6 @@
                         : 'https://ui-avatars.com/api/?name=' . urlencode($currentUser->name) . '&background=1E3A8A&color=fff&size=60';
                 @endphp
 
-                <a href="{{ route('customer.wishlist.index') }}" class="navbar-icon-btn" aria-label="Wishlist">
-                    <i class="fas fa-heart"></i>
-                </a>
                 <button class="navbar-icon-btn" id="navbarNotificationBtn" aria-label="Notifications">
                     <i class="fas fa-bell"></i>
                     <span class="navbar-icon-badge" id="notificationBadge" style="display:none;">0</span>
