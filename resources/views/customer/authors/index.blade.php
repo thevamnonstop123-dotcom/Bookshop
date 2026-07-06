@@ -29,43 +29,33 @@
                         alt="{{ $author->name }}"
                         class="author-card-img"
                         loading="lazy">
-                    <div class="author-card-ring"></div>
                 </div>
 
                 {{-- Info --}}
                 <div class="author-card-info">
-
-                    {{-- Name --}}
+                    {{-- Name + Flag inline --}}
                     <h3 class="author-card-name">
                         {{ $author->name }}
+                        @if($author->country && $author->country->code)
+                            <img src="https://flagcdn.com/24x18/{{ strtolower($author->country->code) }}.png"
+                                 alt="{{ $author->country->name }}"
+                                 class="author-card-name-flag"
+                                 loading="lazy">
+                        @endif
                     </h3>
 
-                    {{-- Meta --}}
                     <div class="author-card-meta">
-
-                        {{-- Country (FIXED) --}}
                         @if($author->country)
-                            <span class="author-card-meta-item">
-                                <i class="fas fa-globe-asia"></i>
-                                {{ $author->country->name }}
-                            </span>
+                            <span class="author-card-meta-item">{{ $author->country->name }}</span>
+                            <span class="author-card-meta-sep">·</span>
                         @endif
-
-                        {{-- Books --}}
-                        <span class="author-card-meta-item">
-                            <i class="fas fa-book"></i>
-                            {{ $author->books_count }} {{ \Illuminate\Support\Str::plural('Book', $author->books_count) }}
-                        </span>
-
+                        <span class="author-card-meta-item">{{ $author->books_count }} {{ Str::plural('Book', $author->books_count) }}</span>
                     </div>
-
                 </div>
 
-                {{-- CTA --}}
                 <span class="author-card-arrow">
                     Explore Books <i class="fas fa-arrow-right"></i>
                 </span>
-
             </a>
             @empty
                 <div class="authors-listing-empty">

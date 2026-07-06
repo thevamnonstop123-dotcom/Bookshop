@@ -62,7 +62,7 @@
             {{-- Cart Button --}}
             @if($book->isPurchasable())
                 <button class="book-card-cart btn-add-cart" data-book-id="{{ $book->id }}" aria-label="Add to cart">
-                    <i class="fas fa-plus"></i>
+                    <i class="fas fa-shopping-cart"></i>
                 </button>
             @elseif($availability['status'] === 'pre_order')
                 <button class="book-card-cart book-card-cart-preorder" data-book-id="{{ $book->id }}" aria-label="Pre-order">

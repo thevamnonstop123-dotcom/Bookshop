@@ -229,14 +229,11 @@
                         <a href="{{ route('authors.show', $author) }}" class="author-card">
                             <div class="author-card-avatar">
                                 <img src="{{ $author->avatarUrl }}" alt="{{ $author->name }}" class="author-card-img">
-                                <div class="author-card-ring"></div>
+                                
                             </div>
                             <div class="author-card-info">
-                                <h4 class="author-card-name">{{ $author->name }}</h4>
-                                <span class="author-card-books">{{ $author->books_count }} {{ Str::plural('Book', $author->books_count) }}</span>
-                                @if($author->famousBook)
-                                    <span class="author-card-famous">📖 {{ Str::limit($author->famousBook->title, 25) }}</span>
-                                @endif
+                                <h4 class="author-card-name">{{ $author->name }} @if($author->country && $author->country->code)<img src="https://flagcdn.com/24x18/{{ strtolower($author->country->code) }}.png" alt="{{ $author->country->name }}" class="author-card-name-flag" loading="lazy">@endif</h4>
+                                <!-- -->{{ $author->books_count }} {{ Str::plural('Book', $author->books_count) }}</span>
                             </div>
                             <span class="author-card-arrow">
                                 View Books <i class="fas fa-arrow-right"></i>
@@ -426,4 +423,4 @@
         });
     </script>
 @endif
-@endpush
+@endpush{{-- DUMMY LINE FOR SED REPLACEMENT --}}
