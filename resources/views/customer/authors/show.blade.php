@@ -1,7 +1,6 @@
 @extends('layouts.customer')
 
 @section('title', $author->name . ' — Books & Biography')
-@section('page_title', $author->name)
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/customer/author.css') }}">
@@ -21,56 +20,69 @@
                      alt="{{ $author->name }}"
                      class="author-hero-image"
                      loading="eager">
-
-                <div class="author-hero-ring"></div>
             </div>
 
             {{-- INFO --}}
             <div class="author-hero-info">
 
                 {{-- Badge --}}
-                <span class="author-hero-badge">
-                    <i class="fas fa-star"></i>
-                    {{ $author->popularityLabel ?? 'Author' }}
-                </span>
+                @if($author->popularityLabel)
+                    <span class="author-hero-badge">
+                        <i class="fas fa-star"></i> {{ $author->popularityLabel }}
+                    </span>
+                @endif
 
                 {{-- NAME --}}
-                <h1 class="author-hero-name">
-                    {{ $author->name }}
-                </h1>
+                <h1 class="author-hero-name">{{ $author->name }}</h1>
 
-                {{-- BIO --}}
-                <p class="author-hero-bio">
-                    {{ $author->bio ?? 'A writer sharing knowledge, stories, and ideas with readers.' }}
-                </p>
-
-                {{-- PRIMARY META (CLEANED HIERARCHY) --}}
+                {{-- META ROW --}}
                 <div class="author-hero-meta">
-
-                    <div class="author-hero-stat">
+                    {{-- Books count --}}
+                    <div class="author-meta-item">
                         <i class="fas fa-book-open"></i>
-                        <span><strong>{{ $author->books_count }}</strong> Books</span>
+                        <span><strong>{{ $author->books_count }}</strong> {{ Str::plural('Book', $author->books_count) }}</span>
                     </div>
 
-                    {{-- COUNTRY (SAFE STRING, NOT RELATION) --}}
+                    {{-- Country with FLAG --}}
                     @if($author->country)
-                        <div class="author-hero-stat">
-                            <i class="fas fa-globe-asia"></i>
+                        <div class="author-meta-item">
+                            @if($author->country->code)
+                                <img src="https://flagcdn.com/24x18/{{ strtolower($author->country->code) }}.png"
+                                     alt="{{ $author->country->name }}"
+                                     class="author-country-flag"
+                                     loading="lazy">
+                            @else
+                                <i class="fas fa-globe-asia"></i>
+                            @endif
                             <span>{{ $author->country->name }}</span>
                         </div>
                     @endif
 
-                    {{-- SALES --}}
-                    @if(!empty($author->sales_count))
-                        <div class="author-hero-stat">
-                            <i class="fas fa-chart-line"></i>
-                            <span><strong>{{ number_format($author->sales_count) }}+</strong></span>
+                    {{-- Active years --}}
+                    @if($author->activeYears)
+                        <div class="author-meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ $author->activeYears }}</span>
                         </div>
                     @endif
 
+                    {{-- Sales --}}
+                    @if($author->sales_count > 0)
+                        <div class="author-meta-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span><strong>{{ number_format($author->sales_count) }}+</strong> sold</span>
+                        </div>
+                    @endif
                 </div>
 
-                {{-- GENRE CHIPS (SAFE CHECK) --}}
+                {{-- BIO --}}
+                @if($author->bio)
+                    <div class="author-hero-bio">
+                        <p>{{ Str::limit($author->bio, 300) }}</p>
+                    </div>
+                @endif
+
+                {{-- GENRES --}}
                 @if(isset($author->genres) && $author->genres->count())
                     <div class="author-hero-genres">
                         @foreach($author->genres as $genre)
@@ -79,7 +91,7 @@
                     </div>
                 @endif
 
-                {{-- WEBSITE (SAFE URL HANDLING) --}}
+                {{-- WEBSITE --}}
                 @if(!empty($author->website))
                     @php
                         $website = $author->website;
@@ -87,12 +99,8 @@
                             $website = 'https://' . $website;
                         }
                     @endphp
-
-                    <a href="{{ $website }}"
-                       target="_blank"
-                       rel="noopener"
-                       class="author-website-link">
-                        <i class="fas fa-globe"></i> Visit Website
+                    <a href="{{ $website }}" target="_blank" rel="noopener" class="author-website-link">
+                        <i class="fas fa-arrow-up-right-from-square"></i> Visit Website
                     </a>
                 @endif
 
@@ -104,48 +112,25 @@
 {{-- BOOKS --}}
 <section class="author-books-section section">
     <div class="container">
-
         <div class="section-heading-row">
             <div class="heading-text-group">
-                <span class="section-eyebrow">Bibliography</span>
-                <h2 class="section-title">Books by {{ $author->name }}</h2>
+                <span class="section-eyebrow">Books</span>
+                <h2 class="section-title">By {{ $author->name }}</h2>
             </div>
-
-            {{-- SORT --}}
             <div class="author-sort-wrapper">
-                <select class="author-sort-select"
-                        id="authorSortSelect"
-                        onchange="window.sortAuthorBooks(this.value)">
-
-                    <option value="latest" {{ ($filters['sort'] ?? '') === 'latest' ? 'selected' : '' }}>
-                        Newest
-                    </option>
-
-                    <option value="bestseller" {{ ($filters['sort'] ?? '') === 'bestseller' ? 'selected' : '' }}>
-                        Best Selling
-                    </option>
-
-                    <option value="rated" {{ ($filters['sort'] ?? '') === 'rated' ? 'selected' : '' }}>
-                        Highest Rated
-                    </option>
-
-                    <option value="price_asc" {{ ($filters['sort'] ?? '') === 'price_asc' ? 'selected' : '' }}>
-                        Price: Low to High
-                    </option>
-
-                    <option value="price_desc" {{ ($filters['sort'] ?? '') === 'price_desc' ? 'selected' : '' }}>
-                        Price: High to Low
-                    </option>
-
+                <select class="author-sort-select" id="authorSortSelect" onchange="window.sortAuthorBooks(this.value)">
+                    <option value="latest" {{ ($filters['sort'] ?? '') === 'latest' ? 'selected' : '' }}>Newest</option>
+                    <option value="bestseller" {{ ($filters['sort'] ?? '') === 'bestseller' ? 'selected' : '' }}>Best Selling</option>
+                    <option value="rated" {{ ($filters['sort'] ?? '') === 'rated' ? 'selected' : '' }}>Highest Rated</option>
+                    <option value="price_asc" {{ ($filters['sort'] ?? '') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
+                    <option value="price_desc" {{ ($filters['sort'] ?? '') === 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
                 </select>
             </div>
         </div>
 
-        {{-- BOOK GRID --}}
         <div id="authorBooksContainer">
             @include('customer.authors.partials.books-grid')
         </div>
-
     </div>
 </section>
 

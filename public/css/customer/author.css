@@ -244,7 +244,7 @@
 .skeleton-image {
     width: 100%;
     height: 220px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 /* Skeleton title */
@@ -593,3 +593,214 @@
     font-size: 10px;
 }
 
+
+/* Section heading - center + smaller on mobile */
+.author-hero .section-heading {
+    text-align: center;
+}
+
+.author-hero .section-title {
+    font-size: 28px;
+}
+
+.author-hero .section-subtitle {
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .author-hero .section-title {
+        font-size: 20px;
+    }
+    
+    .author-hero .section-subtitle {
+        font-size: 12px;
+    }
+    
+    .author-hero .section-eyebrow {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .author-hero .section-title {
+        font-size: 18px;
+    }
+}
+
+.author-hero h1.section-title,
+.author-hero .section-title {
+    font-size: 28px !important;
+}
+
+@media (max-width: 768px) {
+    .author-hero h1.section-title,
+    .author-hero .section-title {
+        font-size: 20px !important;
+    }
+}
+
+/* Authors listing page - center heading + smaller mobile */
+.authors-listing .section-heading {
+    text-align: center;
+}
+
+.authors-listing h1.section-title {
+    font-size: 28px !important;
+}
+
+.authors-listing .section-subtitle {
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .authors-listing h1.section-title {
+        font-size: 20px !important;
+    }
+    
+    .authors-listing .section-subtitle {
+        font-size: 12px;
+    }
+    
+    .authors-listing .section-eyebrow {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .authors-listing h1.section-title {
+        font-size: 18px !important;
+    }
+}
+
+.authors-listing .section-heading {
+    margin-bottom: 20px;
+}
+
+/* =============================================
+   AUTHOR PROFILE - Flag & Meta
+   ============================================= */
+
+.author-country-flag {
+    width: 24px;
+    height: 18px;
+    border-radius: 2px;
+    object-fit: cover;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    vertical-align: middle;
+}
+
+.author-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 14px 0;
+}
+
+.author-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.author-meta-item i {
+    font-size: 14px;
+    color: var(--color-primary);
+    width: 18px;
+    text-align: center;
+}
+
+.author-meta-item strong {
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+.author-hero-bio {
+    margin: 12px 0;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    max-width: 600px;
+}
+
+.author-hero-bio p {
+    margin: 0;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .author-hero-meta {
+        gap: 10px;
+    }
+    
+    .author-meta-item {
+        font-size: 12px;
+    }
+    
+    .author-hero-bio {
+        font-size: 13px;
+    }
+    
+    .author-hero-name {
+        font-size: 22px !important;
+    }
+}
+
+/* Fix text visibility */
+.author-hero-info {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.author-hero-name {
+    color: #FFFFFF !important;
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    margin: 8px 0 4px;
+    letter-spacing: -0.5px;
+}
+
+.author-meta-item {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.author-meta-item i {
+    color: var(--color-accent) !important;
+}
+
+.author-meta-item strong {
+    color: #FFFFFF !important;
+}
+
+.author-hero-bio {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 600px;
+    margin: 14px 0;
+}
+
+.author-hero-bio p {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.author-hero-badge {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--color-accent);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.author-genre-chip {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.author-website-link {
+    color: var(--color-accent) !important;
+    font-weight: 600;
+}
+
+.author-website-link:hover {
+    color: #FCD34D !important;
+}

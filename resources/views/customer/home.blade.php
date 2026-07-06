@@ -80,13 +80,13 @@
                     <div class="hero-slide-bg no-image"></div>
                     <div class="hero-overlay"></div>
                     <div class="container hero-container">
-                        <div class="hero-body" style="max-width: 100%; text-align: center;">
+                        <div class="hero-body" class="hero-body fallback">
                             <span class="hero-chip">
                                 <i class="fas fa-sparkles"></i> Welcome
                             </span>
                             <h1 class="hero-heading">Discover Your Next <span>Great Read</span></h1>
-                            <p class="hero-description" style="margin: 0 auto 40px; max-width: 520px;">Explore our curated collection of premium books and stationery.</p>
-                            <div class="hero-actions" style="justify-content: center;">
+                            <p class="hero-description" >Explore our curated collection of premium books and stationery.</p>
+                            <div class="hero-actions" >
                                 <a href="{{ route('books.index') }}" class="btn-hero btn-hero-primary">
                                     Explore Books <i class="fas fa-arrow-right"></i>
                                 </a>
@@ -137,8 +137,8 @@
                         <i class="fas fa-heart"></i>
                     </div>
                     <div class="stat-content">
-                        <span class="stat-number">99%</span>
-                        <span class="stat-label">Satisfaction Rate</span>
+                        <span class="stat-number">4.9/5</span>
+                        <span class="stat-label">Customer Rating</span>
                     </div>
                 </div>
             </div>
