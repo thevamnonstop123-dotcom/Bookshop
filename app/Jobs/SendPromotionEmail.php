@@ -28,16 +28,19 @@ class SendPromotionEmail implements ShouldQueue
 
     public function handle(): void
     {
-        // Send email
-        Mail::raw(
-            "Hello {$this->customer->name},\n\n{$this->message}\n\n— Bookshop Team",
-            function ($mail) {
-                $mail->to($this->customer->email, $this->customer->name)
-                     ->subject($this->subject);
-            }
-        );
+        Mail::send('mail.promotion', [
+            'name' => $this->customer->name,
+            'subject' => $this->subject,
+            'body' => $this->message,
+            'badge' => 'Special Offer',
+            'ctaLink' => url('/books'),
+            'ctaText' => 'Browse Books',
+            'unsubscribeLink' => null,
+        ], function ($mail) {
+            $mail->to($this->customer->email, $this->customer->name)
+                 ->subject($this->subject);
+        });
 
-        // Create notification
         Notification::create([
             'customer_id' => $this->customer->id,
             'recipient_type' => 'App\Models\Customer',
