@@ -117,14 +117,18 @@
                 <span class="section-eyebrow">Books</span>
                 <h2 class="section-title">By {{ $author->name }}</h2>
             </div>
-            <div class="author-sort-wrapper">
-                <select class="author-sort-select" id="authorSortSelect" onchange="window.sortAuthorBooks(this.value)">
-                    <option value="latest" {{ ($filters['sort'] ?? '') === 'latest' ? 'selected' : '' }}>Newest</option>
-                    <option value="bestseller" {{ ($filters['sort'] ?? '') === 'bestseller' ? 'selected' : '' }}>Best Selling</option>
-                    <option value="rated" {{ ($filters['sort'] ?? '') === 'rated' ? 'selected' : '' }}>Highest Rated</option>
-                    <option value="price_asc" {{ ($filters['sort'] ?? '') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
-                    <option value="price_desc" {{ ($filters['sort'] ?? '') === 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
-                </select>
+            <div class="author-sort-wrapper" id="authorSortWrapper">
+                <button class="author-sort-btn" id="authorSortBtn" onclick="toggleAuthorDropdown()" type="button">
+                    <span id="authorSortLabel">{{ $sortLabels[$filters['sort'] ?? 'latest'] ?? 'Newest' }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="author-sort-dropdown" id="authorSortDropdown" style="display:none;">
+                    @foreach($sortLabels as $value => $label)
+                        <div class="author-sort-item {{ ($filters['sort'] ?? 'latest') === $value ? 'active' : '' }}" onclick="selectAuthorSort('{{ $value }}', '{{ $label }}')">
+                            {{ $label }}
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
 

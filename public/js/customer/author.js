@@ -100,10 +100,10 @@
             
             if (shouldStick) {
                 sortWrapper.style.position = 'fixed';
-                sortWrapper.style.top = offset + 'px';
+                sortWrapper.style.top = "65px";
                 sortWrapper.style.right = (window.innerWidth - containerRect.right) + 'px';
                 sortWrapper.style.zIndex = '50';
-                sortWrapper.style.background = 'var(--color-bg, #F1F5F9)';
+                sortWrapper.style.background = "transparent";
                 sortWrapper.style.padding = '4px 8px';
                 sortWrapper.style.borderRadius = '8px';
             } else {
@@ -142,5 +142,24 @@
         initSticky();
     }
 
-    window.bookEngine = engine;
 })();
+
+window.toggleAuthorDropdown = function() {
+    var dd = document.getElementById('authorSortDropdown');
+    if (!dd) return;
+    dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+};
+
+window.selectAuthorSort = function(value, label) {
+    document.getElementById('authorSortLabel').textContent = label;
+    document.getElementById('authorSortDropdown').style.display = 'none';
+    window.sortAuthorBooks(value);
+};
+
+document.addEventListener('click', function(e) {
+    var wrapper = document.getElementById('authorSortWrapper');
+    var dd = document.getElementById('authorSortDropdown');
+    if (wrapper && dd && !wrapper.contains(e.target)) {
+        dd.style.display = 'none';
+    }
+});

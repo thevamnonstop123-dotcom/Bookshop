@@ -5,6 +5,7 @@ namespace App\Services\Customer;
 use App\Models\Book;
 use App\Models\Category;
 use App\Models\Author;
+use Illuminate\Support\Facades\DB;
 
 class BookService
 {
@@ -14,23 +15,24 @@ class BookService
             ->where('status', 'active')
             ->when(!empty($filters['search']), function ($query) use ($filters) {
                 $query->where(function ($q) use ($filters) {
-                    $q->where('title', 'like', '%' . $filters['search'] . '%')
-                      ->orWhere('description', 'like', '%' . $filters['search'] . '%')
-                      ->orWhereHas('authors', fn($a) => $a->where('name', 'like', '%' . $filters['search'] . '%'))
-                      ->orWhereHas('category', fn($c) => $c->where('name', 'like', '%' . $filters['search'] . '%'));
+                    $escaped = '%' . $filters['search'] . '%';
+                    $q->where('title', 'like', $escaped)
+                      ->orWhere('description', 'like', $escaped)
+                      ->orWhereHas('authors', fn($a) => $a->where('name', 'like', $escaped))
+                      ->orWhereHas('category', fn($c) => $c->where('name', 'like', $escaped));
                 });
             })
             ->when(!empty($filters['category']), fn($q) => $q->where('category_id', $filters['category']))
             ->when(!empty($filters['author']), fn($q) => $q->whereHas('authors', fn($a) => $a->where('authors.id', $filters['author'])))
-            ->when(!empty($filters['min_price']), fn($q) => $q->where('price', '>=', $filters['min_price']))
-            ->when(!empty($filters['max_price']), fn($q) => $q->where('price', '<=', $filters['max_price']))
-            ->when(!empty($filters['rating']), fn($q) => $q->where('rating', '>=', $filters['rating']))
+            ->when(!empty($filters['min_price']), fn($q) => $q->where('price', '>=', (int)$filters['min_price']))
+            ->when(!empty($filters['max_price']), fn($q) => $q->where('price', '<=', (int)$filters['max_price']))
+            ->when(!empty($filters['rating']), fn($q) => $q->where('rating', '>=', (int)$filters['rating']))
             ->when(!empty($filters['language']), fn($q) => $q->where('language', $filters['language']))
             ->when(!empty($filters['in_stock']), fn($q) => $q->where('stock_quantity', '>', 0))
             ->when(!empty($filters['availability']), fn($q) => $q->whereIn('availability_status', explode(',', $filters['availability'])))
             ->when(!empty($filters['on_sale']), function ($q) {
-                $q->whereNotNull('sale_price')->where('sale_price', '<', \DB::raw('price'))
-                  ->where(fn($q) => $q->whereNull('sale_ends_at')->orWhere('sale_ends_at', '>=', now()));
+                $q->whereNotNull('sale_price')->where('sale_price', '<', DB::raw('price'))
+                  ->where(fn($sub) => $sub->whereNull('sale_ends_at')->orWhere('sale_ends_at', '>=', now()));
             })
             ->when(!empty($filters['sort']), function ($query) use ($filters) {
                 match ($filters['sort']) {
@@ -52,7 +54,8 @@ class BookService
     {
         return Category::where('status', 'active')
             ->withCount(['books' => fn($q) => $q->where('status', 'active')])
-            ->orderBy('name')->get();
+            ->orderBy('name')
+            ->get();
     }
 
     public function getAuthors()
@@ -60,29 +63,38 @@ class BookService
         return Author::where('status', 'active')
             ->whereHas('books', fn($q) => $q->where('status', 'active'))
             ->withCount(['books' => fn($q) => $q->where('status', 'active')])
-            ->orderBy('name')->get();
+            ->orderBy('name')
+            ->get();
     }
 
     public function getPriceRange(): array
     {
         $stats = Book::where('status', 'active')
-            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')->first();
-        return ['min' => (int)($stats->min_price ?? 0), 'max' => (int)($stats->max_price ?? 100000)];
+            ->selectRaw('MIN(price) as min_price, MAX(price) as max_price')
+            ->first();
+        return [
+            'min' => (int)($stats->min_price ?? 0),
+            'max' => (int)($stats->max_price ?? 100000)
+        ];
     }
 
     public function getLanguages(): array
     {
-        return Book::where('status', 'active')->whereNotNull('language')
-            ->where('language', '!=', '')->distinct()->pluck('language')->toArray();
+        return Book::where('status', 'active')
+            ->whereNotNull('language')
+            ->where('language', '!=', '')
+            ->distinct()
+            ->pluck('language')
+            ->toArray();
     }
 
     public function getFilterGroups(array $filters = []): array
     {
         return [
-            ["key" => "category", "label" => "Category", "isActive" => !empty($filters["category"])],
-            ["key" => "author",   "label" => "Author",   "isActive" => !empty($filters["author"])],
-            ["key" => "price",    "label" => "Price",    "isActive" => !empty($filters["min_price"]) || !empty($filters["max_price"])],
-            ["key" => "rating",   "label" => "Rating",   "isActive" => !empty($filters["rating"])],
+            ["key" => "category",     "label" => "Category",     "isActive" => !empty($filters["category"])],
+            ["key" => "author",       "label" => "Author",       "isActive" => !empty($filters["author"])],
+            ["key" => "price",        "label" => "Price",        "isActive" => !empty($filters["min_price"]) || !empty($filters["max_price"])],
+            ["key" => "rating",       "label" => "Rating",       "isActive" => !empty($filters["rating"])],
             ["key" => "availability", "label" => "Availability", "isActive" => !empty($filters["availability"])],
         ];
     }
@@ -104,7 +116,7 @@ class BookService
     {
         $active = [];
         if (!empty($filters['search'])) {
-            $active[] = ['param' => 'search', 'label' => '"' . $filters['search'] . '"'];
+            $active[] = ['param' => 'search', 'label' => '"' . htmlspecialchars($filters['search']) . '"'];
         }
         if (!empty($filters['category'])) {
             $cat = $categories->firstWhere('id', $filters['category']);
@@ -121,6 +133,11 @@ class BookService
             $min = !empty($filters['min_price']) ? number_format($filters['min_price']) : '0';
             $max = !empty($filters['max_price']) ? number_format($filters['max_price']) : 'Any';
             $active[] = ['param' => 'price', 'label' => $min . ' — ' . $max . ' MMK'];
+        }
+        if (!empty($filters['availability'])) {
+            $parts = explode(',', $filters['availability']);
+            $labels = array_map(fn($s) => ucwords(str_replace('_', ' ', $s)), $parts);
+            $active[] = ['param' => 'availability', 'label' => implode(', ', $labels)];
         }
         if (!empty($filters['language'])) {
             $active[] = ['param' => 'language', 'label' => $filters['language']];

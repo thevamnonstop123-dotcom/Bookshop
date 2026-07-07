@@ -23,7 +23,7 @@
                         <div class="container hero-container">
                             <div class="hero-body">
                                 <span class="hero-chip">
-                                    <i class="fas fa-sparkles"></i> {{ $banner->title }}
+                                    <i class="fas fa-sparkles"></i> {{ $banner->badge_text ?? 'Special Offer' }}
                                 </span>
                                 <h1 class="hero-heading">{{ $banner->title }}</h1>
                                 <p class="hero-description">{{ $banner->description }}</p>

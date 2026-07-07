@@ -22,7 +22,6 @@
             </div>
 
             <div class="email-body-content">
-                <h2 class="email-title">{{ $subject }}</h2>
                 <p class="email-greeting">Hello <strong>{{ $name }}</strong>,</p>
 
                 <div class="email-message">

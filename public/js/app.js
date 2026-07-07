@@ -129,7 +129,7 @@
          */
         debounce: function (func, delay) {
             delay = delay || 300;
-            const timer;
+            let timer;
             return function () {
                 const context = this;
                 const args = arguments;

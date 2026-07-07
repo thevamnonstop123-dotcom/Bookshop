@@ -7,17 +7,24 @@
 @endpush
 
 @section('content')
-
 <div class="books-page" id="booksPage">
     <div class="container">
         <div class="books-layout">
             <div class="books-main" id="booksMain">
 
+                <div class="books-search-bar">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="bookSearchInput" class="search-input" placeholder="Search books..." value="{{ $filters['search'] ?? '' }}">
+                        <button type="button" id="searchClearBtn" class="search-clear-btn" style="display: {{ isset($filters['search']) ? 'flex' : 'none' }};">&times;</button>
+                    </div>
+                </div>
+
                 <div class="filter-bar" id="filterBar">
                     <div class="filter-bar-scroll">
                         <button class="filter-bar-btn filter-bar-btn-primary" type="button" data-dropdown-type="all">
                             ☰ Filters
-                            <span class="filter-bar-badge" id="filterBadge">0</span>
+                            <span class="filter-bar-badge" id="filterBadge" style="display: none;">0</span>
                         </button>
 
                         @foreach($filterGroups as $group)
@@ -27,11 +34,12 @@
                         @endforeach
 
                         <span class="filter-bar-separator"></span>
-                        <select class="filter-bar-btn filter-bar-sort" id="bookSortSelect">
-                            @foreach($sortOptions as $value => $label)
-                                <option value="{{ $value }}" {{ ($filters['sort'] ?? 'featured') === $value ? 'selected' : '' }}>{{ $label }}</option>
-                            @endforeach
-                        </select>
+                        <button class="filter-bar-btn {{ ($filters['sort'] ?? 'featured') !== 'featured' ? 'is-active' : '' }}" 
+                                type="button" 
+                                data-dropdown-type="sort" 
+                                id="bookSortButton">
+                            Sort: {{ $sortOptions[$filters['sort'] ?? 'featured'] }} ▾
+                        </button>
                     </div>
                 </div>
 
@@ -58,17 +66,18 @@
         </div>
     </div>
 </div>
-
-<div id="filterData" style="display:none !important;"
-    data-categories='@json($categories)'
-    data-authors='@json($authors)'
-    data-price-range='@json($priceRange)'
-    data-languages='@json($languages)'
-    data-current-filters='@json($filters)'
-></div>
-
 @endsection
 
 @push('scripts')
+    <script>
+        window.AppFilterState = {
+            categories: @json($categories),
+            authors: @json($authors),
+            priceRange: @json($priceRange),
+            languages: @json($languages),
+            sortOptions: @json($sortOptions),
+            currentFilters: @json($filters)
+        };
+    </script>
     <script src="{{ asset('js/customer/books.js') }}"></script>
 @endpush

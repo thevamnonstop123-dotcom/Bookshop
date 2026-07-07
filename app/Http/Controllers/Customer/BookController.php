@@ -19,9 +19,10 @@ class BookController extends Controller
 
     public function index(Request $request)
     {
+        // Fixed: Explicitly white-listed the 'availability' attribute array key 
         $filters = $request->only([
             'search', 'category', 'author', 'min_price', 'max_price',
-            'rating', 'language', 'in_stock', 'on_sale', 'sort'
+            'rating', 'language', 'in_stock', 'on_sale', 'sort', 'availability'
         ]);
 
         $books = $this->bookService->getBooks($filters);
@@ -29,7 +30,6 @@ class BookController extends Controller
         $authors = $this->bookService->getAuthors();
         $wishlistedIds = $this->getWishlistedIds();
 
-        // Save recent searches
         if ($search = $request->get('search')) {
             $recent = session()->get('recent_searches', []);
             $recent = array_filter($recent, fn($s) => $s !== $search);
@@ -46,6 +46,9 @@ class BookController extends Controller
                 'filters'        => $filters,
                 'filterGroups'   => $this->bookService->getFilterGroups($filters),
                 'activeFilters'  => $this->bookService->getActiveFilters($filters, $categories, $authors),
+                // Fixed: Explicitly return refreshed parameters to structural data layer 
+                'categories'     => $categories,
+                'authors'        => $authors
             ]);
         }
 
@@ -71,11 +74,13 @@ class BookController extends Controller
         $authorBooks = Book::with('authors')->where('status', 'active')
             ->whereHas('authors', fn($q) => $q->whereIn('authors.id', $book->authors->pluck('id')))
             ->where('id', '!=', $book->id)->limit(6)->get();
+            
         $wishlistedIds = $this->getWishlistedIds();
         $customerId = auth('customer')->id() ?? null;
         $existingRating = null;
         $hasPurchased = false;
         $reviews = collect();
+        
         if ($customerId) {
             $existingRating = Rating::where('customer_id', $customerId)->where('book_id', $book->id)->first();
             $hasPurchased = $this->ratingService->hasPurchased($customerId, $book->id);
@@ -83,6 +88,7 @@ class BookController extends Controller
         if ($book->rating_count > 0) {
             $reviews = $this->ratingService->getBookReviews($book->id, 'newest', 5);
         }
+        
         $highlights = [
             ['icon' => 'fa-truck-fast', 'label' => 'Free Delivery', 'desc' => 'On orders above 50,000 MMK'],
             ['icon' => 'fa-tablet-screen-button', 'label' => 'Instant eBook', 'desc' => 'Read immediately after purchase'],
@@ -90,6 +96,7 @@ class BookController extends Controller
             ['icon' => 'fa-rotate-left', 'label' => 'Easy Returns', 'desc' => '7-day return policy'],
             ['icon' => 'fa-star', 'label' => 'Verified Reviews', 'desc' => 'From real customers'],
         ];
+        
         return view('customer.books.show', compact(
             'book', 'relatedBooks', 'authorBooks', 'wishlistedIds',
             'existingRating', 'hasPurchased', 'reviews', 'highlights'

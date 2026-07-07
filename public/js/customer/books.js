@@ -2,16 +2,16 @@
     "use strict";
 
     let isUpdating = false;
-    let searchTimeout = null;
     let activeDropdown = null;
-    let ignorePopState = false;
 
     const $ = (s) => document.querySelector(s);
 
     function getFilters() {
         const p = new URLSearchParams(window.location.search);
         const f = {};
-        for (const [k, v] of p) f[k] = v;
+        for (const [k, v] of p) {
+            if (v && v.trim() !== "") f[k] = v;
+        }
         return f;
     }
 
@@ -24,158 +24,77 @@
     }
 
     function serverData() {
-        const el = $("#filterData");
-        if (!el)
-            return {
-                categories: [],
-                authors: [],
-                priceRange: { min: 0, max: 100000 },
-            };
-        try {
-            return {
-                categories: JSON.parse(el.dataset.categories || "[]"),
-                authors: JSON.parse(el.dataset.authors || "[]"),
-                priceRange: JSON.parse(
-                    el.dataset.priceRange || '{"min":0,"max":100000}',
-                ),
-            };
-        } catch (e) {
-            return {
-                categories: [],
-                authors: [],
-                priceRange: { min: 0, max: 100000 },
-            };
-        }
+        return window.AppFilterState || { categories: [], authors: [], priceRange: { min: 0, max: 100000 }, sortOptions: {} };
     }
 
-    async function fetchBooks(filters, silent = false) {
+    async function fetchBooks(filters, isPopState = false) {
         if (isUpdating) return;
-
-        const c = $("#booksContainer");
-        if (!c) return;
+        const container = $("#booksContainer");
+        if (!container) return;
 
         isUpdating = true;
 
         try {
-            const grid = c.querySelector(".book-grid");
+            const grid = container.querySelector(".book-grid");
             if (grid) {
-                grid.classList.add("is-loading");
-                grid.classList.remove("is-ready");
+                grid.classList.add("loading");
+                grid.innerHTML = Array(8).fill('<div class="skeleton-card" style="height:320px;background:var(--color-surface);"><div class="skeleton" style="height:100%;"></div></div>').join("");
             }
 
-            if (!silent && grid) {
-                grid.innerHTML = Array(8)
-                    .fill(
-                        '<div class="skeleton-card"><div class="skeleton skeleton-image"></div><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div></div>'
-                    )
-                    .join("");
-            }
-
-            const resp = await fetch(buildUrl(filters), {
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    Accept: "application/json",
-                },
+            const targetUrl = buildUrl(filters);
+            const resp = await fetch(targetUrl, {
+                headers: { "X-Requested-With": "XMLHttpRequest", "Accept": "application/json" }
             });
 
-            if (!resp.ok) throw new Error("Status " + resp.status);
+            if (!resp.ok) throw new Error(`HTTP network pipe error: ${resp.status}`);
             const data = await resp.json();
 
-            if (grid) {
-                grid.style.opacity = "0.2";
-                grid.style.transform = "translateY(4px)";
-            }
+            container.innerHTML = data.html;
 
-            await new Promise((r) => setTimeout(r, 80));
-
-            c.innerHTML = data.html;
-
-            const newGrid = c.querySelector(".book-grid");
-            if (newGrid) {
-                newGrid.classList.remove("is-loading");
-                newGrid.classList.add("is-ready");
-                requestAnimationFrame(() => {
-                    newGrid.style.opacity = "1";
-                    newGrid.style.transform = "translateY(0)";
-                });
+            if (data.categories || data.authors || data.sortOptions) {
+                window.AppFilterState = {
+                    categories: data.categories || window.AppFilterState.categories,
+                    authors: data.authors || window.AppFilterState.authors,
+                    priceRange: data.priceRange || window.AppFilterState.priceRange,
+                    sortOptions: data.sortOptions || window.AppFilterState.sortOptions
+                };
             }
 
             const cnt = $("#booksCount");
             if (cnt && data.count !== undefined) {
-                cnt.textContent =
-                    data.count +
-                    " " +
-                    (data.count === 1 ? "book" : "books") +
-                    " found";
+                cnt.textContent = `${data.count} ${data.count === 1 ? "book" : "books"} found`;
             }
 
             if (data.activeFilters) {
                 const af = $("#activeFilters");
                 if (af) {
-                    let h = data.activeFilters
-                        .map(
-                            (c) =>
-                                '<span class="filter-chip" data-remove="' + c.param + '">' + c.label + ' &times;</span>'
-                        )
-                        .join("");
-                    if (data.activeFilters.length > 1) {
-                        h += '<button class="filter-chip-clear" id="clearAllChips">Clear All</button>';
-                    }
+                    let h = data.activeFilters.map((c) => `<span class="filter-chip" data-remove="${c.param}">${c.label} &times;</span>`).join("");
+                    if (data.activeFilters.length > 1) h += '<button class="filter-chip-clear" id="clearAllChips">Clear All</button>';
                     af.innerHTML = h;
                 }
             }
 
-            if (data.filterGroups) {
-                for (const g of data.filterGroups) {
-                    const btn = document.querySelector(
-                        '.filter-bar-btn[data-dropdown-type="' + g.key + '"]'
-                    );
-                    if (btn) btn.classList.toggle("is-active", !!g.isActive);
-                }
+            const sortBtn = $("#bookSortButton");
+            if (sortBtn) {
+                const currentSort = filters.sort || "featured";
+                sortBtn.classList.toggle("is-active", currentSort !== "featured");
+                sortBtn.innerHTML = `Sort: ${(serverData().sortOptions)[currentSort] || "Featured"} ▾`;
             }
 
-            const badge = $("#filterBadge");
-            if (badge) {
-                const f2 = data.filters || filters;
-                let count = 0;
-                if (f2.category) count++;
-                if (f2.author) count++;
-                if (f2.rating) count++;
-                if (f2.min_price || f2.max_price) count++;
-                badge.textContent = count;
-                badge.style.display = count > 0 ? "flex" : "none";
-            }
-
-            const newUrl = buildUrl(filters).toString();
-            if (window.location.href !== newUrl) {
-                ignorePopState = true;
-                window.history.pushState({ filters }, "", newUrl);
-            }
-
-            if (typeof window.initBookCards === "function") {
-                setTimeout(window.initBookCards, 100);
+            if (!isPopState && window.location.href !== targetUrl.toString()) {
+                window.history.pushState({ filters }, "", targetUrl.toString());
             }
         } catch (e) {
-            console.error("Fetch error:", e);
+            console.error("AJAX execution error:", e);
         } finally {
             isUpdating = false;
-            const grid = $("#booksContainer")?.querySelector(".book-grid");
-            if (grid) {
-                grid.classList.remove("is-loading");
-                grid.classList.add("is-ready");
-            }
         }
     }
 
     function applyFilter(name, value) {
         const f = getFilters();
         delete f.page;
-        if (!value || value === "") delete f[name];
-        else f[name] = value;
-        if (!f.sort)
-            f.sort =
-                ($("#bookSortSelect") && $("#bookSortSelect").value) ||
-                "featured";
+        if (!value || value.trim() === "") delete f[name]; else f[name] = value;
         fetchBooks(f);
     }
 
@@ -188,71 +107,45 @@
     }
 
     function makeItemHTML(name, value, text, count, active) {
-        const bg = active ? "background:#f1f5f9;font-weight:600;" : "";
-        const cnt = count
-            ? '<span style="font-size:11px;color:#94a3b8;background:#e2e8f0;padding:1px 7px;border-radius:99px;pointer-events:none;">' +
-              count +
-              "</span>"
-            : "";
-        return (
-            '<div class="filter-dropdown-item" data-name="' +
-            name +
-            '" data-value="' +
-            value +
-            '" style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;color:#475569;' +
-            bg +
-            '" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'' +
-            (active ? "#f1f5f9" : "transparent") +
-            "'\">" +
-            text +
-            cnt +
-            "</div>"
-        );
+        return `
+            <div class="filter-radio ${active ? "is-active" : ""}" data-name="${name}" data-value="${value}">
+                <span class="filter-radio-label">${text}</span>
+                ${count ? `<span class="filter-radio-count">${count}</span>` : ""}
+            </div>
+        `;
     }
 
     const DropdownTemplates = {
         category(data, f) {
-            let h =
-                '<div style="padding:4px">' +
-                makeItemHTML("category", "", "All Categories", null, !f.category);
-            for (const c of data.categories)
-                h += makeItemHTML("category", c.id, c.name, c.books_count || null, f.category == c.id);
+            let h = '<div class="filter-dropdown-scroll">' + makeItemHTML("category", "", "All Categories", null, !f.category);
+            for (const c of data.categories) h += makeItemHTML("category", c.id, c.name, c.books_count || null, f.category == c.id);
             return h + "</div>";
         },
         author(data, f) {
-            let h =
-                '<div style="max-height:240px;overflow-y:auto;padding:4px">' +
-                makeItemHTML("author", "", "All Authors", null, !f.author);
-            for (const a of data.authors)
-                h += makeItemHTML("author", a.id, a.name, a.books_count || null, f.author == a.id);
+            let h = '<div class="filter-dropdown-scroll">' + makeItemHTML("author", "", "All Authors", null, !f.author);
+            for (const a of data.authors) h += makeItemHTML("author", a.id, a.name, a.books_count || null, f.author == a.id);
             return h + "</div>";
         },
         price(data, f) {
-            return (
-                '<div style="padding:4px">' +
-                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">' +
-                '<input type="number" class="dd-min-price" placeholder="Min ' +
-                data.priceRange.min +
-                '" value="' +
-                (f.min_price || "") +
-                '" style="width:100%;min-width:0;flex:1;padding:10px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;">' +
-                '<span style="color:#94a3b8;flex-shrink:0;">-</span>' +
-                '<input type="number" class="dd-max-price" placeholder="Max ' +
-                data.priceRange.max +
-                '" value="' +
-                (f.max_price || "") +
-                '" style="width:100%;min-width:0;flex:1;padding:10px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;box-sizing:border-box;">' +
-                "</div>" +
-                '<button class="dd-apply-price" style="width:100%;padding:10px;background:var(--color-primary,#0f172a);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">Apply Price</button>' +
-                "</div>"
-            );
+            return `
+                <div style="padding: var(--space-1);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-2);">
+                        <input type="number" class="dd-min-price" placeholder="Min ${data.priceRange.min}" value="${f.min_price || ""}" 
+                               style="width: 100%; min-width: 0; flex: 1; padding: 10px var(--space-2); border: 1.5px solid var(--color-border); border-radius: var(--radius-input); font-size: 13px; background: var(--color-surface); color: var(--color-text); outline: none;">
+                        <span style="color: var(--color-text-muted); flex-shrink: 0;">-</span>
+                        <input type="number" class="dd-max-price" placeholder="Max ${data.priceRange.max}" value="${f.max_price || ""}" 
+                               style="width: 100%; min-width: 0; flex: 1; padding: 10px var(--space-2); border: 1.5px solid var(--color-border); border-radius: var(--radius-input); font-size: 13px; background: var(--color-surface); color: var(--color-text); outline: none;">
+                    </div>
+                    <button class="dd-apply-price" 
+                            style="width: 100%; padding: 10px; background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-input); cursor: pointer; font-weight: 600; font-size: 13px;">
+                        Apply Price
+                    </button>
+                </div>
+            `;
         },
         rating(data, f) {
-            let h =
-                '<div style="padding:4px">' +
-                makeItemHTML("rating", "", "Any Rating", null, !f.rating);
-            for (let s = 4; s >= 2; s--)
-                h += makeItemHTML("rating", s, Array(s + 1).join("★") + " & Up", null, f.rating == s);
+            let h = '<div style="padding: 2px;">' + makeItemHTML("rating", "", "Any Rating", null, !f.rating);
+            for (let s = 4; s >= 2; s--) h += makeItemHTML("rating", s, "★".repeat(s) + " & Up", null, f.rating == s);
             return h + "</div>";
         },
         availability(data, f) {
@@ -264,96 +157,67 @@
                 { value: "pre_order", label: "Pre-order" },
             ];
             const selected = (f.availability || "").split(",").filter(Boolean);
-            let h = '<div style="padding:4px">';
+            let h = '<div style="padding: 2px;">';
             for (const o of options) {
                 const isChecked = selected.includes(o.value);
-                h += '<label style="display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;border-radius:8px;font-size:13px;color:#475569;' + (isChecked ? "background:#f1f5f9;font-weight:600;" : "") + '" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'' + (isChecked ? "#f1f5f9" : "transparent") + '\'"><input type="checkbox" class="availability-cb" value="' + o.value + '" ' + (isChecked ? "checked" : "") + '> <span>' + o.label + "</span></label>";
+                h += `
+                    <label class="filter-checkbox ${isChecked ? "is-active" : ""}">
+                        <input type="checkbox" class="availability-cb" value="${o.value}" ${isChecked ? "checked" : ""}>
+                        <div class="filter-checkbox-icon">${isChecked ? "✓" : ""}</div>
+                        <span>${o.label}</span>
+                    </label>
+                `;
             }
             return h + "</div>";
         },
         all(data, f) {
-            return (
-                '<div style="padding:8px">' +
-                '<details open><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Categories</summary>' +
-                DropdownTemplates.category(data, f) +
-                "</details>" +
-                '<details><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Authors</summary>' +
-                DropdownTemplates.author(data, f) +
-                "</details>" +
-                '<details><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Price</summary>' +
-                DropdownTemplates.price(data, f) +
-                "</details>" +
-                '<details><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Availability</summary>' +
-                DropdownTemplates.availability(data, f) +
-                "</details>" +
-                '<details><summary style="font-weight:700;padding:8px 0;cursor:pointer;font-size:13px">Rating</summary>' +
-                DropdownTemplates.rating(data, f) +
-                "</details>" +
-                "</div>"
-            );
+            return `
+                <div style="padding: 4px;">
+                    <details open><summary style="font-weight: 700; padding: 8px 4px; cursor: pointer; font-size: 13px; color: var(--color-text);">Categories</summary>${DropdownTemplates.category(data, f)}</details>
+                    <details><summary style="font-weight: 700; padding: 8px 4px; cursor: pointer; font-size: 13px; color: var(--color-text);">Authors</summary>${DropdownTemplates.author(data, f)}</details>
+                    <details><summary style="font-weight: 700; padding: 8px 4px; cursor: pointer; font-size: 13px; color: var(--color-text);">Price</summary>${DropdownTemplates.price(data, f)}</details>
+                    <details><summary style="font-weight: 700; padding: 8px 4px; cursor: pointer; font-size: 13px; color: var(--color-text);">Availability</summary>${DropdownTemplates.availability(data, f)}</details>
+                    <details><summary style="font-weight: 700; padding: 8px 4px; cursor: pointer; font-size: 13px; color: var(--color-text);">Rating</summary>${DropdownTemplates.rating(data, f)}</details>
+                </div>
+            `;
         },
+        sort(data, f) {
+            let h = '<div style="padding: 2px;">';
+            for (const [value, label] of Object.entries(data.sortOptions)) {
+                h += makeItemHTML("sort", value, label, null, (f.sort || 'featured') === value);
+            }
+            return h + "</div>";
+        }
     };
 
     function openDropdown(btn, type) {
-        if (activeDropdown && activeDropdown.btn === btn) {
-            closeDropdown();
-            return;
-        }
+        if (activeDropdown && activeDropdown.btn === btn) { closeDropdown(); return; }
         closeDropdown();
-
         if (!DropdownTemplates[type]) return;
-
-        const data = serverData();
-        const f = getFilters();
-        const html = DropdownTemplates[type](data, f);
 
         const dd = document.createElement("div");
         dd.id = "activeDropdownPanel";
-
-        if (type === "price" || type === "rating") {
-            dd.style.cssText =
-                "position:absolute;min-width:280px;max-width:320px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);z-index:99999;padding:12px;";
-            dd.classList.add("no-scroll");
-        } else {
-            dd.style.cssText =
-                "position:absolute;min-width:240px;max-width:320px;max-height:380px;overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.15);z-index:99999;padding:8px;";
-        }
-
-        dd.innerHTML = html;
+        dd.className = "filter-dropdown show";
+        dd.innerHTML = DropdownTemplates[type](serverData(), getFilters());
 
         const br = btn.getBoundingClientRect();
-        dd.style.top = br.bottom + window.scrollY + 6 + "px";
-        let l = br.left + window.scrollX;
-        if (l + 300 > window.innerWidth + window.scrollX)
-            l = window.innerWidth + window.scrollX - 310;
-        if (l < 0) l = 0;
-        dd.style.left = l + "px";
+        dd.style.top = `${br.bottom + window.scrollY + 6}px`;
+        dd.style.left = `${Math.max(0, Math.min(br.left + window.scrollX, window.innerWidth + window.scrollX - 310))}px`;
 
         const ov = document.createElement("div");
         ov.id = "activeDropdownOverlay";
-        ov.style.cssText =
-            "position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.05)";
+        ov.className = "filter-dropdown-overlay show";
         ov.addEventListener("click", closeDropdown);
 
+        // Scope targeted interactive handlers to the newly mounted dropdown shell
         dd.addEventListener("click", function (e) {
-            const item = e.target.closest(".filter-dropdown-item");
+            const item = e.target.closest(".filter-radio");
             if (item) {
                 applyFilter(item.dataset.name, item.dataset.value);
                 closeDropdown();
                 return;
             }
-            const availCb = e.target.closest(".availability-cb");
-            if (availCb) {
-                const checked = [];
-                e.target.closest("#activeDropdownPanel").querySelectorAll(".availability-cb:checked").forEach(function(cb) { checked.push(cb.value); });
-                const f2 = getFilters();
-                delete f2.page;
-                if (checked.length > 0) f2.availability = checked.join(",");
-                else delete f2.availability;
-                if (!f2.sort) f2.sort = ($("#bookSortSelect") && $("#bookSortSelect").value) || "featured";
-                fetchBooks(f2);
-                return;
-            }
+            
             const priceBtn = e.target.closest(".dd-apply-price");
             if (priceBtn) {
                 const container = priceBtn.parentElement;
@@ -361,111 +225,83 @@
                 const mx = container.querySelector(".dd-max-price").value;
                 const f2 = getFilters();
                 delete f2.page;
-                if (mn) f2.min_price = mn;
-                else delete f2.min_price;
-                if (mx) f2.max_price = mx;
-                else delete f2.max_price;
-                if (!f2.sort)
-                    f2.sort =
-                        ($("#bookSortSelect") && $("#bookSortSelect").value) ||
-                        "featured";
+                if (mn) f2.min_price = mn; else delete f2.min_price;
+                if (mx) f2.max_price = mx; else delete f2.max_price;
                 fetchBooks(f2);
                 closeDropdown();
             }
         });
 
+        dd.addEventListener("change", function (e) {
+            const availCb = e.target.closest(".availability-cb");
+            if (availCb) {
+                const checked = Array.from(dd.querySelectorAll(".availability-cb:checked")).map((cb) => cb.value);
+                const f2 = getFilters();
+                delete f2.page;
+                if (checked.length > 0) f2.availability = checked.join(","); else delete f2.availability;
+                fetchBooks(f2);
+            }
+        });
+
         document.body.appendChild(ov);
         document.body.appendChild(dd);
-
-        activeDropdown = { dd: dd, ov: ov, btn: btn };
+        activeDropdown = { dd, ov, btn };
     }
 
     document.addEventListener("click", function (e) {
-        const dropdownBtn = e.target.closest("[data-dropdown-type]");
-        if (dropdownBtn) {
-            e.preventDefault();
-            openDropdown(dropdownBtn, dropdownBtn.dataset.dropdownType);
-            return;
-        }
-
+        const dBtn = e.target.closest("[data-dropdown-type]");
+        if (dBtn) { e.preventDefault(); openDropdown(dBtn, dBtn.dataset.dropdownType); return; }
+        
         if (e.target.closest("#clearAllChips")) {
-            fetchBooks({
-                sort:
-                    ($("#bookSortSelect") && $("#bookSortSelect").value) ||
-                    "featured",
-            });
+            const currentFilters = getFilters();
+            fetchBooks({ sort: currentFilters.sort || "featured" });
             return;
         }
 
         const chip = e.target.closest(".filter-chip");
         if (chip) {
+            const f = getFilters(); delete f.page;
             const p = chip.dataset.remove;
-            if (p === "price") {
-                const f = getFilters();
-                delete f.min_price;
-                delete f.max_price;
-                delete f.page;
-                if (!f.sort)
-                    f.sort =
-                        ($("#bookSortSelect") && $("#bookSortSelect").value) ||
-                        "featured";
-                fetchBooks(f);
-            } else if (p === "search") {
-                const si = $("#bookSearchInput");
-                if (si) si.value = "";
-                applyFilter("search", "");
-            } else {
-                applyFilter(p, "");
-            }
-            return;
-        }
-
-        if (e.target.closest("#searchClearBtn")) {
-            const si = $("#bookSearchInput");
-            if (si) si.value = "";
-            applyFilter("search", "");
+            if (p === "price") { delete f.min_price; delete f.max_price; }
+            else if (p === "availability") { delete f.availability; }
+            else { delete f[p]; }
+            fetchBooks(f);
             return;
         }
 
         const pl = e.target.closest(".pagination-wrapper a");
         if (pl) {
             e.preventDefault();
-            const u = new URL(pl.href),
-                params = {};
-            u.searchParams.forEach((v, k) => (params[k] = v));
+            const u = new URL(pl.href);
+            const params = {};
+            u.searchParams.forEach((v, k) => { params[k] = v; });
             fetchBooks(params);
-            const m = $("#booksMain");
-            if (m)
-                window.scrollTo({
-                    top: m.getBoundingClientRect().top + window.scrollY - 100,
-                    behavior: "smooth",
-                });
         }
     });
 
-    const sortSel = $("#bookSortSelect");
-    if (sortSel) {
-        sortSel.addEventListener("change", function () {
-            const f = getFilters();
-            f.sort = this.value;
-            delete f.page;
-            fetchBooks(f);
+    const searchInput = $("#bookSearchInput");
+    const clearSearchBtn = $("#searchClearBtn");
+    let searchDebounceTimeout = null;
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            if (clearSearchBtn) clearSearchBtn.style.display = this.value ? "flex" : "none";
+            clearTimeout(searchDebounceTimeout);
+            searchDebounceTimeout = setTimeout(() => { applyFilter("search", this.value); }, 400);
+        });
+    }
+
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener("click", function () {
+            if (searchInput) { searchInput.value = ""; this.style.display = "none"; applyFilter("search", ""); }
         });
     }
 
     window.addEventListener("popstate", function (e) {
-        if (ignorePopState) {
-            ignorePopState = false;
-            return;
-        }
-        if (e.state && e.state.filters) {
-            fetchBooks(e.state.filters, true);
-            if (sortSel) sortSel.value = e.state.filters.sort || "featured";
-        }
+        fetchBooks((e.state && e.state.filters) || getFilters(), true);
     });
 
     document.addEventListener("keydown", function (e) {
         if (e.key === "Escape") closeDropdown();
     });
-
 })();

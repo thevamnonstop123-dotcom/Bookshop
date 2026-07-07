@@ -121,7 +121,7 @@
 
 @media (max-width: 640px) {
     .site-footer-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .site-footer-bottom {

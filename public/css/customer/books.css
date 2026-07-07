@@ -681,3 +681,65 @@
         font-size: 12px;
     }
 }
+
+@media (max-width: 768px) {
+    .filter-bar {
+        top: calc(var(--navbar-height) - 8px);
+        padding: 2px 0;
+    }
+}
+
+.filter-bar-sort-btn {
+    cursor: pointer;
+}
+/* =============================================
+   MOBILE FILTER BAR (FLEX WRAP)
+   ============================================= */
+.filter-bar {
+    width: 100%;
+}
+
+.filter-bar-scroll {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    
+    /* Allow items to flow to the next row */
+    flex-wrap: wrap; 
+    
+    /* Disable scrolling completely */
+    overflow-x: visible; 
+    padding: 4px 16px;
+}
+
+/* Optional: Make buttons stretch to fill available space on tiny screens */
+@media (max-width: 480px) {
+    .filter-bar-btn {
+        flex-grow: 1;
+        text-align: center;
+    }
+}
+
+/* =============================================
+   STICKY FILTER BAR (WITH NAVBAR OFFSET)
+   ============================================= */
+.filter-bar {
+    position: -webkit-sticky; /* Legacy Safari support */
+    position: sticky;
+    
+    /* Dynamically offsets position below your header. Defaults to 0 if variable is missing */
+    top: var(--navbar-height, 0px); 
+    
+    /* Forces element above the scrolling grid cards (which typically sit at z-index 1-10) */
+    z-index: 200; 
+    
+    /* CRITICAL: Prevents underlying grid cards from showing through the text/buttons */
+    background-color: var(--color-surface, #ffffff); 
+    
+    /* Optional: Adds separation shadow only when the element is floating over content */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    
+    padding: 8px 16px;
+    transition: top 0.2s ease;
+}

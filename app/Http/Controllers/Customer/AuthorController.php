@@ -26,6 +26,7 @@ class AuthorController extends Controller
             'price_min',
             'price_max'
         ]);
+        $sortLabels = ["latest" => "Newest", "bestseller" => "Best Selling", "rated" => "Highest Rated", "price_asc" => "Price: Low to High", "price_desc" => "Price: High to Low"];
 
         $author = $this->authorService->getAuthor($authorId, [
             'genres',
@@ -51,7 +52,7 @@ class AuthorController extends Controller
             ]);
         }
 
-        return view('customer.authors.show', compact(
+        return view('customer.authors.show', compact('sortLabels',
             'author',
             'books',
             'filters',
