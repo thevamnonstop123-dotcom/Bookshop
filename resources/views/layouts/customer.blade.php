@@ -61,4 +61,4 @@
      <script src="{{ asset('js/ux-engine.js') }}"></script>
     @stack('scripts')
 </body>
-</html>
+</html> 
