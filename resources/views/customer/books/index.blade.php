@@ -12,14 +12,6 @@
         <div class="books-layout">
             <div class="books-main" id="booksMain">
 
-                <div class="books-search-bar">
-                    <div class="search-input-wrapper">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="bookSearchInput" class="search-input" placeholder="Search books..." value="{{ $filters['search'] ?? '' }}">
-                        <button type="button" id="searchClearBtn" class="search-clear-btn" style="display: {{ isset($filters['search']) ? 'flex' : 'none' }};">&times;</button>
-                    </div>
-                </div>
-
                 <div class="filter-bar" id="filterBar">
                     <div class="filter-bar-scroll">
                         <button class="filter-bar-btn filter-bar-btn-primary" type="button" data-dropdown-type="all">
@@ -40,6 +32,14 @@
                                 id="bookSortButton">
                             Sort: {{ $sortOptions[$filters['sort'] ?? 'featured'] }} ▾
                         </button>
+                    </div>
+
+                    <div class="books-search-bar">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="bookSearchInput" class="search-input" placeholder="Search books..." value="{{ $filters['search'] ?? '' }}">
+                            <button type="button" id="searchClearBtn" class="search-clear-btn" style="display: {{ isset($filters['search']) ? 'flex' : 'none' }};">&times;</button>
+                        </div>
                     </div>
                 </div>
 
