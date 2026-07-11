@@ -40,7 +40,7 @@
                     e.preventDefault();
                     const qtyInput = document.getElementById('quantity');
                     const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
-                    self.addItem(addBtn.dataset.bookId, quantity);
+                    var f = document.querySelector("input[name=format]:checked"); var fmt = f ? f.value : "physical"; self.addItem(addBtn.dataset.bookId, quantity, fmt);
                     return;
                 }
 
@@ -113,7 +113,7 @@
             }
         },
 
-        addItem: async function (bookId, quantity) {
+        addItem: async function (bookId, quantity, format) {
             quantity = quantity || 1;
             try {
                 const resp = await fetch('/cart/add', {
@@ -123,7 +123,7 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({ book_id: bookId, quantity: quantity }),
+                    body: JSON.stringify({ book_id: bookId, quantity: quantity, format: format || "physical" }),
                 });
                 const data = await resp.json();
                 this.updateCartUI(data.cart, 'add');
@@ -259,6 +259,7 @@
                         '<div class="cart-item-info">' +
                             '<div class="cart-item-title">' + item.title + '</div>' +
                             '<div class="cart-item-price">' + self.formatCurrency(item.price * item.quantity) + '</div>' +
+                            '<div class="cart-item-format">' + (item.format === "ebook" ? "E-Book" : "Physical") + '</div>' +
                             '<div class="cart-item-actions">' +
                                 '<div class="cart-qty">' +
                                     '<button type="button" class="cart-qty-down" data-item-id="' + item.id + '" data-qty="' + item.quantity + '">−</button>' +

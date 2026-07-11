@@ -253,29 +253,51 @@
         }
     };
 
-    // ========== MOBILE SEARCH ==========
-    window.openMobileSearch = function () {
-        const overlay = document.getElementById("navbarSearchOverlay");
-        if (!overlay) return;
-        if (overlay.classList.contains("open")) { closeMobileSearch(); return; }
-        overlay.classList.add("open");
-        document.body.style.overflow = "hidden";
-        setTimeout(function() { document.addEventListener("click", handleSearchOutsideClick); }, 0);
-        const input = document.getElementById("mobileSearchInput");
-        if (input) setTimeout(function () { input.focus(); }, 150);
-    };
+    // ============================================
+// OPEN MOBILE SEARCH - WITH BACK BUTTON
+// ============================================
+window.openMobileSearch = function () {
+    const overlay = document.getElementById("navbarSearchOverlay");
+    if (!overlay) return;
+    
+    if (overlay.classList.contains("open")) { 
+        closeMobileSearch(); 
+        return; 
+    }
+    
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+    
+    // Load search history when opened
+    loadSearchHistory('mobileSearchSuggestions');
+    
+    const input = document.getElementById("mobileSearchInput");
+    if (input) {
+        setTimeout(function () { 
+            input.focus(); 
+            input.select();
+        }, 200);
+    }
+};
+
+// ============================================
+// CLOSE MOBILE SEARCH
+// ============================================
+window.closeMobileSearch = function () {
+    const overlay = document.getElementById("navbarSearchOverlay");
+    if (overlay) {
+        overlay.classList.remove("open");
+    }
+    document.body.style.overflow = "";
+    document.removeEventListener("click", handleSearchOutsideClick);
+};
 
     function handleSearchOutsideClick(e) {
         const overlay = document.getElementById("navbarSearchOverlay");
         if (overlay && !overlay.contains(e.target)) { closeMobileSearch(); }
     }
 
-    window.closeMobileSearch = function () {
-        const overlay = document.getElementById("navbarSearchOverlay");
-        if (overlay) overlay.classList.remove("open");
-        document.body.style.overflow = "";
-        document.removeEventListener("click", handleSearchOutsideClick);
-    };
+   
 
     function initMobileSearchEnter() {
         const input = document.getElementById('mobileSearchInput');

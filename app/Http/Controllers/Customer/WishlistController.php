@@ -47,4 +47,20 @@ class WishlistController extends Controller
 
         return view('customer.wishlist.index', compact('wishlists', 'wishlistedIds'));
     }
+
+    /**
+     * Remove item from wishlist.
+     */
+    public function remove($bookId)
+    {
+        $removed = $this->wishlistService->remove(
+            auth('customer')->id(),
+            $bookId
+        );
+
+        return response()->json([
+            'success' => $removed,
+            'message' => $removed ? 'Removed from wishlist.' : 'Item not found.',
+        ]);
+    }
 }

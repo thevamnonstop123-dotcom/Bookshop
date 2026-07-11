@@ -1,254 +1,369 @@
 /**
- * Bookshop Checkout — Step Navigation & Interactions
+ * Checkout Page — Complete JavaScript
+ * Separated from Blade for clean organization
  */
-(function () {
-    'use strict';
 
-    let currentStep = 1;
-    const totalSteps = 3;
-    const form = document.getElementById('checkoutForm');
-    const nextBtn = document.getElementById('nextStep');
-    const prevBtn = document.getElementById('prevStep');
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ============================================
+    // 1. STEP NAVIGATION (2 Steps)
+    // ============================================
     const steps = document.querySelectorAll('.checkout-step');
-    const indicators = document.querySelectorAll('[data-step-indicator]');
+    const stepIndicators = document.querySelectorAll('.step');
+    const toStep2Btn = document.getElementById('toStep2');
+    const backToStep1Btn = document.getElementById('backToStep1');
 
-    if (!form) return;
-
-    // ========== PHONE INPUT RESTRICTION ==========
-    const phoneInput = document.getElementById('newPhone');
-    if (phoneInput) {
-        // Prevent non-digit input
-        phoneInput.addEventListener('input', function(e) {
-            // Remove any non-digit characters
-            this.value = this.value.replace(/[^0-9]/g, '');
-            
-            // Limit to 11 digits
-            if (this.value.length > 11) {
-                this.value = this.value.slice(0, 11);
-            }
+    function goToStep(stepNumber) {
+        // Update steps
+        steps.forEach(function(step) {
+            step.classList.toggle('active', parseInt(step.dataset.step) === stepNumber);
         });
-
-        // Prevent pasting non-digits
-        phoneInput.addEventListener('paste', function(e) {
-            e.preventDefault();
-            var pasted = (e.clipboardData || window.clipboardData).getData('text');
-            var digits = pasted.replace(/[^0-9]/g, '').slice(0, 11);
-            this.value = digits;
+        
+        // Update indicators
+        stepIndicators.forEach(function(indicator) {
+            indicator.classList.toggle('active', parseInt(indicator.dataset.step) === stepNumber);
         });
+    }
 
-        // Prevent non-digit keys
-        phoneInput.addEventListener('keypress', function(e) {
-            // Allow only digits, backspace, delete, arrows
-            if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-                e.preventDefault();
-            }
-            
-            // Prevent typing if already 11 digits
-            if (this.value.length >= 11 && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-                e.preventDefault();
+    if (toStep2Btn) {
+        toStep2Btn.addEventListener('click', function() {
+            if (validateAddressForm()) {
+                goToStep(2);
             }
         });
     }
 
-    // ========== STEP NAVIGATION ==========
-    function showStep(step) {
-        steps.forEach(function (el) { el.classList.remove('active'); });
-        const target = document.querySelector('[data-step="' + step + '"]');
-        if (target) target.classList.add('active');
-
-        indicators.forEach(function (i) {
-            i.classList.toggle('active', parseInt(i.dataset.stepIndicator) === step);
+    if (backToStep1Btn) {
+        backToStep1Btn.addEventListener('click', function() {
+            goToStep(1);
         });
-
-        if (prevBtn) {
-            prevBtn.style.display = step === 1 ? 'none' : 'inline-flex';
-        }
-
-        if (nextBtn) {
-            if (step === totalSteps) {
-                nextBtn.innerHTML = '<i class="fas fa-lock"></i> Place Order';
-                nextBtn.type = 'submit';
-            } else {
-                nextBtn.innerHTML = 'Continue <i class="fas fa-arrow-right"></i>';
-                nextBtn.type = 'button';
-            }
-        }
-
-        if (step === 3) {
-            updateConfirmSection();
-        }
-
-        if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // Next button click
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function (e) {
-            if (currentStep === totalSteps) return;
+    // ============================================
+    // 2. ADDRESS FORM VALIDATION
+    // ============================================
+    function validateAddressForm() {
+        const name = document.getElementById('receiverName');
+        const phone = document.getElementById('phoneNumber');
+        const address = document.getElementById('addressLine');
+        
+        let isValid = true;
+        let errorMsg = [];
+
+        if (!name.value.trim() || name.value.trim().length < 2) {
+            name.classList.add('error');
+            errorMsg.push('Please enter your full name');
+            isValid = false;
+        } else {
+            name.classList.remove('error');
+        }
+
+        if (!phone.value.trim() || phone.value.trim().length < 9) {
+            phone.classList.add('error');
+            errorMsg.push('Please enter a valid phone number');
+            isValid = false;
+        } else {
+            phone.classList.remove('error');
+        }
+
+        if (!address.value.trim() || address.value.trim().length < 5) {
+            address.classList.add('error');
+            errorMsg.push('Please enter your full address');
+            isValid = false;
+        } else {
+            address.classList.remove('error');
+        }
+
+        if (!isValid) {
+            alert('Please fix the following:\n\n• ' + errorMsg.join('\n• '));
+        }
+
+        return isValid;
+    }
+
+    // ============================================
+    // 3. ADDRESS DROPDOWN
+    // ============================================
+    const addressBtn = document.getElementById('addressSelectBtn');
+    const addressDropdown = document.getElementById('addressDropdown');
+    const addressDisplay = document.getElementById('addressDisplayText');
+    const receiverName = document.getElementById('receiverName');
+    const phoneNumber = document.getElementById('phoneNumber');
+    const addressLine = document.getElementById('addressLine');
+
+    if (addressBtn) {
+        addressBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('open');
+            addressDropdown.classList.toggle('open');
+        });
+    }
+
+    // Select saved address
+    document.querySelectorAll('.address-option-item.address-saved').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            if (e.target.closest('input[type="radio"]')) return;
             
-            e.preventDefault();
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
             
-            if (currentStep === 1) {
-                const selectedAddress = document.querySelector('input[name="address_id"]:checked');
-                const newName = document.getElementById('newReceiverName');
-                const newPhone = document.getElementById('newPhone');
-                const newAddress = document.getElementById('newAddress');
+            // Get data from attributes
+            const name = this.dataset.name || '';
+            const phone = this.dataset.phone || '';
+            const address = this.dataset.address || '';
+            
+            // Fill form
+            if (receiverName) receiverName.value = name;
+            if (phoneNumber) phoneNumber.value = phone;
+            if (addressLine) addressLine.value = address;
+            
+            // Update display
+            addressDisplay.textContent = name + ' • ' + address;
+            
+            // Update selected state
+            document.querySelectorAll('.address-option-item.address-saved').forEach(function(el) {
+                el.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            
+            // Update confirm address
+            updateConfirmAddress(name, address);
+            
+            // Close dropdown
+            addressDropdown.classList.remove('open');
+            addressBtn.classList.remove('open');
+        });
+    });
+
+    // GPS Result click
+    const gpsResultItem = document.getElementById('gpsResultItem');
+    if (gpsResultItem) {
+        gpsResultItem.addEventListener('click', function() {
+            const desc = this.querySelector('.address-option-desc')?.textContent || '';
+            const title = this.querySelector('.address-option-title')?.textContent || 'GPS Location';
+            
+            if (addressLine) addressLine.value = desc;
+            addressDisplay.textContent = '📍 ' + desc;
+            
+            // Deselect saved addresses
+            document.querySelectorAll('.address-option-item.address-saved').forEach(function(el) {
+                el.classList.remove('selected');
+                const radio = el.querySelector('input[type="radio"]');
+                if (radio) radio.checked = false;
+            });
+            
+            updateConfirmAddress('GPS Location', desc);
+            
+            addressDropdown.classList.remove('open');
+            addressBtn.classList.remove('open');
+        });
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('addressOption');
+        if (wrapper && !wrapper.contains(e.target)) {
+            if (addressDropdown) addressDropdown.classList.remove('open');
+            if (addressBtn) addressBtn.classList.remove('open');
+        }
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('addressSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('.address-option-item.address-saved').forEach(function(item) {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query) ? 'flex' : 'none';
+            });
+        });
+    }
+
+    // ============================================
+    // 4. TOGGLE NEW ADDRESS (Manual Entry)
+    // ============================================
+    window.toggleNewAddress = function() {
+        // Just focus on the form fields
+        document.getElementById('receiverName').focus();
+        addressDropdown.classList.remove('open');
+        addressBtn.classList.remove('open');
+    };
+
+    // ============================================
+    // 5. UPDATE CONFIRM ADDRESS DISPLAY
+    // ============================================
+    function updateConfirmAddress(name, address) {
+        const confirmText = document.getElementById('confirmAddressText');
+        if (confirmText) {
+            confirmText.textContent = name + ' • ' + address;
+        }
+    }
+
+    // ============================================
+    // 6. PAYMENT CARD SELECTION
+    // ============================================
+    const paymentCards = document.querySelectorAll('.payment-card');
+    
+    paymentCards.forEach(function(card) {
+        card.addEventListener('click', function(e) {
+            if (e.target.closest('.payment-card-check')) return;
+            
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                const event = new Event('change', { bubbles: true });
+                radio.dispatchEvent(event);
+            }
+            
+            paymentCards.forEach(function(c) {
+                c.classList.remove('selected');
+            });
+            this.classList.add('selected');
+        });
+    });
+
+    // ============================================
+    // 7. GPS LOCATION DETECTION
+    // ============================================
+    let gpsMap = null;
+
+    window.detectLocation = function() {
+        const gpsStatusText = document.getElementById('gpsStatusText');
+        const gpsStatusDesc = document.getElementById('gpsStatusDesc');
+        const gpsSpinner = document.getElementById('gpsSpinner');
+        const gpsResultItem = document.getElementById('gpsResultItem');
+        const gpsResultDesc = document.getElementById('gpsResultDesc');
+        const gpsErrorMsg = document.getElementById('gpsErrorMsg');
+        const gpsErrorText = document.getElementById('gpsErrorText');
+        const addressDisplay = document.getElementById('addressDisplayText');
+        const addressInput = document.getElementById('addressLine');
+        
+        gpsErrorMsg.style.display = 'none';
+        gpsResultItem.style.display = 'none';
+        gpsSpinner.style.display = 'inline-block';
+        gpsStatusText.textContent = 'Detecting...';
+        gpsStatusDesc.textContent = 'Please wait';
+        
+        if (!navigator.geolocation) {
+            gpsSpinner.style.display = 'none';
+            gpsStatusText.textContent = 'Use Current Location';
+            gpsStatusDesc.textContent = 'GPS not supported';
+            gpsErrorText.textContent = 'Geolocation is not supported by your browser';
+            gpsErrorMsg.style.display = 'flex';
+            return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
                 
-                if (!selectedAddress) {
-                    var errors = [];
+                document.getElementById('gpsLat').value = lat;
+                document.getElementById('gpsLng').value = lng;
+                
+                gpsSpinner.style.display = 'none';
+                gpsStatusText.textContent = '✅ Location Found!';
+                gpsStatusDesc.textContent = 'Tap to use this address';
+                
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
+                    );
+                    const data = await response.json();
                     
-                    if (!newName || !newName.value.trim()) {
-                        errors.push('Please enter receiver name');
+                    const address = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    document.getElementById('gpsAddressInput').value = address;
+                    
+                    gpsResultDesc.textContent = address;
+                    gpsResultItem.style.display = 'flex';
+                    
+                    if (addressInput) {
+                        addressInput.value = address;
                     }
                     
-                    if (!newPhone || !newPhone.value.trim()) {
-                        errors.push('Please enter phone number');
-                    } else if (!/^09[0-9]{9}$/.test(newPhone.value.trim())) {
-                        errors.push('Phone must be 11 digits starting with 09 (e.g. 09xxxxxxxxx)');
-                    }
+                    addressDisplay.textContent = '📍 ' + address;
+                    updateConfirmAddress('GPS Location', address);
                     
-                    if (!newAddress || !newAddress.value.trim()) {
-                        errors.push('Please enter full address');
-                    }
+                    // Deselect saved addresses
+                    document.querySelectorAll('.address-option-item.address-saved').forEach(function(el) {
+                        el.classList.remove('selected');
+                        const radio = el.querySelector('input[type="radio"]');
+                        if (radio) radio.checked = false;
+                    });
                     
-                    if (errors.length > 0) {
-                        alert(errors.join('\n'));
-                        return;
-                    }
+                    setTimeout(function() {
+                        addressDropdown.classList.remove('open');
+                        addressBtn.classList.remove('open');
+                    }, 1500);
+                    
+                } catch (err) {
+                    const fallback = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+                    document.getElementById('gpsAddressInput').value = fallback;
+                    gpsResultDesc.textContent = fallback;
+                    gpsResultItem.style.display = 'flex';
+                    if (addressInput) addressInput.value = fallback;
+                    addressDisplay.textContent = '📍 ' + fallback;
                 }
+            },
+            function(error) {
+                gpsSpinner.style.display = 'none';
+                gpsStatusText.textContent = 'Use Current Location';
+                gpsStatusDesc.textContent = 'Auto-detect via GPS';
+                
+                let msg = 'Unable to detect location. ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        msg = 'Location permission denied. Please allow location access.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        msg = 'Location unavailable. Please enter manually.';
+                        break;
+                    case error.TIMEOUT:
+                        msg = 'Location request timed out. Please try again.';
+                        break;
+                }
+                gpsErrorText.textContent = msg;
+                gpsErrorMsg.style.display = 'flex';
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
             }
-            
-            if (currentStep < totalSteps) {
-                currentStep++;
-                showStep(currentStep);
-            }
-        });
-    }
+        );
+    };
 
-    if (prevBtn) {
-        prevBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (currentStep > 1) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        });
-    }
-
-    // ========== ADDRESS SELECTION ==========
-    const addressCards = document.querySelectorAll('.address-card');
-    const newAddressInputs = document.querySelectorAll('#newReceiverName, #newPhone, #newAddress');
-    const newAddressHint = document.getElementById('newAddressHint');
-
-    addressCards.forEach(function (card) {
-        card.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            addressCards.forEach(function (c) { c.classList.remove('address-card-selected'); });
-            card.classList.add('address-card-selected');
-            
-            const radio = card.querySelector('input[type="radio"]');
-            if (radio) radio.checked = true;
-            
-            newAddressInputs.forEach(function(input) { input.value = ''; });
-            if (newAddressHint) newAddressHint.style.display = 'none';
-        });
-    });
-
-    newAddressInputs.forEach(function(input) {
-        input.addEventListener('input', function() {
-            var anyFilled = Array.from(newAddressInputs).some(function(inp) { return inp.value.trim() !== ''; });
-            if (anyFilled) {
-                addressCards.forEach(function(c) { c.classList.remove('address-card-selected'); });
-                document.querySelectorAll('input[name="address_id"]').forEach(function(r) { r.checked = false; });
-                if (newAddressHint) newAddressHint.style.display = 'block';
-            } else {
-                if (newAddressHint) newAddressHint.style.display = 'none';
-            }
-        });
-    });
-
-    // ========== PAYMENT METHOD SELECTION ==========
-    const paymentOptions = document.querySelectorAll('.payment-option');
-    paymentOptions.forEach(function (option) {
-        option.addEventListener('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            paymentOptions.forEach(function (o) { o.classList.remove('selected'); });
-            option.classList.add('selected');
-            
-            const radio = option.querySelector('input');
-            if (radio) radio.checked = true;
-        });
-    });
-
-    // ========== PREVENT EARLY FORM SUBMISSION ==========
-    form.addEventListener('submit', function(e) {
-        if (currentStep !== totalSteps) {
-            e.preventDefault();
-            alert('Please complete all steps before placing your order.');
-            showStep(currentStep);
-            return false;
+    // ============================================
+    // 8. KEYBOARD SHORTCUTS
+    // ============================================
+    document.addEventListener('keydown', function(e) {
+        // Escape to close dropdown
+        if (e.key === 'Escape') {
+            if (addressDropdown) addressDropdown.classList.remove('open');
+            if (addressBtn) addressBtn.classList.remove('open');
         }
         
-        // Final validation
-        const selectedAddress = document.querySelector('input[name="address_id"]:checked');
-        const newName = document.getElementById('newReceiverName');
-        const newPhone = document.getElementById('newPhone');
-        const newAddress = document.getElementById('newAddress');
-        
-        if (!selectedAddress) {
-            if (!newName || !newName.value.trim() || 
-                !newPhone || !newPhone.value.trim() || 
-                !newAddress || !newAddress.value.trim()) {
-                e.preventDefault();
-                alert('Please provide a shipping address.');
-                showStep(1);
-                return false;
-            }
-            
-            if (!/^09[0-9]{9}$/.test(newPhone.value.trim())) {
-                e.preventDefault();
-                alert('Phone must be 11 digits starting with 09 (e.g. 09xxxxxxxxx)');
-                showStep(1);
-                return false;
+        // Enter on Step 1 to go to Step 2
+        if (e.key === 'Enter' && document.querySelector('.checkout-step.active[data-step="1"]')) {
+            const activeElement = document.activeElement;
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                // Let the form handle it
             }
         }
-        
-        return true;
     });
 
-    // ========== CONFIRM SECTION ==========
-    function updateConfirmSection() {
-        const confirmAddr = document.getElementById('confirmAddress');
-        const confirmAddrText = document.getElementById('confirmAddressText');
-        
-        if (confirmAddr && confirmAddrText) {
-            const selectedAddress = document.querySelector('input[name="address_id"]:checked');
-            if (selectedAddress) {
-                const card = selectedAddress.closest('.address-card');
-                if (card) {
-                    const name = card.querySelector('.address-card-receiver').textContent;
-                    const phone = card.querySelector('.address-card-phone').textContent;
-                    const addr = card.querySelector('.address-card-line').textContent;
-                    confirmAddrText.textContent = name + ' • ' + phone + ' • ' + addr;
-                    confirmAddr.style.display = 'block';
-                }
-            } else {
-                const newName = document.getElementById('newReceiverName');
-                const newPhone = document.getElementById('newPhone');
-                const newAddr = document.getElementById('newAddress');
-                if (newName && newName.value && newPhone && newPhone.value && newAddr && newAddr.value) {
-                    confirmAddrText.textContent = newName.value + ' • ' + newPhone.value + ' • ' + newAddr.value;
-                    confirmAddr.style.display = 'block';
-                }
-            }
+    // ============================================
+    // 9. INITIALIZE - Load first saved address
+    // ============================================
+    const firstSaved = document.querySelector('.address-option-item.address-saved.selected');
+    if (firstSaved) {
+        const name = firstSaved.dataset.name || '';
+        const address = firstSaved.dataset.address || '';
+        if (addressDisplay) {
+            addressDisplay.textContent = name + ' • ' + address;
         }
+        updateConfirmAddress(name, address);
     }
 
-    // ========== INIT ==========
-    showStep(1);
-
-})();
+});

@@ -242,8 +242,45 @@
                     </div>
                 </div>
 
-                {{-- Description --}}
+                {{-- Book Type Toggle --}}
                 <div class="admin-form-group admin-form-group-full">
+                    <label class="admin-form-label">Book Format</label>
+                    <label class="admin-form-toggle">
+                        <input type="checkbox" name="is_ebook" value="1"
+                               {{ old('is_ebook') ? 'checked' : '' }}
+                               onchange="toggleEbookFields(this)" id="isEbookCheckbox">
+                        <span class="admin-form-toggle-switch"></span>
+                        <span class="admin-form-toggle-label">
+                            <i class="fas fa-tablet-screen-button"></i> This is an E-Book
+                        </span>
+                    </label>
+                </div>
+
+                {{-- E-Book PDF Upload --}}
+                <div class="admin-form-group admin-form-group-full" id="ebookFields" style="display: {{ old('is_ebook') ? 'block' : 'none' }};">
+                    <label for="ebook_file" class="admin-form-label">E-Book PDF File</label>
+                    <div class="admin-form-file-upload">
+                        <i class="fas fa-file-pdf admin-form-file-icon"></i>
+                        <div class="admin-form-file-info">
+                            <span class="admin-form-file-label">Upload PDF</span>
+                            <span class="admin-form-file-hint">Max 20MB</span>
+                        </div>
+                        <input type="file" id="ebook_file" name="ebook_file"
+                               class="admin-form-input-file @error('ebook_file') admin-form-input-error @enderror" accept=".pdf">
+                        <label for="ebook_file" class="admin-form-file-btn">
+                            <i class="fas fa-upload"></i> Choose File
+                        </label>
+                    </div>
+                    @error('ebook_file')
+                        <span class="admin-form-error">{{ $message }}</span>
+                    @enderror
+
+                    <label for="ebook_price" class="admin-form-label" style="margin-top:16px;">E-Book Price (MMK)</label>
+                    <input type="number" id="ebook_price" name="ebook_price"
+                           class="admin-form-input"
+                           value="{{ old('ebook_price', $book->ebook_price) }}" placeholder="e.g. 9999" step="0.01" min="0">
+                    <span class="admin-form-hint">Usually cheaper than physical book</span>
+                </div>
                     <label for="description" class="admin-form-label">Description</label>
                     <textarea id="description" name="description"
                               class="admin-form-input admin-form-textarea @error('description') admin-form-input-error @enderror"
@@ -299,8 +336,14 @@
 
 @push('scripts')
     <script>
-        window.selectedAuthors = @json(old('author_ids', $selectedAuthors));
+        window.bookCreateRoutes = {
+            aiDescription: '{{ route("admin.ai.generate-description") }}',
+            aiBulkCreate: '{{ route("admin.ai.bulk-create") }}',
+            booksIndex: '{{ route("admin.books.index") }}',
+        };
+        window.selectedAuthors = @json(old('author_ids', []));
     </script>
     <script src="{{ asset('js/admin/form.js') }}"></script>
     <script src="{{ asset('js/admin/drag-drop-authors.js') }}"></script>
+    <script src="{{ asset('js/admin/book-create.js') }}"></script>
 @endpush

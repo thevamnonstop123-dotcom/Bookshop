@@ -1,0 +1,44 @@
+[1mdiff --git a/resources/views/customer/home.blade.php b/resources/views/customer/home.blade.php[m
+[1mindex b3fb6c8..725c85d 100644[m
+[1m--- a/resources/views/customer/home.blade.php[m
+[1m+++ b/resources/views/customer/home.blade.php[m
+[36m@@ -44,8 +44,8 @@[m
+                                     <a href="{{ route('books.index') }}" class="btn-hero btn-hero-primary">[m
+                                         Shop Now <i class="fas fa-arrow-right"></i>[m
+                                     </a>[m
+[31m-                                    <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="btn-hero btn-hero-ghost">[m
+[31m-                                        New Arrivals[m
+[32m+[m[32m                                    <a href="{{ route('books.index', ['sort' => 'newest']) }}" class="btn-hero btn-hero-ghost">[m
+[32m+[m[32m                                        Newest[m
+                                     </a>[m
+                                 </div>[m
+                             </div>[m
+[36m@@ -90,8 +90,8 @@[m
+                                 <a href="{{ route('books.index') }}" class="btn-hero btn-hero-primary">[m
+                                     Explore Books <i class="fas fa-arrow-right"></i>[m
+                                 </a>[m
+[31m-                                <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="btn-hero btn-hero-ghost">[m
+[31m-                                    New Arrivals[m
+[32m+[m[32m                                <a href="{{ route('books.index', ['sort' => 'newest']) }}" class="btn-hero btn-hero-ghost">[m
+[32m+[m[32m                                    Newest[m
+                                 </a>[m
+                             </div>[m
+                         </div>[m
+[36m@@ -257,7 +257,7 @@[m
+                 <div class="section-heading-row">[m
+                     <div class="heading-text-group">[m
+                         <span class="section-eyebrow">Fresh</span>[m
+[31m-                        <h2 class="section-title">New Arrivals</h2>[m
+[32m+[m[32m                        <h2 class="section-title">Newest</h2>[m
+                         <p class="section-subtitle">Just added to our shelves</p>[m
+                     </div>[m
+                 </div>[m
+[36m@@ -277,7 +277,7 @@[m
+                     </button>[m
+                 </div>[m
+                 <div class="section-view-all-wrapper">[m
+[31m-                    <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="section-view-all">[m
+[32m+[m[32m                    <a href="{{ route('books.index', ['sort' => 'newest']) }}" class="section-view-all">[m
+                         View All <i class="fas fa-arrow-right"></i>[m
+                     </a>[m
+                 </div>[m

@@ -256,7 +256,6 @@
                         </span>
                     </label>
                 </div>
-
                 {{-- E-Book PDF Upload --}}
                 <div class="admin-form-group admin-form-group-full" id="ebookFields" style="display: {{ old('is_ebook') ? 'block' : 'none' }};">
                     <label for="ebook_file" class="admin-form-label">E-Book PDF File</label>
@@ -275,9 +274,13 @@
                     @error('ebook_file')
                         <span class="admin-form-error">{{ $message }}</span>
                     @enderror
-                </div>
 
-                {{-- Description --}}
+                    <label for="ebook_price" class="admin-form-label" style="margin-top:16px;">E-Book Price (MMK)</label>
+                    <input type="number" id="ebook_price" name="ebook_price"
+                           class="admin-form-input"
+                           value="{{ old('ebook_price') }}" placeholder="e.g. 9999" step="0.01" min="0">
+                    <span class="admin-form-hint">Usually cheaper than physical book</span>
+                </div>
                 <div class="admin-form-group admin-form-group-full">
                     <label for="description" class="admin-form-label">Description</label>
                     <textarea id="description" name="description"

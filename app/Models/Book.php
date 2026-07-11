@@ -195,6 +195,14 @@ public function discountPercentage(): int
         return array_merge($config, ["status" => $status]);
     }
 
+    public function getPriceForFormat(string $format = "physical"): float
+    {
+        if ($format === "ebook" && $this->ebook_price) {
+            return (float) $this->ebook_price;
+        }
+        return $this->isOnSale() ? (float) $this->sale_price : (float) $this->price;
+    }
+
     public function isPurchasable(): bool
     {
         return in_array($this->availability_status, ["in_stock", "low_stock", "pre_order"]);

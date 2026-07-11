@@ -8,7 +8,6 @@ class WishlistService
 {
     /**
      * Toggle wishlist: add if not exists, remove if exists.
-     * Returns the new state (true = added, false = removed).
      */
     public function toggle(int $customerId, int $bookId): bool
     {
@@ -30,6 +29,16 @@ class WishlistService
     }
 
     /**
+     * Remove item from wishlist.
+     */
+    public function remove(int $customerId, int $bookId): bool
+    {
+        return Wishlist::where('customer_id', $customerId)
+            ->where('book_id', $bookId)
+            ->delete() > 0;
+    }
+
+    /**
      * Check if a book is wishlisted.
      */
     public function isWishlisted(int $customerId, int $bookId): bool
@@ -40,18 +49,18 @@ class WishlistService
     }
 
     /**
-     * Get all wishlisted books for a customer.
+     * Get wishlist items for a customer.
      */
     public function getWishlist(int $customerId)
     {
-        return Wishlist::with('book.authors')
+        return Wishlist::with('book')
             ->where('customer_id', $customerId)
             ->latest()
             ->get();
     }
 
     /**
-     * Get wishlisted book IDs for a customer (for heart icon check).
+     * Get wishlisted book IDs.
      */
     public function getWishlistedIds(int $customerId): array
     {

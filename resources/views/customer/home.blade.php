@@ -44,7 +44,7 @@
                                     <a href="{{ route('books.index') }}" class="btn-hero btn-hero-primary">
                                         Shop Now <i class="fas fa-arrow-right"></i>
                                     </a>
-                                    <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="btn-hero btn-hero-ghost">
+                                    <a href="{{ route('books.index', ['sort' => 'newest']) }}" class="btn-hero btn-hero-ghost">
                                         New Arrivals
                                     </a>
                                 </div>
@@ -90,7 +90,7 @@
                                 <a href="{{ route('books.index') }}" class="btn-hero btn-hero-primary">
                                     Explore Books <i class="fas fa-arrow-right"></i>
                                 </a>
-                                <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="btn-hero btn-hero-ghost">
+                                <a href="{{ route('books.index', ['sort' => 'newest']) }}" class="btn-hero btn-hero-ghost">
                                     New Arrivals
                                 </a>
                             </div>
@@ -195,7 +195,7 @@
                     <button class="carousel-arrow carousel-arrow-left" id="bestSellersPrev" aria-label="Previous books">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <div class="carousel-track-wrapper">
+                    <div class="carousel-track-wrapper" id="bestSellersWrapper">
                         <div class="carousel-track" id="bestSellersTrack">
                             @foreach($bestSellers as $book)
                                 @include('components.customer.book-card', ['book' => $book])
@@ -206,7 +206,9 @@
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
-                 <div class="section-view-all-wrapper">
+                {{-- DOTS --}}
+                <div class="carousel-dots" id="bestSellersDots"></div>
+                <div class="section-view-all-wrapper">
                     <a href="{{ route('books.index') }}" class="section-view-all">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
@@ -265,7 +267,7 @@
                     <button class="carousel-arrow carousel-arrow-left" id="newArrivalsPrev" aria-label="Previous books">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <div class="carousel-track-wrapper">
+                    <div class="carousel-track-wrapper" id="newArrivalsWrapper">
                         <div class="carousel-track" id="newArrivalsTrack">
                             @foreach($newBooks as $book)
                                 @include('components.customer.book-card', ['book' => $book])
@@ -276,14 +278,17 @@
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
+                {{-- DOTS --}}
+                <div class="carousel-dots" id="newArrivalsDots"></div>
                 <div class="section-view-all-wrapper">
-                    <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="section-view-all">
+                    <a href="{{ route('books.index', ['sort' => 'newest']) }}" class="section-view-all">
                         View All <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
             </div>
         </section>
     @endif
+
 
     {{-- PROMOTIONS --}}
     <section class="section promotions-section">

@@ -30,8 +30,8 @@ class HomeController extends Controller
         ->limit(4)
         ->get();
 
-        $newBooks = Book::with(['authors','category'])->where('status','active')->latest()->limit(5)->get();
-        $bestSellers = Book::with(['authors','category'])->where('status','active')->inRandomOrder()->limit(5)->get();
+        $newBooks = Book::with(['authors','category'])->where('status','active')->latest()->get();
+        $bestSellers = Book::with(['authors','category'])->where('status','active')->withCount('orderItems')->orderByDesc('order_items_count')->get();
 
         $topAuthors = \App\Models\Author::withCount('books')
             ->where('status', 'active')

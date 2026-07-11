@@ -38,6 +38,7 @@ class BookRequest extends FormRequest
             'description'    => 'nullable|string|max:5000',
             'status'         => 'required|in:active,inactive',
             'is_ebook'       => 'boolean',
+            'ebook_price'    => 'nullable|numeric|min:0',
             'ebook_file'     => 'nullable|file|mimes:pdf|max:20480',
             'author_ids'     => 'required|array|min:1',
             'author_ids.*'   => 'exists:authors,id',

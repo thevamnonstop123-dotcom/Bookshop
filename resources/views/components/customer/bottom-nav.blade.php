@@ -9,17 +9,17 @@
         <i class="fas fa-book"></i><span>Books</span>
     </a>
 
+    {{-- More --}}
+    <button class="bottom-nav-item" id="morePanelToggle" onclick="toggleMorePanel()" aria-label="More">
+        <i class="fas fa-th"></i><span>More</span>
+    </button>
+
     {{-- Cart with count --}}
     <a href="#" class="bottom-nav-item" id="mobileCartBtn" onclick="openCartDrawer(); return false;">
         <i class="fas fa-shopping-cart"></i>
         <span>Cart</span>
         <span class="navbar-cart-badge" id="mobileCartCount" style="display: {{ isset($cartCount) && $cartCount > 0 ? 'flex' : 'none' }}">{{ $cartCount ?? 0 }}</span>
     </a>
-
-    {{-- More --}}
-    <button class="bottom-nav-item" id="morePanelToggle" onclick="toggleMorePanel()" aria-label="More">
-        <i class="fas fa-ellipsis"></i><span>More</span>
-    </button>
 
     {{-- Profile --}}
     @auth('customer')

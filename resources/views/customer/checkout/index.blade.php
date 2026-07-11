@@ -31,245 +31,249 @@
         <form action="{{ route('checkout.process') }}" method="POST" id="checkoutForm">
             @csrf
 
-            {{-- STEP INDICATOR --}}
-            <div class="checkout-steps-indicator">
-                <div class="step active" data-step-indicator="1">1. Address</div>
-                <div class="step" data-step-indicator="2">2. Payment</div>
-                <div class="step" data-step-indicator="3">3. Confirm</div>
+            {{-- Step Indicator (2 Steps) --}}
+            <div class="checkout-steps">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Address</span>
+                </div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Payment &amp; Confirm</span>
+                </div>
             </div>
 
             <div class="checkout-layout">
 
                 {{-- LEFT SIDE --}}
                 <div class="checkout-main">
+                   {{-- Address Dropdown --}}
+                    <div class="address-select-wrapper">
+                        <div class="address-option" id="addressOption">
+                            <button type="button" class="address-select-btn" id="addressSelectBtn">
+                                <span class="address-select-label">
+                                    <i class="fas fa-map-pin"></i>
+                                    <span id="addressDisplayText">Select an address</span>
+                                </span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
 
-                    {{-- STEP 1: ADDRESS --}}
-                    <div class="checkout-step active" data-step="1">
-                        <div class="checkout-card">
-                            <div class="checkout-card-header">
-                                <div class="checkout-card-icon"><i class="fas fa-truck"></i></div>
-                                <div>
-                                    <h3 class="checkout-card-title">Shipping Address</h3>
-                                    <p class="checkout-card-subtitle">Choose how to provide your address</p>
+                            {{-- Dropdown --}}
+                            <div class="address-dropdown" id="addressDropdown">
+                                <div class="address-dropdown-search">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search addresses..." id="addressSearchInput">
                                 </div>
-                            </div>
 
-                            {{-- Option 1: GPS Auto-Location --}}
-                            <div class="address-gps-section">
-                                <button type="button" class="gps-detect-btn" id="gpsDetectBtn" onclick="detectLocation()">
-                                    <div class="gps-detect-icon">
+                                {{-- GPS Option --}}
+                                <div class="address-option-item gps-option" id="gpsOptionBtn" onclick="detectLocation()">
+                                    <div class="address-option-icon">
                                         <i class="fas fa-location-crosshairs"></i>
                                     </div>
-                                    <div class="gps-detect-content">
-                                        <span class="gps-detect-title">Use My Current Location</span>
-                                        <span class="gps-detect-desc">Auto-detect your address via GPS</span>
+                                    <div class="address-option-content">
+                                        <span class="address-option-title" id="gpsStatusText">Use Current Location</span>
+                                        <span class="address-option-desc" id="gpsStatusDesc">Auto-detect via GPS</span>
                                     </div>
-                                    <div class="gps-detect-arrow">
-                                        <i class="fas fa-chevron-right"></i>
+                                    <div class="address-option-spinner" id="gpsSpinner" style="display:none;">
+                                        <i class="fas fa-spinner fa-spin"></i>
                                     </div>
-                                </button>
-                                
-                                {{-- GPS Result Display --}}
-                                <div class="gps-result" id="gpsResult" style="display:none;">
-                                    <div class="gps-result-header">
-                                        <i class="fas fa-map-pin"></i>
-                                        <span>Detected Address</span>
-                                    </div>
-                                    <div class="gps-result-address" id="gpsAddress"></div>
-                                    <div class="gps-result-map" id="gpsMap" style="height:150px;border-radius:10px;margin-top:8px;"></div>
-                                    <button type="button" class="gps-change-btn" onclick="detectLocation()">
-                                        <i class="fas fa-refresh"></i> Re-detect
-                                    </button>
                                 </div>
-                                
-                                <div class="gps-loading" id="gpsLoading" style="display:none;">
-                                    <i class="fas fa-spinner fa-spin"></i> Detecting your location...
+
+                                {{-- GPS Result --}}
+                                <div class="address-option-item gps-result-item" id="gpsResultItem" style="display:none;">
+                                    <div class="address-option-icon" style="background:#dcfce7;color:#16a34a;">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="address-option-content">
+                                        <span class="address-option-title" id="gpsResultTitle">Location Detected</span>
+                                        <span class="address-option-desc" id="gpsResultDesc">Tap to use this address</span>
+                                    </div>
+                                    <span class="address-option-check"><i class="fas fa-check-circle"></i></span>
                                 </div>
-                                <div class="gps-error" id="gpsError" style="display:none;"></div>
-                            </div>
 
-                            <div class="checkout-section-divider">
-                                <span>Or choose another option</span>
-                            </div>
-
-                            {{-- Option 2: Saved Addresses --}}
-                            @if ($addresses->count() > 0)
-                                <div class="address-saved-list">
-                                    <label class="section-label">Saved Addresses</label>
+                                {{-- Saved Addresses --}}
+                                @if ($addresses->count() > 0)
+                                    <div class="address-dropdown-divider">Saved Addresses</div>
                                     @foreach ($addresses as $address)
-                                        <label class="address-card {{ $loop->first ? 'address-card-selected' : '' }}">
-                                            <input type="radio" name="address_id" value="{{ $address->id }}" 
-                                                {{ $loop->first ? 'checked' : '' }}>
-                                            <div class="address-card-body">
-                                                <div class="address-card-receiver">{{ $address->receiver_name }}</div>
-                                                <div class="address-card-phone">{{ $address->phone_number }}</div>
-                                                <div class="address-card-line">{{ $address->address_line }}</div>
+                                        <label class="address-option-item address-saved {{ $loop->first ? 'selected' : '' }}" 
+                                            data-address-id="{{ $address->id }}"
+                                            data-name="{{ $address->receiver_name }}"
+                                            data-phone="{{ $address->phone_number }}"
+                                            data-address="{{ $address->address_line }}">
+                                            <input type="radio" name="address_id" value="{{ $address->id }}" {{ $loop->first ? 'checked' : '' }}>
+                                            <div class="address-option-content">
+                                                <span class="address-option-title">{{ $address->receiver_name }}</span>
+                                                <span class="address-option-desc">{{ Str::limit($address->address_line, 40) }}</span>
                                             </div>
-                                            <div class="address-card-check"><i class="fas fa-check-circle"></i></div>
+                                            <span class="address-option-check"><i class="fas fa-check-circle"></i></span>
                                         </label>
                                     @endforeach
-                                </div>
-                            @endif
+                                @endif
 
-                            {{-- Option 3: New Address Form --}}
-                            <div class="checkout-section-divider">
-                                <span>Or enter manually</span>
-                            </div>
-
-                            <div class="checkout-form-grid">
-                                <div class="form-group-full">
-                                    <label class="form-label">Receiver Name</label>
-                                    <input type="text" name="receiver_name" class="checkout-input" 
-                                        placeholder="Enter full name" id="newReceiverName">
-                                </div>
-                                <div class="form-group-full">
-                                    <label class="form-label">Phone Number</label>
-                                    <input type="tel" name="phone_number" class="checkout-input" 
-                                        placeholder="09xxxxxxxxx" id="newPhone" maxlength="11" inputmode="numeric" pattern="[0-9]*" autocomplete="tel">
-                                </div>
-                                <div class="form-group-full">
-                                    <label class="form-label">Full Address</label>
-                                    <textarea name="address_line" class="checkout-input checkout-textarea" 
-                                        placeholder="Street, City, Region" rows="2" id="newAddress"></textarea>
+                                {{-- Manual Entry --}}
+                                <div class="address-dropdown-divider">New Address</div>
+                                <div class="address-option-item address-new" onclick="toggleNewAddress()">
+                                    <div class="address-option-icon">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </div>
+                                    <div class="address-option-content">
+                                        <span class="address-option-title">Enter Manually</span>
+                                        <span class="address-option-desc">Add a new shipping address</span>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <p class="new-address-hint" id="newAddressHint" style="display:none;">
-                                <i class="fas fa-info-circle"></i> Fill in the fields above to use a new address
-                            </p>
+                        </div>
+
+                        {{-- Address Form (Always visible, filled when address is selected) --}}
+                        <div class="address-form" id="addressForm">
+                            <div class="address-form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Receiver Name <span class="required">*</span></label>
+                                    <input type="text" name="receiver_name" class="form-control" 
+                                        placeholder="Enter full name" id="receiverName"
+                                        value="{{ $addresses->first()->receiver_name ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Phone Number <span class="required">*</span></label>
+                                    <input type="tel" name="phone_number" class="form-control" 
+                                        placeholder="09xxxxxxxxx" id="phoneNumber" maxlength="11"
+                                        value="{{ $addresses->first()->phone_number ?? '' }}">
+                                </div>
+                                <div class="form-group-full">
+                                    <label class="form-label">Address <span class="required">*</span></label>
+                                    <textarea name="address_line" class="form-control form-textarea" 
+                                            placeholder="Street, City, Region" rows="2" id="addressLine">{{ $addresses->first()->address_line ?? '' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- GPS Error --}}
+                        <div class="gps-error-msg" id="gpsErrorMsg" style="display:none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span id="gpsErrorText"></span>
                         </div>
                     </div>
 
-                    {{-- STEP 2: PAYMENT --}}
+                    {{-- ================================ --}}
+                    {{-- STEP 2: PAYMENT & CONFIRM        --}}
+                    {{-- ================================ --}}
                     <div class="checkout-step" data-step="2">
                         <div class="checkout-card">
                             <div class="checkout-card-header">
-                                <div class="checkout-card-icon"><i class="fas fa-credit-card"></i></div>
-                                <div>
-                                    <h3 class="checkout-card-title">Payment Method</h3>
-                                    <p class="checkout-card-subtitle">Choose your preferred payment option</p>
-                                </div>
+                                <h3 class="checkout-card-title">Payment Method</h3>
                             </div>
 
-                            <div class="payment-methods">
-                                <label class="payment-option selected">
+                            {{-- Payment Grid --}}
+                            <div class="payment-grid">
+                                <label class="payment-card selected">
                                     <input type="radio" name="payment_method" value="stripe" checked>
-                                    <div class="payment-option-icon"><i class="far fa-credit-card"></i></div>
-                                    <div class="payment-option-info">
-                                        <span class="payment-option-name">Credit / Debit Card</span>
-                                        <span class="payment-option-desc">Pay securely via Stripe</span>
+                                    <div class="payment-card-icon stripe">
+                                        <i class="far fa-credit-card"></i>
                                     </div>
-                                    <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">Credit / Debit</span>
+                                        <span class="payment-card-desc">Secure via Stripe</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
                                 </label>
 
-                                <label class="payment-option">
+                                <label class="payment-card">
                                     <input type="radio" name="payment_method" value="kpay">
-                                    <div class="payment-option-icon payment-icon-kpay"><i class="fas fa-mobile-alt"></i></div>
-                                    <div class="payment-option-info">
-                                        <span class="payment-option-name">KBZ Pay</span>
-                                        <span class="payment-option-desc">Pay with KBZ Pay mobile wallet</span>
+                                    <div class="payment-card-icon kpay">
+                                        <img src="{{ asset('paymentLogo/kbzpay.png') }}" alt="KBZ Pay Logo" class="payment-logo">
                                     </div>
-                                    <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">KBZ Pay</span>
+                                        <span class="payment-card-desc">Mobile wallet</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
                                 </label>
 
-                                <label class="payment-option">
+                                <label class="payment-card">
                                     <input type="radio" name="payment_method" value="wave">
-                                    <div class="payment-option-icon payment-icon-wave"><i class="fas fa-wifi"></i></div>
-                                    <div class="payment-option-info">
-                                        <span class="payment-option-name">Wave Pay</span>
-                                        <span class="payment-option-desc">Pay with Wave Pay mobile wallet</span>
+                                    <div class="payment-card-icon wave">
+                                        <img src="{{ asset('paymentLogo/wavepay.png') }}" alt="Wave Pay Logo" class="payment-logo">
                                     </div>
-                                    <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">Wave Pay</span>
+                                        <span class="payment-card-desc">Mobile wallet</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
                                 </label>
 
-                                <label class="payment-option">
+                                <label class="payment-card">
                                     <input type="radio" name="payment_method" value="cod">
-                                    <div class="payment-option-icon payment-icon-cod"><i class="fas fa-hand-holding-dollar"></i></div>
-                                    <div class="payment-option-info">
-                                        <span class="payment-option-name">Cash on Delivery</span>
-                                        <span class="payment-option-desc">Pay when you receive your order</span>
+                                    <div class="payment-card-icon cod">
+                                        <i class="fas fa-hand-holding-dollar"></i>
                                     </div>
-                                    <div class="payment-option-check"><i class="fas fa-check-circle"></i></div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">Cash on Delivery</span>
+                                        <span class="payment-card-desc">Pay on arrival</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
                                 </label>
                             </div>
-                        </div>
-                    </div>
 
-                    {{-- STEP 3: CONFIRM --}}
-                    <div class="checkout-step" data-step="3">
-                        <div class="checkout-card">
-                            <div class="checkout-card-header">
-                                <div class="checkout-card-icon"><i class="fas fa-clipboard-check"></i></div>
-                                <div>
-                                    <h3 class="checkout-card-title">Confirm Order</h3>
-                                    <p class="checkout-card-subtitle">Review your order before placing it</p>
+                            {{-- Trust Badges --}}
+                            <div class="payment-trust">
+                                <span><i class="fas fa-lock"></i> SSL Encrypted</span>
+                                <span><i class="fas fa-shield-alt"></i> Secure</span>
+                                <span><i class="fas fa-headset"></i> 24/7 Support</span>
+                            </div>
+
+                            {{-- ========================================== --}}
+                            {{-- CONFIRM — Address + Place Order --}}
+                            <div class="confirm-section">
+                                <div class="confirm-address-display" id="confirmAddressDisplay">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span id="confirmAddressText">{{ $addresses->first()->receiver_name ?? "No address" }} • {{ $addresses->first()->address_line ?? "No address selected" }}</span>
                                 </div>
+                                <button type="submit" class="checkout-submit-btn">
+                                    <i class="fas fa-lock"></i> Place Order • {{ number_format($total) }} MMK
+                                </button>
                             </div>
 
-                            <div class="confirm-summary">
-                                @foreach ($cart->items as $item)
-                                    @php $price = $item->book->isOnSale() ? $item->book->sale_price : $item->book->price; @endphp
-                                    <div class="summary-item">
-                                        <div class="summary-item-left">
-                                            <span class="summary-item-title">{{ Str::limit($item->book->title, 40) }}</span>
-                                            <span class="summary-item-qty">Qty: {{ $item->quantity }}</span>
-                                        </div>
-                                        <span class="summary-item-price">{{ number_format($price * $item->quantity) }} MMK</span>
-                                    </div>
-                                @endforeach
+                            {{-- Navigation --}}
+                            <div class="checkout-nav">
+                                <button type="button" id="backToStep1" class="btn-ghost">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
                             </div>
-
-                            <div class="confirm-address" id="confirmAddress" style="display:none;">
-                                <strong><i class="fas fa-map-marker-alt"></i> Shipping to:</strong>
-                                <span id="confirmAddressText"></span>
-                            </div>
-
-                            <button type="submit" class="checkout-submit-btn">
-                                <i class="fas fa-lock"></i> Place Order • {{ number_format($total) }} MMK
-                            </button>
                         </div>
                     </div>
 
-                    {{-- NAVIGATION BUTTONS --}}
-                    <div class="checkout-step-actions">
-                        <button type="button" id="prevStep" class="btn btn-outline" style="display:none;">
-                            <i class="fas fa-arrow-left"></i> Back
-                        </button>
-                        <button type="button" id="nextStep" class="checkout-submit-btn">
-                            Continue <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
                 </div>
 
-                {{-- RIGHT SUMMARY --}}
+                {{-- ================================ --}}
+                {{-- RIGHT SIDEBAR (Only summary)      --}}
+                {{-- ================================ --}}
                 <div class="checkout-sidebar">
-                    <div class="checkout-card checkout-summary-card">
-                        <h3 class="checkout-summary-title">Order Summary</h3>
+                    <div class="checkout-summary">
+                        <h4 class="summary-title">Order Summary</h4>
 
                         @foreach ($cart->items as $item)
-                            @php $price = $item->book->isOnSale() ? $item->book->sale_price : $item->book->price; @endphp
+                            @php $price = $item->book->getPriceForFormat($item->format ?? "physical"); @endphp
                             <div class="summary-item">
-                                <div class="summary-item-left">
-                                    <span>{{ Str::limit($item->book->title, 25) }}</span>
-                                    <span class="summary-item-qty">x{{ $item->quantity }}</span>
-                                </div>
-                                <span>{{ number_format($price * $item->quantity) }} MMK</span>
+                                <img src="{{ $item->book->image && $item->book->image !== 'default.png' ? asset('storage/'.$item->book->image) : 'https://placehold.co/48x64/F1F5F9/1E3A8A?text='.urlencode($item->book->title) }}" alt="{{ $item->book->title }}" class="summary-item-img">
+                                <span class="summary-item-title">{{ Str::limit($item->book->title, 20) }}</span>
+                                <span class="summary-item-qty">×{{ $item->quantity }}</span>
+                                <span class="summary-item-price">{{ number_format($price * $item->quantity) }} MMK</span>
                             </div>
                         @endforeach
 
                         @if($savings > 0)
                             <div class="summary-savings">
-                                <i class="fas fa-tag"></i> You save {{ number_format($savings) }} MMK
+                                <i class="fas fa-tag"></i> Save {{ number_format($savings) }} MMK
                             </div>
                         @endif
 
-                        <div class="summary-total-row">
+                        <div class="summary-total">
                             <span>Total</span>
                             <span>{{ number_format($total) }} MMK</span>
                         </div>
-                        
+
                         <div class="summary-secure">
-                            <i class="fas fa-lock"></i> Secure checkout • SSL encrypted
+                            <i class="fas fa-lock"></i> Secure checkout
                         </div>
                     </div>
                 </div>
@@ -287,137 +291,6 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/customer/checkout.js') }}"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-// ========== GPS LOCATION DETECTION ==========
-let gpsMap = null;
-let gpsMarker = null;
-
-function detectLocation() {
-    const gpsResult = document.getElementById('gpsResult');
-    const gpsLoading = document.getElementById('gpsLoading');
-    const gpsError = document.getElementById('gpsError');
-    const gpsAddress = document.getElementById('gpsAddress');
-    
-    // Reset
-    gpsResult.style.display = 'none';
-    gpsError.style.display = 'none';
-    gpsLoading.style.display = 'flex';
-    
-    if (!navigator.geolocation) {
-        gpsLoading.style.display = 'none';
-        gpsError.style.display = 'block';
-        gpsError.innerHTML = '<i class="fas fa-exclamation-circle"></i> Geolocation not supported by your browser';
-        return;
-    }
-    
-    navigator.geolocation.getCurrentPosition(
-        // Success
-        async function(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            
-            document.getElementById('gpsLat').value = lat;
-            document.getElementById('gpsLng').value = lng;
-            
-            // Reverse geocode using OpenStreetMap Nominatim (free)
-            try {
-                const response = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
-                );
-                const data = await response.json();
-                
-                const address = data.display_name || `${lat}, ${lng}`;
-                gpsAddress.textContent = address;
-                document.getElementById('gpsAddressInput').value = address;
-                
-                // Fill the new address field with GPS address
-                const newAddressInput = document.getElementById('newAddress');
-                if (newAddressInput) {
-                    newAddressInput.value = address;
-                }
-                
-                // Fill receiver name from road/suburb if available
-                const road = data.address?.road || '';
-                const suburb = data.address?.suburb || data.address?.city || '';
-                const receiverInput = document.getElementById('newReceiverName');
-                if (receiverInput && !receiverInput.value) {
-                    // Don't overwrite if user already typed
-                }
-                
-                gpsLoading.style.display = 'none';
-                gpsResult.style.display = 'block';
-                
-                // Show mini map
-                setTimeout(function() {
-                    initGpsMap(lat, lng);
-                }, 100);
-                
-                // Deselect saved addresses
-                document.querySelectorAll('.address-card').forEach(c => c.classList.remove('address-card-selected'));
-                document.querySelectorAll('input[name="address_id"]').forEach(r => r.checked = false);
-                
-            } catch (err) {
-                gpsAddress.textContent = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-                document.getElementById('gpsAddressInput').value = `Lat: ${lat}, Lng: ${lng}`;
-                gpsLoading.style.display = 'none';
-                gpsResult.style.display = 'block';
-                setTimeout(function() {
-                    initGpsMap(lat, lng);
-                }, 100);
-            }
-        },
-        // Error
-        function(error) {
-            gpsLoading.style.display = 'none';
-            gpsError.style.display = 'block';
-            
-            let msg = 'Unable to detect location. ';
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    msg += 'Location permission denied. Please allow location access.';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    msg += 'Location information unavailable.';
-                    break;
-                case error.TIMEOUT:
-                    msg += 'Location request timed out.';
-                    break;
-            }
-            gpsError.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        }
-    );
-}
-
-function initGpsMap(lat, lng) {
-    const mapEl = document.getElementById('gpsMap');
-    if (!mapEl) return;
-    
-    if (gpsMap) {
-        gpsMap.remove();
-        gpsMap = null;
-    }
-    
-    gpsMap = L.map('gpsMap').setView([lat, lng], 16);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(gpsMap);
-    
-    gpsMarker = L.marker([lat, lng]).addTo(gpsMap)
-        .bindPopup('📍 Your Location')
-        .openPopup();
-    
-    // Invalidate size after display
-    setTimeout(function() {
-        gpsMap.invalidateSize();
-    }, 200);
-}
-</script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{{ asset('js/customer/checkout.js') }}"></script>
 @endpush
