@@ -49,9 +49,9 @@
             <i class="fas fa-fire"></i>
             <span>Best Sellers</span>
         </a>
-        <a href="{{ route('books.index', ['sort' => 'latest']) }}" class="mobile-more-item">
-            <i class="fas fa-sparkles"></i>
-            <span>New Arrivals</span>
+        <a href="{{ route('about') }}" class="mobile-more-item">
+            <i class="fas fa-envelope"></i>
+            <span>Contact Us</span>
         </a>
         @auth('customer')
             <a href="{{ route('customer.orders.index') }}" class="mobile-more-item">

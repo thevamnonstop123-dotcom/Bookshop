@@ -23,6 +23,7 @@ use App\Http\Controllers\Customer\RatingController;
 */
 
 // ========== PUBLIC ROUTES (No auth required) ==========
+Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/', [HomeController::class, 'index'])->name('customer.home');
 Route::get('/books', [BookController::class, 'index'])->name('books.index');
 Route::get('/books/{slug}', [BookController::class, 'show'])->name('books.show');

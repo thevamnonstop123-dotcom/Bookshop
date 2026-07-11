@@ -1,0 +1,226 @@
+/* =============================================
+   CONTACT US PAGE — Premium Responsive
+   ============================================= */
+
+.about-hero {
+    text-align: center; padding: 56px 0 40px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: #fff; margin-bottom: 40px;
+}
+.about-hero h1 { font-size: 32px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.about-hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 500px; margin: 0 auto; }
+
+.about-page { padding: 0 0 60px; }
+
+/* Contact Cards */
+.about-contact {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px;
+}
+.about-contact-card {
+    background: var(--color-surface); border: 1px solid var(--color-border-light);
+    border-radius: 14px; padding: 22px 18px; display: flex; align-items: flex-start; gap: 14px;
+    transition: all 0.2s ease;
+}
+.about-contact-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.about-contact-icon {
+    width: 46px; height: 46px; border-radius: 12px; background: var(--color-bg);
+    display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--color-primary); flex-shrink: 0;
+}
+.about-contact-info h4 { font-size: 14px; font-weight: 700; margin-bottom: 2px; color: var(--color-text); }
+.about-contact-info p { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+.about-contact-sub { font-size: 11px; color: var(--color-text-muted); display: block; margin-top: 4px; }
+
+/* Form */
+.about-form-card {
+    background: var(--color-surface); border: 1px solid var(--color-border-light);
+    border-radius: 16px; padding: 32px; margin-bottom: 40px;
+}
+.about-form-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.about-form-card > p { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 24px; }
+
+.about-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.about-form-full { grid-column: 1 / -1; }
+.about-form-group { display: flex; flex-direction: column; gap: 6px; }
+.about-form-group label { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
+.about-form-group input,
+.about-form-group textarea {
+    padding: 10px 14px; border: 1.5px solid var(--color-border); border-radius: 10px;
+    font-size: 13px; color: var(--color-text); background: var(--color-bg);
+    font-family: var(--font-body); transition: border-color 0.2s;
+}
+.about-form-group input:focus,
+.about-form-group textarea:focus { outline: none; border-color: var(--color-primary); }
+.about-form-group textarea { resize: vertical; min-height: 100px; }
+
+.about-form-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px;
+    background: var(--color-primary); color: #fff; border: none; border-radius: 12px;
+    font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 20px;
+    transition: all 0.2s; font-family: var(--font-body);
+}
+.about-form-btn:hover { background: var(--color-primary-dark); }
+
+/* Map */
+.about-map-placeholder {
+    text-align: center; padding: 48px; background: var(--color-surface);
+    border: 1px solid var(--color-border-light); border-radius: 16px;
+}
+.about-map-icon { font-size: 36px; color: var(--color-primary); margin-bottom: 12px; }
+.about-map-placeholder h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.about-map-placeholder p { font-size: 13px; color: var(--color-text-secondary); }
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .about-contact { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .about-hero { padding: 40px 20px 30px; }
+    .about-hero h1 { font-size: 24px; }
+    .about-hero p { font-size: 13px; }
+    .about-contact { grid-template-columns: 1fr; }
+    .about-form-card { padding: 20px; }
+    .about-form-grid { grid-template-columns: 1fr; }
+    .about-map-placeholder { padding: 32px 20px; }
+}
+
+/* Map Container */
+.about-map-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--color-border-light);
+    height: 320px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.about-map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Map placeholder (shown before iframe loads) */
+.about-map-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.about-map-overlay i {
+    font-size: 48px;
+    color: var(--color-primary);
+    margin-bottom: 12px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.about-map-overlay h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.about-map-overlay p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.about-map-overlay .loading-text {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .about-map-container {
+        height: 240px;
+        border-radius: 12px;
+    }
+}
+
+/* Hero Badge & Stats */
+.about-hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: #FBBF24;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.about-hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.about-hero-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+}
+
+.about-hero-stat i {
+    color: #FBBF24;
+    font-size: 16px;
+}
+
+/* Bottom Row: Form + Map side by side */
+.about-bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.about-form-card {
+    margin-bottom: 0;
+}
+
+.about-map-container {
+    height: 100%;
+    min-height: 450px;
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .about-bottom-row {
+        grid-template-columns: 1fr;
+    }
+    .about-map-container {
+        min-height: 300px;
+    }
+    .about-hero-stats {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-hero-stats {
+        gap: 12px;
+        flex-direction: column;
+        align-items: center;
+    }
+    .about-hero-stat {
+        font-size: 12px;
+    }
+}

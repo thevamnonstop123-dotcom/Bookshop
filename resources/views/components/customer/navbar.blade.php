@@ -13,7 +13,7 @@
                 <li><a href="{{ route('customer.home') }}" class="navbar-link {{ request()->routeIs('customer.home') ? 'navbar-link-active' : '' }}">Home</a></li>
                 <li><a href="{{ route('books.index') }}" class="navbar-link {{ request()->routeIs('books.index') && !request('sort') ? 'navbar-link-active' : '' }}">Books</a></li>
                 <li><a href="{{ route('authors.index') }}" class="navbar-link {{ request()->routeIs('authors.*') ? 'navbar-link-active' : '' }}">Authors</a></li>
-                <li><a href="{{ route('books.index', ['sort' => 'bestseller']) }}" class="navbar-link">Best Sellers</a></li>
+                <li><a href="{{ route('about') }}" class="navbar-link {{ request()->routeIs('about') ? 'navbar-link-active' : '' }}">Contact Us</a></li>
             </ul>
         </nav>
 

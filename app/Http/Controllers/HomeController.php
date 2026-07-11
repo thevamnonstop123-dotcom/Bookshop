@@ -12,6 +12,11 @@ use App\Services\Customer\WishlistService;
 
 class HomeController extends Controller
 {
+    public function about()
+    {
+        return view("customer.about");
+    }
+
     public function index()
     {
         $banners = Banner::where('status','active')
