@@ -1,5 +1,4 @@
 /* ==========================================================================
-   NAVBAR COMPONENT — Premium Educational E-commerce
    Aligned with Design System (No Hardcoded Values)
    ========================================================================== */
 
@@ -971,120 +970,7 @@
     }
 }
 
-/* =============================================
-   DARK MODE SUPPORT
-   ============================================= */
-@media (prefers-color-scheme: dark) {
-    .navbar {
-        background: rgba(30, 41, 59, 0.92);
-        border-bottom-color: #334155;
-    }
 
-    .navbar-search-input {
-        background: #1e293b;
-        border-color: #334155;
-        color: #e2e8f0;
-    }
-
-    .navbar-search-input::placeholder {
-        color: #64748b;
-    }
-
-    .navbar-search-dropdown {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .navbar-search-dropdown-item:hover {
-        background: #0f172a;
-    }
-
-    .navbar-user-panel {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .navbar-user-links a:hover {
-        background: #0f172a;
-    }
-
-    .navbar-notification-panel {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .bottom-nav {
-        background: rgba(30, 41, 59, 0.92);
-        border-top-color: #334155;
-    }
-
-    .bottom-nav-item {
-        color: #94a3b8;
-    }
-
-    .bottom-nav-item.active {
-        color: #60a5fa;
-    }
-
-    .mobile-more-panel {
-        background: #1e293b;
-        border-top-color: #334155;
-    }
-
-    .mobile-more-item:hover {
-        background: #0f172a;
-    }
-
-    .navbar-search-overlay {
-        background: #1e293b;
-    }
-
-    .navbar-search-overlay-input {
-        background: #0f172a;
-        border-color: #334155;
-        color: #e2e8f0;
-    }
-
-    .notification-item.unread {
-        background: rgba(37, 99, 235, 0.15);
-    }
-
-    .notification-item:hover {
-        background: #0f172a;
-    }
-
-    .navbar-search-clear:hover {
-        background: #450a0a;
-        color: #f87171;
-    }
-
-    .navbar-search-suggestion-delete:hover {
-        background: #450a0a;
-        color: #f87171;
-    }
-
-    .navbar-search-clear-all:hover {
-        background: #450a0a;
-    }
-
-    .navbar-user-logout:hover {
-        background: #dc2626;
-        color: #fff;
-    }
-
-    .mobile-more-logout:hover {
-        background: #dc2626;
-        color: #fff;
-    }
-
-    .search-fab {
-        background: #2563eb;
-    }
-
-    .search-fab:hover {
-        background: #1d4ed8;
-    }
-}
 
 /* ============================================
    SEARCH HISTORY / RECENT SEARCHES - FIXED
@@ -1278,39 +1164,6 @@
     font-size: 13px;
 }
 
-/* ============================================
-   DARK MODE
-   ============================================ */
-@media (prefers-color-scheme: dark) {
-    .navbar-search-suggestion-item-wrap:hover {
-        background: #1e293b;
-    }
-    
-    .navbar-search-suggestion-item-wrap:active {
-        background: #0f172a;
-    }
-    
-    .navbar-search-suggestion-item {
-        color: #e2e8f0;
-    }
-    
-    .navbar-search-suggestion-item i {
-        color: #64748b;
-    }
-    
-    .navbar-search-clear-all:hover {
-        background: #450a0a;
-    }
-    
-    .navbar-search-suggestion-delete:hover {
-        background: #450a0a;
-        color: #f87171;
-    }
-    
-    .navbar-search-dropdown .navbar-search-suggestion-item-wrap:hover {
-        background: #0f172a;
-    }
-}
 
 
 /* Mobile search result images */

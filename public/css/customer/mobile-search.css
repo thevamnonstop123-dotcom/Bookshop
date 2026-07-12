@@ -313,59 +313,6 @@
 /* =============================================
    DARK MODE
    ============================================= */
-@media (prefers-color-scheme: dark) {
-    .navbar-search-overlay {
-        background: #0f172a;
-    }
-
-    .navbar-search-overlay-header {
-        background: #0f172a;
-        border-bottom-color: #1e293b;
-    }
-
-    .navbar-search-overlay-form {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .navbar-search-overlay-form:focus-within {
-        border-color: #3b82f6;
-        background: #1e293b;
-    }
-
-    .navbar-search-suggestions {
-        background: #0f172a;
-    }
-
-    .navbar-search-suggestion-item-wrap:active {
-        background: #1e293b;
-    }
-
-    .navbar-search-suggestion-item {
-        color: #e2e8f0;
-    }
-
-    .navbar-search-suggestion-item i {
-        color: #64748b;
-    }
-
-    .navbar-search-suggestions-title {
-        color: #94a3b8;
-    }
-
-    .navbar-search-clear-all {
-        color: #f87171;
-    }
-
-    .navbar-search-clear-all:hover {
-        background: #450a0a;
-    }
-
-    .navbar-search-suggestion-delete:hover {
-        background: #450a0a;
-        color: #f87171;
-    }
-}
 
 /* =============================================
    SAFE AREA FOR NOTCH PHONES
