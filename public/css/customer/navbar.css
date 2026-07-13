@@ -686,23 +686,28 @@
    BOTTOM NAVIGATION (Mobile)
    ============================================= */
 .bottom-nav {
-    display: none;
+    display: flex;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: max(5px, env(safe-area-inset-bottom));
+    left: 16px;
+    right: 16px;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--color-border-light);
-    padding: 4px 0 env(safe-area-inset-bottom);
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 32px;
+    padding: 12px 0;
     justify-content: space-around;
     align-items: center;
+    box-shadow:
+        0 8px 32px -4px rgba(0, 0, 0, 0.15),
+        0 4px 12px -2px rgba(0, 0, 0, 0.10),
+        inset 0 -2px 4px rgba(255, 255, 255, 0.5);
 }
 
 .bottom-nav-item {
+    /* ... your existing layout properties ... */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -715,43 +720,33 @@
     font-size: 10px;
     font-weight: 500;
     gap: 2px;
-    transition: all 0.2s ease;
     position: relative;
     border: none;
     background: transparent;
     cursor: pointer;
     font-family: var(--font-body);
+    
+    transition: color 0.15s ease, transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Hint to the GPU that this element will be manipulated */
+    will-change: transform; 
 }
 
-.bottom-nav-item i {
-    font-size: 20px;
-    transition: all 0.2s ease;
+/* Add the 3D push down state */
+.bottom-nav-item:active {
+    transform: translateY(2px);
 }
 
 .bottom-nav-item.active {
     color: var(--color-primary);
+    /* Mimic a permanent, slight indentation for the active tab */
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 14px;
 }
 
-.bottom-nav-item .bottom-nav-badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #dc2626;
-    color: #fff;
-    font-size: 9px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-}
-
-.bottom-nav-item .bottom-nav-label {
-    font-size: 9px;
-    letter-spacing: 0.2px;
+.bottom-nav-item i {
+    font-size: 20px;
+    /* FIX: Remove transition: all entirely. 
+       The icon scales automatically because its parent scales. */
 }
 
 /* =============================================

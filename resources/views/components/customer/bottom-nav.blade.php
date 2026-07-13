@@ -1,11 +1,11 @@
 <nav class="bottom-nav" id="bottomNav">
     {{-- Home --}}
-    <a href="{{ route('customer.home') }}" class="bottom-nav-item {{ request()->routeIs('customer.home') ? 'bottom-nav-item-active' : '' }}">
+    <a href="{{ route('customer.home') }}" class="bottom-nav-item {{ request()->routeIs('customer.home') ? 'active' : '' }}">
         <i class="fas fa-home"></i><span>Home</span>
     </a>
 
     {{-- Books --}}
-    <a href="{{ route('books.index') }}" class="bottom-nav-item {{ request()->routeIs('books.index') && !request('category') && !request('author') ? 'bottom-nav-item-active' : '' }}">
+    <a href="{{ route('books.index') }}" class="bottom-nav-item {{ request()->routeIs('books.index') && !request('category') && !request('author') ? 'active' : '' }}">
         <i class="fas fa-book"></i><span>Books</span>
     </a>
 
@@ -15,19 +15,19 @@
     </button>
 
     {{-- Cart with count --}}
-    <a href="#" class="bottom-nav-item" id="mobileCartBtn" onclick="openCartDrawer(); return false;">
+    <button class="bottom-nav-item" id="mobileCartBtn" onclick="openCartDrawer()">
         <i class="fas fa-shopping-cart"></i>
         <span>Cart</span>
         <span class="navbar-cart-badge" id="mobileCartCount" style="display: {{ isset($cartCount) && $cartCount > 0 ? 'flex' : 'none' }}">{{ $cartCount ?? 0 }}</span>
-    </a>
+    </button>
 
     {{-- Profile --}}
     @auth('customer')
-        <a href="{{ route('customer.profile') }}" class="bottom-nav-item {{ request()->routeIs('customer.profile') ? 'bottom-nav-item-active' : '' }}">
+        <a href="{{ route('customer.profile') }}" class="bottom-nav-item {{ request()->routeIs('customer.profile') ? 'active' : '' }}">
             <i class="fas fa-user"></i><span>Profile</span>
         </a>
     @else
-        <button class="bottom-nav-item" onclick="openLoginModal(); return false;">
+        <button class="bottom-nav-item" onclick="openLoginModal()">
             <i class="fas fa-user"></i><span>Profile</span>
         </button>
     @endauth
