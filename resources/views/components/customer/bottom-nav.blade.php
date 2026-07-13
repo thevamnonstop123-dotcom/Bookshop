@@ -11,7 +11,7 @@
 
     {{-- More --}}
     <button class="bottom-nav-item" id="morePanelToggle" onclick="toggleMorePanel()" aria-label="More">
-        <i class="fas fa-th"></i><span>More</span>
+        <i class="fas fa-sliders-h" aria-hidden="true"></i><span>More</span>
     </button>
 
     {{-- Cart with count --}}

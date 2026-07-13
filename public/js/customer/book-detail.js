@@ -17,7 +17,7 @@
     };
 
     // ========== STICKY MOBILE BAR ==========
-    function initMobileBar() {
+    function initMobileBar() {``
         var bar = document.getElementById('bookMobileBar');
         if (!bar) return;
 

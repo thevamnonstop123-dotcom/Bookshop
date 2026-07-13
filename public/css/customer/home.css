@@ -1683,3 +1683,45 @@
     min-width: 24px;
     text-align: center;
 }
+
+/* Mobile - smaller countdown */
+@media (max-width: 768px) {
+    .hero-countdown-timer {
+        font-size: 13px;
+    }
+    .hero-countdown-label {
+        font-size: 9px;
+        letter-spacing: 0.5px;
+    }
+    .hero-countdown-timer span {
+        min-width: 18px;
+    }
+}
+
+@media (max-width: 430px) {
+    .hero-countdown-timer {
+        font-size: 11px;
+    }
+    .hero-countdown-label {
+        font-size: 8px;
+    }
+    .hero-countdown-timer span {
+        min-width: 14px;
+    }
+}
+
+/* Mobile - smaller hero text */
+@media (max-width: 430px) {
+    .hero-heading {
+        font-size: 12px !important;
+        line-height: 1.2;
+    }
+    .hero-description {
+        font-size: 8px !important;
+        line-height: 1.3;
+    }
+    .hero-chip {
+        font-size: 8px;
+        padding: 2px 6px;
+    }
+}

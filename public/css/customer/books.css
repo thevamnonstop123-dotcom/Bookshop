@@ -958,7 +958,6 @@
         right: 0;
         width: 100%;
         z-index: 300;
-        padding: 8px 12px !important;
         background: var(--color-bg, #ffffff);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         border-bottom: 1px solid var(--color-border, #e2e8f0);
@@ -1350,8 +1349,9 @@
     .book-card-wishlist,
     .filter-chip-clear,
     .search-clear-btn {
-        min-height: 44px;
-        min-width: 44px;
+        min-height: 30px;
+        min-width: 30px;
+        background: var(--color-bg, #0582ff);
     }
 
     .filter-bar-btn {
@@ -1397,7 +1397,3 @@
         height: 28px;
     }
 }
-
-/* ============================================
-   DARK MODE SUPPORT
-   ============================================ */
