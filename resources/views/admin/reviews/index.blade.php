@@ -10,12 +10,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <div class="admin-alert admin-alert-success">
-        <i class="fas fa-circle-check"></i> {{ session('success') }}
-    </div>
-@endif
-
 {{-- Stats --}}
 <div class="payment-stats-grid">
     <div class="payment-stat-card payment-stat-revenue">

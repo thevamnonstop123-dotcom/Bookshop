@@ -19,22 +19,31 @@ class CartService
     /**
      * Add item to cart.
      */
-    public function addItem(int $customerId, int $bookId, int $quantity): void
+    public function addItem(int $customerId, int $bookId, int $quantity, string $format = 'physical'): void
     {
         $cart = $this->getOrCreateCart($customerId);
         $book = Book::findOrFail($bookId);
 
-        // Check stock
-        if ($quantity > $book->stock_quantity) {
+        // Validate format
+        $availableFormats = $book->getAvailableFormats();
+        if (!in_array($format, $availableFormats)) {
+            throw new \Exception('Selected format is not available for this book.');
+        }
+
+        // Only check stock for physical format
+        if ($format === 'physical' && $quantity > $book->stock_quantity) {
             throw new \Exception('Not enough stock available.');
         }
 
-        // Check if already in cart — update quantity
-        $existingItem = $cart->items()->where('book_id', $bookId)->first();
+        // Check if this book+format combination already in cart
+        $existingItem = $cart->items()
+            ->where('book_id', $bookId)
+            ->where('format', $format)
+            ->first();
 
         if ($existingItem) {
             $newQty = $existingItem->quantity + $quantity;
-            if ($newQty > $book->stock_quantity) {
+            if ($format === 'physical' && $newQty > $book->stock_quantity) {
                 throw new \Exception('Cannot exceed available stock.');
             }
             $existingItem->update(['quantity' => $newQty]);
@@ -42,6 +51,7 @@ class CartService
             $cart->items()->create([
                 'book_id'  => $bookId,
                 'quantity' => $quantity,
+                'format'   => $format,
             ]);
         }
     }
@@ -73,43 +83,50 @@ class CartService
     /**
      * Get cart with items for JSON response.
      */
-        /**
-     * Get cart with items for JSON response.
-     */
     public function getCart(int $customerId): array
     {
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
 
         if (!$cart || $cart->items->isEmpty()) {
             return [
-                'items'       => [],
-                'total'       => 0,
-                'total_items' => 0,
+                'items'        => [],
+                'total'        => 0,
+                'total_items'  => 0,
+                'has_physical' => false,
             ];
         }
 
+        $hasPhysical = false;
         $items = $cart->items->filter(function ($item) {
             return $item->book !== null;
-        })->map(function ($item) {
+        })->map(function ($item) use (&$hasPhysical) {
+            $format = $item->format ?? 'physical';
+            if ($format === 'physical') {
+                $hasPhysical = true;
+            }
+            $price = $item->book->getPriceForFormat($format);
+            
             return [
                 'id'       => $item->id,
                 'title'    => $item->book->title,
-                'price'    => $item->book->isOnSale() ? $item->book->sale_price : $item->book->price,
+                'price'    => $price,
                 'quantity' => $item->quantity,
-                'image'    => $item->book->image ? asset('storage/' . $item->book->image) : 'https://placehold.co/70x95/e2e8f0/64748b?text=Book',
+                'format'   => $format,
+                'image'    => $item->book->image && $item->book->image !== 'default.png' 
+                    ? asset('storage/' . $item->book->image) 
+                    : 'https://placehold.co/70x95/e2e8f0/64748b?text=' . urlencode($item->book->title),
             ];
         });
 
-        $total = $items->sum(function ($item) use ($cart) {
-            $cartItem = $cart->items->where('id', $item['id'])->first();
-            $price = $cartItem->book->isOnSale() ? $cartItem->book->sale_price : $cartItem->book->price;
-            return $price * $item['quantity'];
+        $total = $items->sum(function ($item) {
+            return $item['price'] * $item['quantity'];
         });
 
         return [
-            'items'       => $items->values(),
-            'total'       => $total,
-            'total_items' => $items->sum('quantity'),
+            'items'        => $items->values(),
+            'total'        => $total,
+            'total_items'  => $items->sum('quantity'),
+            'has_physical' => $hasPhysical,
         ];
     }
 }

@@ -40,7 +40,8 @@ class CheckoutController extends Controller
         }
 
         $total = $validItems->sum(function($item) {
-            $price = $item->book->isOnSale() ? $item->book->sale_price : $item->book->price;
+            $format = $item->format ?? 'physical';
+            $price = $item->book->getPriceForFormat($format);
             return $price * $item->quantity;
         });
 
@@ -63,26 +64,37 @@ class CheckoutController extends Controller
         $maxRetries = 2;
         $attempt = 0;
 
-        // Validate address
-        if ($request->address_id) {
-            $request->validate(['address_id' => 'required|exists:customer_addresses,id']);
-            $addressId = $request->address_id;
+        // Check if cart has physical items
+        $cart = \App\Models\Cart::with('items')->where('customer_id', $customerId)->first();
+        $hasPhysicalItems = $cart && $cart->items->contains(function($item) {
+            return ($item->format ?? 'physical') === 'physical';
+        });
+
+        // Validate address only if there are physical items
+        if ($hasPhysicalItems) {
+            if ($request->address_id) {
+                $request->validate(['address_id' => 'required|exists:customer_addresses,id']);
+                $addressId = $request->address_id;
+            } else {
+                $request->validate([
+                    'receiver_name' => 'required|string|max:100',
+                    'phone_number'  => 'required|regex:/^09[0-9]{9}$/',
+                    'address_line'  => 'required|string|max:500',
+                ]);
+
+                $address = \App\Models\CustomerAddress::create([
+                    'customer_id'   => $customerId,
+                    'receiver_name' => $request->receiver_name,
+                    'phone_number'  => $request->phone_number,
+                    'address_line'  => $request->address_line,
+                    'is_default'    => true,
+                ]);
+
+                $addressId = $address->id;
+            }
         } else {
-            $request->validate([
-                'receiver_name' => 'required|string|max:100',
-                'phone_number'  => 'required|regex:/^09[0-9]{9}$/',
-                'address_line'  => 'required|string|max:500',
-            ]);
-
-            $address = \App\Models\CustomerAddress::create([
-                'customer_id'   => $customerId,
-                'receiver_name' => $request->receiver_name,
-                'phone_number'  => $request->phone_number,
-                'address_line'  => $request->address_line,
-                'is_default'    => true,
-            ]);
-
-            $addressId = $address->id;
+            // Ebook only - no address needed, use a placeholder
+            $addressId = null;
         }
 
         // Retry loop for payment failures

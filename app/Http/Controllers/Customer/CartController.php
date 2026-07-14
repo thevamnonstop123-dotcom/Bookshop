@@ -23,20 +23,28 @@ class CartController extends Controller
         $request->validate([
             'book_id'  => 'required|exists:books,id',
             'quantity' => 'required|integer|min:1',
+            'format'   => 'nullable|in:physical,ebook',
         ]);
 
-        $this->cartService->addItem(
-            auth('customer')->id(),
-            $request->book_id,
-            $request->quantity
-        );
+        try {
+            $this->cartService->addItem(
+                auth('customer')->id(),
+                $request->book_id,
+                $request->quantity,
+                $request->format ?? 'physical'
+            );
 
-        $cart = $this->cartService->getCart(auth('customer')->id());
+            $cart = $this->cartService->getCart(auth('customer')->id());
 
-        return response()->json([
-            'message' => 'Item added to cart.',
-            'cart'    => $cart,
-        ]);
+            return response()->json([
+                'message' => 'Item added to cart.',
+                'cart'    => $cart,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     /**
@@ -73,7 +81,7 @@ class CartController extends Controller
         ]);
     }
 
-        /**
+    /**
      * Get cart data for initial page load.
      */
     public function getData()

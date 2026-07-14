@@ -8,13 +8,6 @@
 @endpush
 
 @section('content')
-
-    @if (session('success'))
-        <div class="admin-alert admin-alert-success">
-            <i class="fas fa-circle-check"></i> {{ session('success') }}
-        </div>
-    @endif
-
     @if (session('error'))
         <div class="admin-alert admin-alert-error">
             <i class="fas fa-circle-exclamation"></i> {{ session('error') }}

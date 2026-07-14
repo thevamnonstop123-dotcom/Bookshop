@@ -17,10 +17,13 @@ class EbookController extends Controller
     {
         $customerId = auth('customer')->id();
         
-        $purchasedBooks = Book::where('is_ebook', true)
-            ->whereHas('orderItems.order', function ($q) use ($customerId) {
-                $q->where('customer_id', $customerId)
-                  ->where('status', '!=', 'cancelled');
+        $purchasedBooks = Book::where('status', 'active')
+            ->whereHas('orderItems', function ($q) use ($customerId) {
+                $q->where('format', 'ebook')
+                  ->whereHas('order', function ($sub) use ($customerId) {
+                      $sub->where('customer_id', $customerId)
+                         ->where('status', '!=', 'cancelled');
+                  });
             })
             ->with('authors')
             ->get();
@@ -35,12 +38,15 @@ class EbookController extends Controller
     {
         $customerId = auth('customer')->id();
         
-        // Verify purchase
+        // Verify purchase - check for ebook format order item
         $purchased = Book::where('id', $bookId)
-            ->where('is_ebook', true)
-            ->whereHas('orderItems.order', function ($q) use ($customerId) {
-                $q->where('customer_id', $customerId)
-                  ->where('status', '!=', 'cancelled');
+            ->where('status', 'active')
+            ->whereHas('orderItems', function ($q) use ($customerId) {
+                $q->where('format', 'ebook')
+                  ->whereHas('order', function ($sub) use ($customerId) {
+                      $sub->where('customer_id', $customerId)
+                         ->where('status', '!=', 'cancelled');
+                  });
             })
             ->exists();
 
@@ -75,10 +81,13 @@ class EbookController extends Controller
         $customerId = auth('customer')->id();
         
         $purchased = Book::where('id', $bookId)
-            ->where('is_ebook', true)
-            ->whereHas('orderItems.order', function ($q) use ($customerId) {
-                $q->where('customer_id', $customerId)
-                  ->where('status', '!=', 'cancelled');
+            ->where('status', 'active')
+            ->whereHas('orderItems', function ($q) use ($customerId) {
+                $q->where('format', 'ebook')
+                  ->whereHas('order', function ($sub) use ($customerId) {
+                      $sub->where('customer_id', $customerId)
+                         ->where('status', '!=', 'cancelled');
+                  });
             })
             ->exists();
 

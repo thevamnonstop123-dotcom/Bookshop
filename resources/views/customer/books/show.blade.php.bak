@@ -6,37 +6,9 @@
     <link rel="stylesheet" href="{{ asset('css/customer/book-detail.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customer/books.css') }}">
     <link rel="stylesheet" href="{{ asset('css/customer/rating.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/customer/format-selector.css') }}">
 @endpush
 
 @section('content')
-
-{{-- Format data for JavaScript --}}
-<meta name="physical-price" content="{{ $book->price }}">
-@if($book->isOnSale())
-<meta name="physical-sale-price" content="{{ $book->sale_price }}">
-<meta name="physical-on-sale" content="1">
-<meta name="physical-discount" content="{{ $book->discountPercentage() }}">
-@else
-<meta name="physical-on-sale" content="0">
-@endif
-<meta name="physical-stock" content="{{ $book->stock_quantity }}">
-<meta name="physical-availability" content="{{ $book->availability['status'] }}">
-<meta name="physical-availability-label" content="{{ $book->availability['label'] }}">
-<meta name="physical-availability-icon" content="{{ $book->availability['icon'] }}">
-<meta name="physical-availability-bg" content="{{ $book->availability['bg'] }}">
-<meta name="physical-availability-text" content="{{ $book->availability['text'] }}">
-<meta name="physical-purchasable" content="{{ $book->isPurchasable() ? '1' : '0' }}">
-@if($book->is_ebook)
-<meta name="ebook-price" content="{{ $book->ebook_price ?? $book->price }}">
-@if($book->isOnSale())
-<meta name="ebook-sale-price" content="{{ min($book->ebook_price ?? $book->sale_price, $book->sale_price) }}">
-<meta name="ebook-on-sale" content="1">
-@else
-<meta name="ebook-on-sale" content="0">
-@endif
-@endif
-
 
 <div class="book-detail-page">
 
@@ -120,102 +92,41 @@
                 {{-- RIGHT: Purchase Card --}}
                 <div class="book-hero-purchase">
                     <div class="book-purchase-card" id="purchaseCard">
-                        
-                        {{-- Format Selector --}}
-                        @php $formats = $book->getAvailableFormats(); @endphp
-                        
-                        @if(count($formats) > 1)
-                            <div class="format-selector">
-                                <label class="format-selector-label">Choose Format</label>
-                                <div class="format-options">
-                                    @foreach($formats as $fmt)
-                                        <label class="format-option {{ $loop->first ? 'selected' : '' }}" data-format="{{ $fmt }}">
-                                            <input type="radio" name="format" value="{{ $fmt }}" {{ $loop->first ? 'checked' : '' }} class="format-radio">
-                                            <span class="format-option-icon">
-                                                @if($fmt === 'ebook')
-                                                    <i class="fas fa-tablet-screen-button"></i>
-                                                @else
-                                                    <i class="fas fa-book"></i>
-                                                @endif
-                                            </span>
-                                            <span class="format-option-type">
-                                                {{ $fmt === 'ebook' ? 'eBook' : 'Paperback' }}
-                                            </span>
-                                            @if($fmt === 'ebook')
-                                                <span class="format-option-badge">Instant Access</span>
-                                            @else
-                                                @if($book->stock_quantity > 0 && $book->stock_quantity <= 10)
-                                                    <span class="format-option-badge format-badge-low">Only {{ $book->stock_quantity }} left</span>
-                                                @endif
-                                            @endif
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Price Display --}}
-                        @php $defaultFormat = $formats[0] ?? 'physical'; @endphp
-                        @php $defaultPrice = $book->getPriceForFormat($defaultFormat); @endphp
-                        
-                        <div class="book-purchase-price" id="purchasePrice">
-                            @if($book->isOnSale() && $defaultFormat === 'physical')
+                        <div class="book-purchase-price">
+                            @if($book->isOnSale())
                                 <span class="purchase-price-original">{{ number_format($book->price) }} MMK</span>
-                                <span class="purchase-price-sale" id="formatPrice">{{ number_format($defaultPrice) }} MMK</span>
+                                <span class="purchase-price-sale">{{ number_format($book->sale_price) }} MMK</span>
                                 <span class="purchase-price-save">Save {{ $book->discountPercentage() }}%</span>
-                            @elseif($defaultFormat === 'ebook' && $book->ebook_price && $book->isOnSale())
-                                <span class="purchase-price-original">{{ number_format($book->ebook_price) }} MMK</span>
-                                <span class="purchase-price-sale" id="formatPrice">{{ number_format($defaultPrice) }} MMK</span>
                             @else
-                                <span class="purchase-price-current" id="formatPrice">{{ number_format($defaultPrice) }} MMK</span>
+                                <span class="purchase-price-current">{{ number_format($book->price) }} MMK</span>
                             @endif
                         </div>
 
                         {{-- Availability --}}
-                        <div class="book-purchase-availability" id="formatAvailability">
-                            @if($defaultFormat === 'ebook')
-                                <span class="purchase-availability-badge" style="background:#F0FDF4;color:#166534;">
-                                    <i class="fas fa-circle-check"></i> Available Instantly
-                                </span>
-                            @else
-                                @php $avail = $book->availability; @endphp
-                                <span class="purchase-availability-badge" style="background:{{ $avail['bg'] }};color:{{ $avail['text'] }};">
-                                    <i class="fas {{ $avail['icon'] }}"></i> {{ $avail['label'] }}
-                                </span>
-                            @endif
+                        @php $avail = $book->availability; @endphp
+                        <div class="book-purchase-availability">
+                            <span class="purchase-availability-badge" style="background:{{ $avail["bg"] }};color:{{ $avail["text"] }};">
+                                <i class="fas {{ $avail["icon"] }}"></i> {{ $avail["label"] }}
+                            </span>
                         </div>
 
-                        {{-- Quantity (only for physical) --}}
-                        <div class="book-purchase-qty" id="quantitySelector" style="{{ $defaultFormat === 'ebook' ? 'display:none;' : '' }}">
-                            <button type="button" class="purchase-qty-btn" onclick="changeQuantity(-1)"><i class="fas fa-minus"></i></button>
-                            <input type="number" id="quantity" class="purchase-qty-input" value="1" min="1" max="{{ $book->stock_quantity }}" readonly>
-                            <button type="button" class="purchase-qty-btn" onclick="changeQuantity(1)"><i class="fas fa-plus"></i></button>
-                        </div>
-
-                        {{-- Ebook Info --}}
-                        <div class="book-purchase-ebook-info" id="ebookInfo" style="{{ $defaultFormat === 'ebook' ? '' : 'display:none;' }}">
-                            <span><i class="fas fa-bolt"></i> Instant delivery</span>
-                            <span><i class="fas fa-infinity"></i> Lifetime access</span>
-                            <span><i class="fas fa-mobile-screen"></i> Read on any device</span>
-                        </div>
+                        {{-- Quantity --}}
+                        @if(!$book->isEbook() && $book->isPurchasable())
+                            <div class="book-purchase-qty">
+                                <button type="button" class="purchase-qty-btn" onclick="changeQuantity(-1)"><i class="fas fa-minus"></i></button>
+                                <input type="number" id="quantity" class="purchase-qty-input" value="1" min="1" max="{{ $book->stock_quantity }}" readonly>
+                                <button type="button" class="purchase-qty-btn" onclick="changeQuantity(1)"><i class="fas fa-plus"></i></button>
+                            </div>
+                        @endif
 
                         {{-- Buttons --}}
-                        <div class="book-purchase-actions" id="purchaseActions">
-                            @if($defaultFormat === 'physical' && !$book->isPurchasable())
-                                <button class="purchase-btn purchase-btn-disabled" disabled>
-                                    <i class="fas {{ $avail['icon'] ?? 'fa-circle-xmark' }}"></i> {{ $avail['label'] ?? 'Unavailable' }}
-                                </button>
-                            @else
-                                <button class="purchase-btn purchase-btn-cart btn-add-cart" 
-                                    data-book-id="{{ $book->id }}" 
-                                    data-format="{{ $defaultFormat }}">
-                                    <i class="fas fa-shopping-bag"></i> Add to Cart
-                                </button>
-                                <button class="purchase-btn purchase-btn-buy" id="buyNowBtn">
-                                    <i class="fas fa-bolt"></i> Buy Now
-                                </button>
-                            @endif
-                            
+                        @if($book->isEbook() || $book->isPurchasable())
+                            <button class="purchase-btn purchase-btn-cart btn-add-cart" data-book-id="{{ $book->id }}">
+                                <i class="fas fa-shopping-bag"></i> Add to Cart
+                            </button>
+                            <button class="purchase-btn purchase-btn-buy" id="buyNowBtn">
+                                <i class="fas fa-bolt"></i> Buy Now
+                            </button>
                             @auth('customer')
                                 <button class="purchase-btn purchase-btn-wishlist {{ in_array($book->id, $wishlistedIds) ? 'wishlisted' : '' }}"
                                         data-book-id="{{ $book->id }}" onclick="toggleWishlist(this, {{ $book->id }})">
@@ -223,9 +134,23 @@
                                     <span>Wishlist</span>
                                 </button>
                             @endauth
-                        </div>
+                        @else
+                            <button class="purchase-btn purchase-btn-disabled" disabled>
+                                <i class="fas {{ $avail["icon"] }}"></i> {{ $avail["label"] }}
+                            </button>
+                            @auth("customer")
+                                <button class="purchase-btn purchase-btn-wishlist {{ in_array($book->id, $wishlistedIds) ? "wishlisted" : "" }}"
+                                        data-book-id="{{ $book->id }}" onclick="toggleWishlist(this, {{ $book->id }})">
+                                    <i class="{{ in_array($book->id, $wishlistedIds) ? "fas" : "far" }} fa-heart"></i>
+                                    <span>Add to Wishlist</span>
+                                </button>
+                                <button class="purchase-btn purchase-btn-notify">
+                                    <i class="fas fa-bell"></i> Notify Me
+                                </button>
+                            @endauth
+                        @endif
 
-                        {{-- Trust Badges --}}{{-- Trust Badges --}}
+                        {{-- Trust Badges --}}
                         <div class="book-purchase-trust">
                             <span><i class="fas fa-truck-fast"></i> Free Delivery</span>
                             <span><i class="fas fa-shield-halved"></i> Secure Checkout</span>
@@ -396,11 +321,10 @@
 {{-- Sticky Mobile Bar --}}
 <div class="book-mobile-bar" id="bookMobileBar">
     <div class="book-mobile-bar-price">
-        <span id="mobileFormatPrice">{{ number_format($defaultPrice) }} MMK</span>
-        <small id="mobileFormatLabel">{{ $defaultFormat === 'ebook' ? 'eBook' : 'Paperback' }}</small>
+        <span>{{ number_format($book->isOnSale() ? $book->sale_price : $book->price) }} MMK</span>
     </div>
-    @if($defaultFormat === 'ebook' || ($defaultFormat === 'physical' && $book->isPurchasable()))
-        <button class="book-mobile-bar-cart btn-add-cart" data-book-id="{{ $book->id }}" data-format="{{ $defaultFormat }}">
+    @if($book->isEbook() || $book->isPurchasable())
+        <button class="book-mobile-bar-cart btn-add-cart" data-book-id="{{ $book->id }}">
             <i class="fas fa-shopping-bag"></i> Add to Cart
         </button>
     @endif
@@ -419,7 +343,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/customer/format-selector.js') }}"></script>
     <script src="{{ asset('js/customer/book-detail.js') }}"></script>
     <script src="{{ asset('js/customer/rating.js') }}"></script>
 @endpush

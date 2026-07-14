@@ -14,13 +14,6 @@
     <a href="{{ route('admin.customers.index') }}" class="admin-form-back">
         <i class="fas fa-arrow-left"></i> Back to Customers
     </a>
-
-    @if (session('success'))
-        <div class="admin-alert admin-alert-success">
-            <i class="fas fa-circle-check"></i> {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Top Grid --}}
     <div class="customer-detail-grid">
 

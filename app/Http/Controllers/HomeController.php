@@ -44,9 +44,9 @@ class HomeController extends Controller
             ->limit(5)
             ->get();
 
-        // Get the most famous book for each author
+        $topAuthors->load(["books" => fn($q) => $q->where("status", "active")->limit(1)]);
         $topAuthors->each(function ($author) {
-            $author->famousBook = $author->books()->where('status', 'active')->first();
+            $author->famousBook = $author->books->first();
         });
 
         // Wishlisted book IDs for heart icon

@@ -1390,3 +1390,55 @@
         z-index: 9999 !important;
     }
 }
+
+/* ============================================
+   FORMAT BADGES ON BOOK CARDS
+   ============================================ */
+.book-format-badges {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    gap: 4px;
+    z-index: 2;
+}
+
+.format-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.3px;
+}
+
+.format-badge i {
+    font-size: 8px;
+}
+
+.format-badge-physical {
+    background: rgba(15, 23, 42, 0.85);
+}
+
+.format-badge-ebook {
+    background: rgba(124, 58, 237, 0.85);
+}
+
+.format-badge-both {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(124, 58, 237, 0.85));
+}
+
+@media (max-width: 768px) {
+    .book-format-badges {
+        bottom: 4px;
+        left: 4px;
+    }
+    .format-badge {
+        font-size: 8px;
+        padding: 2px 6px;
+    }
+}

@@ -17,8 +17,9 @@ class BookService
         return Book::with(['category', 'authors'])
             ->when(!empty($filters["availability"]), fn($q) => $q->whereIn("availability_status", explode(",", $filters["availability"])))
             ->latest()
-            ->paginate(20);  // Changed from ->get() to ->paginate(20)
+            ->paginate(20);
     }
+
     /**
      * Store a new book.
      */
@@ -28,7 +29,6 @@ class BookService
             $data['image'] = $this->uploadImage($data['image']);
         }
 
-        // Handle ebook file upload (no $book exists yet, just store)
         if (isset($data['ebook_file']) && $data['ebook_file'] instanceof UploadedFile) {
             $data['ebook_file'] = $data['ebook_file']->store('ebooks', 'public');
         }
@@ -69,17 +69,15 @@ class BookService
 
         $data['updated_by'] = auth('staff')->id();
 
-        // Separate author_ids
         $authorIds = $data['author_ids'] ?? [];
         unset($data['author_ids']);
 
         $book->update($data);
 
-        if ($book->wasChanged("stock_quantity")) {
-            $this->checkStockAlert($book);
+        if ($book->wasChanged("stock_quantity") || $book->wasChanged("availability_status")) {
+            $this->autoSetAvailability($book);
         }
 
-        // Sync authors
         if (!empty($authorIds)) {
             $book->authors()->sync($authorIds);
         }
@@ -96,9 +94,7 @@ class BookService
             Storage::disk('public')->delete($book->image);
         }
 
-        // Detach authors from pivot table
         $book->authors()->detach();
-
         $book->delete();
     }
 
@@ -110,10 +106,27 @@ class BookService
         return $file->store('books', 'public');
     }
 
+    /**
+     * Auto-set availability status based on stock quantity.
+     */
+    private function autoSetAvailability($book): void
+    {
+        if ($book->stock_quantity <= 0) {
+            $book->updateQuietly(["availability_status" => "out_of_stock"]);
+        } elseif ($book->stock_quantity <= 5) {
+            $book->updateQuietly(["availability_status" => "low_stock"]);
+        } else {
+            $book->updateQuietly(["availability_status" => "in_stock"]);
+        }
+    }
+
+    /**
+     * Send notification for low/out of stock.
+     */
     private function checkStockAlert($book): void
     {
         if ($book->stock_quantity <= 0) {
-            NotificationService::send(NotificationService::bookRoles(), "out_of_stock", '"' . $book->title . '" is out of stock', "Stock reached 0. Please restock.", $book);
+            NotificationService::send(NotificationService::bookRoles(), "out_of_stock", '"' . $book->title. '" is out of stock', "Stock reached 0. Please restock.", $book);
         } elseif ($book->stock_quantity <= 5) {
             NotificationService::send(NotificationService::bookRoles(), "low_stock", '"' . $book->title . '" is low in stock', "Only {$book->stock_quantity} left.", $book);
         }

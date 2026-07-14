@@ -24,6 +24,7 @@ class Book extends Model
         'status',
         'is_ebook',
         'ebook_file',
+        'ebook_price',
         'created_by',
         'updated_by',
         'category_id', 'title', 'slug', 'isbn', 'price', 'sale_price',
@@ -197,7 +198,7 @@ public function discountPercentage(): int
 
     public function getPriceForFormat(string $format = "physical"): float
     {
-        if ($format === "ebook" && $this->ebook_price) {
+        if ($format === "ebook" && $this->is_ebook && $this->ebook_price && $this->ebook_price > 0) {
             return (float) $this->ebook_price;
         }
         return $this->isOnSale() ? (float) $this->sale_price : (float) $this->price;
@@ -206,5 +207,86 @@ public function discountPercentage(): int
     public function isPurchasable(): bool
     {
         return in_array($this->availability_status, ["in_stock", "low_stock", "pre_order"]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Format Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get the available format types for this book.
+     * Returns an array like ["physical"], ["ebook"], or ["physical", "ebook"]
+     */
+    public function getAvailableFormats(): array
+    {
+        $formats = [];
+        
+        if ($this->stock_quantity > 0 || in_array($this->availability_status, ["pre_order", "coming_soon"])) {
+            $formats[] = "physical";
+        }
+        
+        if ($this->is_ebook && $this->ebook_file) {
+            $formats[] = "ebook";
+        }
+        
+        return $formats;
+    }
+
+    /**
+     * Check if book has both physical and ebook formats.
+     */
+    public function hasBothFormats(): bool
+    {
+        return count($this->getAvailableFormats()) === 2;
+    }
+
+    /**
+     * Check if book has only ebook format.
+     */
+    public function isEbookOnly(): bool
+    {
+        $formats = $this->getAvailableFormats();
+        return count($formats) === 1 && $formats[0] === "ebook";
+    }
+
+    /**
+     * Check if book has only physical format.
+     */
+    public function isPhysicalOnly(): bool
+    {
+        $formats = $this->getAvailableFormats();
+        return count($formats) === 1 && $formats[0] === "physical";
+    }
+
+    /**
+     * Get format badge label for display.
+     */
+    public function getFormatBadgeLabel(): string
+    {
+        if ($this->hasBothFormats()) return "Print + eBook";
+        if ($this->isEbookOnly()) return "eBook";
+        return "Paperback";
+    }
+
+    /**
+     * Get format badge icon class (Font Awesome).
+     */
+    public function getFormatBadgeIcon(): string
+    {
+        if ($this->hasBothFormats()) return "fa-book-open";
+        if ($this->isEbookOnly()) return "fa-tablet-screen-button";
+        return "fa-book";
+    }
+
+    /**
+     * Get format badge color class.
+     */
+    public function getFormatBadgeColor(): string
+    {
+        if ($this->hasBothFormats()) return "format-badge-both";
+        if ($this->isEbookOnly()) return "format-badge-ebook";
+        return "format-badge-physical";
     }
 }

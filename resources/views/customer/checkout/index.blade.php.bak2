@@ -9,6 +9,7 @@
 
 @section('content')
 
+
 @php 
     $hasPhysicalItems = $cart->items->contains(function($item) {
         return ($item->format ?? 'physical') === 'physical';
@@ -37,7 +38,7 @@
         <form action="{{ route('checkout.process') }}" method="POST" id="checkoutForm">
             @csrf
 
-            {{-- Step Indicator (Only show if physical items exist) --}}
+            {{-- Step Indicator (2 Steps) --}}
             @if($hasPhysicalItems)
             <div class="checkout-steps">
                 <div class="step active" data-step="1">
@@ -53,16 +54,16 @@
 
             <div class="checkout-layout">
 
-                {{-- LEFT SIDE --}}
+                {{-- ================================ --}}
+                {{-- EBOOK ONLY: Skip address, go straight to payment --}}
+                {{-- ================================ --}}
+                @if(!$hasPhysicalItems)
                 <div class="checkout-main">
-
-                    {{-- EBOOK ONLY: Digital Order Notice --}}
-                    @if(!$hasPhysicalItems)
                     <div class="checkout-card" style="text-align:center;padding:40px 24px;margin-bottom:24px;">
                         <div style="font-size:48px;color:#16a34a;margin-bottom:16px;">
                             <i class="fas fa-bolt"></i>
                         </div>
-                        <h3 style="margin-bottom:8px;">Digital Order — No Shipping Needed</h3>
+                        <h3 style="margin-bottom:8px;">Digital Order - No Shipping Needed</h3>
                         <p style="color:var(--color-text-secondary);margin-bottom:20px;">
                             This order contains only digital items. You will get instant access after payment.
                         </p>
@@ -78,10 +79,17 @@
                             </span>
                         </div>
                     </div>
-                    @endif
+                    
+                    {{-- Payment Section --}}
+                    <div class="checkout-card">
+                        <div class="checkout-card-header">
+                            <h3 class="checkout-card-title">Payment Method</h3>
+                        </div>
+                        <div class="payment-grid">
 
-                    {{-- PHYSICAL: Address Section --}}
-                    @if($hasPhysicalItems)
+                {{-- LEFT SIDE --}}
+                <div class="checkout-main">
+                   {{-- Address Dropdown --}}
                     <div class="address-select-wrapper">
                         <div class="address-option" id="addressOption">
                             <button type="button" class="address-select-btn" id="addressSelectBtn">
@@ -158,7 +166,7 @@
                             </div>
                         </div>
 
-                        {{-- Address Form --}}
+                        {{-- Address Form (Always visible, filled when address is selected) --}}
                         <div class="address-form" id="addressForm">
                             <div class="address-form-grid">
                                 <div class="form-group">
@@ -187,98 +195,100 @@
                             <span id="gpsErrorText"></span>
                         </div>
                     </div>
-                    @endif
 
-                    {{-- PAYMENT SECTION --}}
-                    <div class="checkout-card">
-                        <div class="checkout-card-header">
-                            <h3 class="checkout-card-title">Payment Method</h3>
-                        </div>
-
-                        {{-- Payment Grid --}}
-                        <div class="payment-grid">
-                            <label class="payment-card selected">
-                                <input type="radio" name="payment_method" value="stripe" checked>
-                                <div class="payment-card-icon stripe">
-                                    <i class="far fa-credit-card"></i>
-                                </div>
-                                <div class="payment-card-info">
-                                    <span class="payment-card-name">Credit / Debit</span>
-                                    <span class="payment-card-desc">Secure via Stripe</span>
-                                </div>
-                                <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
-                            </label>
-
-                            <label class="payment-card">
-                                <input type="radio" name="payment_method" value="kpay">
-                                <div class="payment-card-icon kpay">
-                                    <img src="{{ asset('paymentLogo/kbzpay.png') }}" alt="KBZ Pay Logo" class="payment-logo">
-                                </div>
-                                <div class="payment-card-info">
-                                    <span class="payment-card-name">KBZ Pay</span>
-                                    <span class="payment-card-desc">Mobile wallet</span>
-                                </div>
-                                <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
-                            </label>
-
-                            <label class="payment-card">
-                                <input type="radio" name="payment_method" value="wave">
-                                <div class="payment-card-icon wave">
-                                    <img src="{{ asset('paymentLogo/wavepay.png') }}" alt="Wave Pay Logo" class="payment-logo">
-                                </div>
-                                <div class="payment-card-info">
-                                    <span class="payment-card-name">Wave Pay</span>
-                                    <span class="payment-card-desc">Mobile wallet</span>
-                                </div>
-                                <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
-                            </label>
-
-                            @if($hasPhysicalItems)
-                            <label class="payment-card">
-                                <input type="radio" name="payment_method" value="cod">
-                                <div class="payment-card-icon cod">
-                                    <i class="fas fa-hand-holding-dollar"></i>
-                                </div>
-                                <div class="payment-card-info">
-                                    <span class="payment-card-name">Cash on Delivery</span>
-                                    <span class="payment-card-desc">Pay on arrival</span>
-                                </div>
-                                <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
-                            </label>
-                            @endif
-                        </div>
-
-                        {{-- Trust Badges --}}
-                        <div class="payment-trust">
-                            <span><i class="fas fa-lock"></i> SSL Encrypted</span>
-                            <span><i class="fas fa-shield-alt"></i> Secure</span>
-                            <span><i class="fas fa-headset"></i> 24/7 Support</span>
-                        </div>
-
-                        {{-- CONFIRM --}}
-                        <div class="confirm-section">
-                            @if($hasPhysicalItems)
-                            <div class="confirm-address-display" id="confirmAddressDisplay">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span id="confirmAddressText">{{ $addresses->first()->receiver_name ?? "No address" }} • {{ $addresses->first()->address_line ?? "No address selected" }}</span>
+                    {{-- ================================ --}}
+                    {{-- STEP 2: PAYMENT & CONFIRM        --}}
+                    {{-- ================================ --}}
+                    <div class="checkout-step" data-step="2">
+                        <div class="checkout-card">
+                            <div class="checkout-card-header">
+                                <h3 class="checkout-card-title">Payment Method</h3>
                             </div>
-                            @endif
-                            <button type="submit" class="checkout-submit-btn">
-                                <i class="fas fa-lock"></i> Place Order • {{ number_format($total) }} MMK
-                            </button>
-                        </div>
 
-                        @if($hasPhysicalItems)
-                        <div class="checkout-nav">
-                            <button type="button" id="backToStep1" class="btn-ghost">
-                                <i class="fas fa-arrow-left"></i> Back
-                            </button>
+                            {{-- Payment Grid --}}
+                            <div class="payment-grid">
+                                <label class="payment-card selected">
+                                    <input type="radio" name="payment_method" value="stripe" checked>
+                                    <div class="payment-card-icon stripe">
+                                        <i class="far fa-credit-card"></i>
+                                    </div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">Credit / Debit</span>
+                                        <span class="payment-card-desc">Secure via Stripe</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
+                                </label>
+
+                                <label class="payment-card">
+                                    <input type="radio" name="payment_method" value="kpay">
+                                    <div class="payment-card-icon kpay">
+                                        <img src="{{ asset('paymentLogo/kbzpay.png') }}" alt="KBZ Pay Logo" class="payment-logo">
+                                    </div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">KBZ Pay</span>
+                                        <span class="payment-card-desc">Mobile wallet</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
+                                </label>
+
+                                <label class="payment-card">
+                                    <input type="radio" name="payment_method" value="wave">
+                                    <div class="payment-card-icon wave">
+                                        <img src="{{ asset('paymentLogo/wavepay.png') }}" alt="Wave Pay Logo" class="payment-logo">
+                                    </div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">Wave Pay</span>
+                                        <span class="payment-card-desc">Mobile wallet</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
+                                </label>
+
+                                <label class="payment-card">
+                                    <input type="radio" name="payment_method" value="cod">
+                                    <div class="payment-card-icon cod">
+                                        <i class="fas fa-hand-holding-dollar"></i>
+                                    </div>
+                                    <div class="payment-card-info">
+                                        <span class="payment-card-name">Cash on Delivery</span>
+                                        <span class="payment-card-desc">Pay on arrival</span>
+                                    </div>
+                                    <span class="payment-card-check"><i class="fas fa-check-circle"></i></span>
+                                </label>
+                            </div>
+
+                            {{-- Trust Badges --}}
+                            <div class="payment-trust">
+                                <span><i class="fas fa-lock"></i> SSL Encrypted</span>
+                                <span><i class="fas fa-shield-alt"></i> Secure</span>
+                                <span><i class="fas fa-headset"></i> 24/7 Support</span>
+                            </div>
+
+                            {{-- ========================================== --}}
+                            {{-- CONFIRM — Address + Place Order --}}
+                            <div class="confirm-section">
+                                <div class="confirm-address-display" id="confirmAddressDisplay">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span id="confirmAddressText">{{ $addresses->first()->receiver_name ?? "No address" }} • {{ $addresses->first()->address_line ?? "No address selected" }}</span>
+                                </div>
+                                <button type="submit" class="checkout-submit-btn">
+                                    <i class="fas fa-lock"></i> Place Order • {{ number_format($total) }} MMK
+                                </button>
+                            </div>
+
+                            {{-- Navigation --}}
+                            <div class="checkout-nav">
+                                <button type="button" id="backToStep1" class="btn-ghost">
+                                    <i class="fas fa-arrow-left"></i> Back
+                                </button>
+                            </div>
                         </div>
-                        @endif
                     </div>
+
                 </div>
 
-                {{-- RIGHT SIDEBAR (Order Summary) --}}
+                {{-- ================================ --}}
+                {{-- RIGHT SIDEBAR (Only summary)      --}}
+                {{-- ================================ --}}
                 <div class="checkout-sidebar">
                     <div class="checkout-summary">
                         <h4 class="summary-title">Order Summary</h4>

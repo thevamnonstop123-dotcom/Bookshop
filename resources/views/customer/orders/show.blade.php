@@ -54,10 +54,15 @@
             {{-- Shipping Address --}}
             <div class="order-detail-card">
                 <div class="order-detail-card-header">
-                    <div class="order-detail-card-icon order-detail-icon-shipping">
-                        <i class="fas fa-location-dot"></i>
+            @php
+                $allEbook = $order->items->every(fn($i) => ($i->format ?? 'physical') === 'ebook');
+            @endphp
+                    <div class="order-detail-card-icon {{ $allEbook ? 'order-detail-icon-ebook' : 'order-detail-icon-shipping' }}">
+                        <i class="fas {{ $allEbook ? 'fa-download' : 'fa-location-dot' }}"></i>
                     </div>
-                    <h3 class="order-detail-card-title">Shipping Address</h3>
+                                    <h3 class="order-detail-card-title">
+                                        {{ $allEbook ? 'Digital Order' : 'Shipping Address' }}
+                                    </h3>
                 </div>
                 @if ($order->shippingAddress)
                     <div class="order-detail-address">
@@ -66,7 +71,14 @@
                         <div class="order-detail-address-line">{{ $order->shippingAddress->address_line }}</div>
                     </div>
                 @else
-                    <p class="order-detail-missing">No shipping address recorded.</p>
+                    @if($allEbook)
+                                        <div class="order-detail-ebook-notice">
+                                            <i class="fas fa-bolt"></i>
+                                            <span>Digital delivery — no shipping needed</span>
+                                        </div>
+                                    @else
+                                        <p class="order-detail-missing">No shipping address recorded.</p>
+                                    @endif
                 @endif
             </div>
 
@@ -127,7 +139,16 @@
                                         <div class="order-item-book-info">
                                             <img src="{{ $item->book->image && $item->book->image !== 'default.png' ? asset('storage/' . $item->book->image) : 'https://placehold.co/40x52/F1F5F9/94A3B8?text=Book' }}"
                                                  alt="{{ $item->book->title }}" class="order-item-book-image">
-                                            <span>{{ $item->book->title }}</span>
+                                            <div>
+                                                <span>{{ $item->book->title }}</span>
+                                                <span class="order-item-format">
+                                                    @if(($item->format ?? 'physical') === 'ebook')
+                                                        <i class="fas fa-tablet-screen-button"></i> eBook
+                                                    @else
+                                                        <i class="fas fa-book"></i> Paperback
+                                                    @endif
+                                                </span>
+                                            </div>
                                         </div>
                                     @else
                                         <span class="order-detail-missing">Book no longer available</span>

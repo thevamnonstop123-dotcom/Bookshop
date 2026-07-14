@@ -8,13 +8,6 @@
 @endpush
 
 @section('content')
-
-    @if (session('success'))
-        <div class="admin-alert admin-alert-success">
-            <i class="fas fa-circle-check"></i> {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Filter Tabs --}}
     <div class="order-filter-tabs">
         <a href="{{ route('admin.orders.index') }}" class="order-filter-tab {{ !$status ? 'order-filter-tab-active' : '' }}">

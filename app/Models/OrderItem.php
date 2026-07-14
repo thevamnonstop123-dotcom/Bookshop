@@ -14,6 +14,7 @@ class OrderItem extends Model
         'book_id',
         'quantity',
         'price',
+        'format',
     ];
 
     protected $casts = [
@@ -49,10 +50,18 @@ class OrderItem extends Model
     */
 
     /**
-     * Get the subtotal for this order item (snapshot price × quantity).
+     * Get the subtotal for this order item (snapshot price x quantity).
      */
     public function subtotal(): float
     {
         return $this->price * $this->quantity;
+    }
+
+    /**
+     * Check if this item is an ebook.
+     */
+    public function isEbook(): bool
+    {
+        return ($this->format ?? 'physical') === 'ebook';
     }
 }

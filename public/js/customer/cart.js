@@ -259,7 +259,7 @@
                         '<div class="cart-item-info">' +
                             '<div class="cart-item-title">' + item.title + '</div>' +
                             '<div class="cart-item-price">' + self.formatCurrency(item.price * item.quantity) + '</div>' +
-                            '<div class="cart-item-format">' + (item.format === "ebook" ? "E-Book" : "Physical") + '</div>' +
+                            '<div class="cart-item-format">' + (item.format === "ebook" ? '<i class="fas fa-tablet-screen-button"></i> eBook' : '<i class="fas fa-book"></i> Paperback') + '</div>' +
                             '<div class="cart-item-actions">' +
                                 '<div class="cart-qty">' +
                                     '<button type="button" class="cart-qty-down" data-item-id="' + item.id + '" data-qty="' + item.quantity + '">−</button>' +

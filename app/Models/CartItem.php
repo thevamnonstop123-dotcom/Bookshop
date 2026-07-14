@@ -13,6 +13,7 @@ class CartItem extends Model
         'cart_id',
         'book_id',
         'quantity',
+        'format',
     ];
 
     /*
@@ -48,6 +49,7 @@ class CartItem extends Model
      */
     public function subtotal(): float
     {
-        return $this->quantity * $this->book->price;
+        $format = $this->format ?? 'physical';
+        return $this->quantity * $this->book->getPriceForFormat($format);
     }
 }

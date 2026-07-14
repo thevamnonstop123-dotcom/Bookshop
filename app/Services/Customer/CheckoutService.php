@@ -25,18 +25,18 @@ class CheckoutService
     }
 
     /**
-     * Get the effective price of a book (sale price if on sale).
+     * Get the effective price of a book based on format.
      */
-    private function getBookPrice($book): float
+    private function getBookPrice($book, string $format = 'physical'): float
     {
         if (!$book) return 0;
-        return $book->isOnSale() ? $book->sale_price : $book->price;
+        return $book->getPriceForFormat($format);
     }
 
     /**
      * Create a Stripe checkout session.
      */
-    public function createStripeSession(int $customerId, int $addressId): Session
+    public function createStripeSession(int $customerId, ?int $addressId): Session
     {
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -46,17 +46,21 @@ class CheckoutService
         $validItems = $this->getValidItems($cart);
         if ($validItems->isEmpty()) throw new \Exception('Your cart is empty.');
 
-        $address = \App\Models\CustomerAddress::where('id', $addressId)
-            ->where('customer_id', $customerId)->first();
-        if (!$address) throw new \Exception('Invalid shipping address.');
+        $address = null;
+        if ($addressId) {
+            $address = \App\Models\CustomerAddress::where('id', $addressId)
+                ->where('customer_id', $customerId)->first();
+            if (!$address) throw new \Exception('Invalid shipping address.');
+        }
 
         $lineItems = [];
         foreach ($validItems as $item) {
-            $price = $this->getBookPrice($item->book);
+            $format = $item->format ?? 'physical';
+            $price = $this->getBookPrice($item->book, $format);
             $lineItems[] = [
                 'price_data' => [
                     'currency'     => 'mmk',
-                    'product_data' => ['name' => $item->book->title],
+                    'product_data' => ['name' => $item->book->title . ' (' . ($format === 'ebook' ? 'eBook' : 'Paperback') . ')'],
                     'unit_amount'  => (int)($price * 100),
                 ],
                 'quantity'   => $item->quantity,
@@ -71,7 +75,7 @@ class CheckoutService
             'cancel_url'           => route('checkout.cancel'),
             'metadata'             => [
                 'customer_id' => (string) $customerId,
-                'address_id'  => (string) $addressId,
+                'address_id'  => $addressId ? (string) $addressId : '0',
             ],
         ]);
     }
@@ -86,18 +90,16 @@ class CheckoutService
         $metadata = $session->metadata;
         
         $customerId = (int) ($metadata->customer_id ?? 0);
-        $addressId = (int) ($metadata->address_id ?? 0);
+        $addressId = ($metadata->address_id ?? null) ? (int) $metadata->address_id : null;
 
-        if (!$customerId || !$addressId) {
-            Log::error('Stripe callback missing metadata', ['session_id' => $sessionId, 'metadata' => $metadata]);
+        if (!$customerId) {
+            Log::error('Stripe callback missing customer_id', ['session_id' => $sessionId, 'metadata' => $metadata]);
             throw new \Exception('Invalid session data.');
         }
 
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
         
-        // If cart is empty, the order might already be processed
         if (!$cart || $cart->items->isEmpty()) {
-            // Check if order already exists for this session
             $existingPayment = Payment::where('transaction_reference', $session->payment_intent)->first();
             if ($existingPayment) {
                 return $existingPayment->order;
@@ -105,15 +107,16 @@ class CheckoutService
             throw new \Exception('Cart is empty and no existing order found.');
         }
 
-        $address = \App\Models\CustomerAddress::find($addressId);
-        if (!$address) {
-            // Fallback: get any address from customer
-            $address = \App\Models\CustomerAddress::where('customer_id', $customerId)->first();
-            if (!$address) throw new \Exception('No shipping address found.');
+        $address = null;
+        if ($addressId) {
+            $address = \App\Models\CustomerAddress::find($addressId);
+            if (!$address) {
+                $address = \App\Models\CustomerAddress::where('customer_id', $customerId)->first();
+            }
         }
 
         $validItems = $this->getValidItems($cart);
-        $totalAmount = $validItems->sum(fn($item) => $this->getBookPrice($item->book) * $item->quantity);
+        $totalAmount = $validItems->sum(fn($item) => $this->getBookPrice($item->book, $item->format ?? 'physical') * $item->quantity);
 
         $order = Order::create([
             'customer_id'  => $customerId,
@@ -123,23 +126,31 @@ class CheckoutService
         ]);
 
         foreach ($validItems as $cartItem) {
-            $price = $this->getBookPrice($cartItem->book);
+            $format = $cartItem->format ?? 'physical';
+            $price = $this->getBookPrice($cartItem->book, $format);
             OrderItem::create([
                 'order_id' => $order->id,
                 'book_id'  => $cartItem->book_id,
                 'quantity' => $cartItem->quantity,
                 'price'    => $price,
+                'format'   => $format,
             ]);
-            $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
-            $this->checkStockAlert($cartItem->book);
+            if ($format === 'physical') {
+                $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
+                $cartItem->book->refresh();
+                $this->autoSetAvailability($cartItem->book);
+                $this->checkStockAlert($cartItem->book);
+            }
         }
 
-        OrderShippingAddress::create([
-            'order_id'      => $order->id,
-            'receiver_name' => $address->receiver_name,
-            'phone_number'  => $address->phone_number,
-            'address_line'  => $address->address_line,
-        ]);
+        if ($address) {
+            OrderShippingAddress::create([
+                'order_id'      => $order->id,
+                'receiver_name' => $address->receiver_name,
+                'phone_number'  => $address->phone_number,
+                'address_line'  => $address->address_line,
+            ]);
+        }
 
         Payment::create([
             'order_id'              => $order->id,
@@ -150,7 +161,6 @@ class CheckoutService
             'paid_at'               => now(),
         ]);
 
-        // Clear cart
         $cart->items()->delete();
         
         NotificationService::send(NotificationService::orderRoles(), "new_order", "New Order #" . $order->order_number, $order->customer->name . " placed an order for " . number_format($order->total_amount) . " MMK", $order);
@@ -161,14 +171,14 @@ class CheckoutService
     /**
      * Process direct payment (KPay, Wave, COD).
      */
-    public function processDirectPayment(int $customerId, int $addressId, string $paymentMethod): Order
+    public function processDirectPayment(int $customerId, ?int $addressId, string $paymentMethod): Order
     {
         $cart = Cart::with('items.book')->where('customer_id', $customerId)->first();
-        $address = \App\Models\CustomerAddress::find($addressId);
+        $address = $addressId ? \App\Models\CustomerAddress::find($addressId) : null;
         if (!$cart) throw new \Exception('Cart is empty.');
 
         $validItems = $this->getValidItems($cart);
-        $totalAmount = $validItems->sum(fn($item) => $this->getBookPrice($item->book) * $item->quantity);
+        $totalAmount = $validItems->sum(fn($item) => $this->getBookPrice($item->book, $item->format ?? 'physical') * $item->quantity);
 
         $order = Order::create([
             'customer_id'  => $customerId,
@@ -178,25 +188,31 @@ class CheckoutService
         ]);
 
         foreach ($validItems as $cartItem) {
-            $price = $this->getBookPrice($cartItem->book);
+            $format = $cartItem->format ?? 'physical';
+            $price = $this->getBookPrice($cartItem->book, $format);
             OrderItem::create([
                 'order_id' => $order->id,
                 'book_id'  => $cartItem->book_id,
                 'quantity' => $cartItem->quantity,
                 'price'    => $price,
+                'format'   => $format,
             ]);
-            if (!$cartItem->book->is_ebook) {
+            if ($format === 'physical') {
                 $cartItem->book->decrement('stock_quantity', $cartItem->quantity);
+                $cartItem->book->refresh();
+                $this->autoSetAvailability($cartItem->book);
                 $this->checkStockAlert($cartItem->book);
             }
         }
 
-        OrderShippingAddress::create([
-            'order_id'      => $order->id,
-            'receiver_name' => $address->receiver_name,
-            'phone_number'  => $address->phone_number,
-            'address_line'  => $address->address_line,
-        ]);
+        if ($address) {
+            OrderShippingAddress::create([
+                'order_id'      => $order->id,
+                'receiver_name' => $address->receiver_name,
+                'phone_number'  => $address->phone_number,
+                'address_line'  => $address->address_line,
+            ]);
+        }
 
         Payment::create([
             'order_id'       => $order->id,
@@ -209,6 +225,15 @@ class CheckoutService
         $cart->items()->delete();
         NotificationService::send(NotificationService::orderRoles(), "new_order", "New Order #" . $order->order_number, $order->customer->name . " placed an order for " . number_format($order->total_amount) . " MMK", $order);
         return $order;
+    }
+
+    private function autoSetAvailability($book): void
+    {
+        if ($book->stock_quantity <= 0) {
+            $book->updateQuietly(["availability_status" => "out_of_stock"]);
+        } elseif ($book->stock_quantity <= 5) {
+            $book->updateQuietly(["availability_status" => "low_stock"]);
+        }
     }
 
     private function checkStockAlert($book): void

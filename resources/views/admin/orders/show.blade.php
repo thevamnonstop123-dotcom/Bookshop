@@ -2,24 +2,15 @@
 
 @section('title', 'Order #' . $order->order_number . ' — Bookshop Admin')
 @section('page_title', 'Order #' . $order->order_number)
-
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/admin/form.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/order-detail.css') }}">
-@endpush
-
 @section('content')
 
     <a href="{{ route('admin.orders.index') }}" class="admin-form-back">
         <i class="fas fa-arrow-left"></i> Back to Orders
     </a>
-
-    @if (session('success'))
-        <div class="admin-alert admin-alert-success">
-            <i class="fas fa-circle-check"></i> {{ session('success') }}
-        </div>
-    @endif
 
     {{-- Top Grid --}}
     <div class="order-detail-grid">

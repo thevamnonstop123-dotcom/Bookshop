@@ -52,7 +52,9 @@
         if (!btn) return;
 
         btn.addEventListener('click', async function () {
-            var bookId = document.querySelector('.btn-add-cart')?.dataset?.bookId;
+            var cartBtn = document.querySelector('.btn-add-cart');
+            var bookId = cartBtn?.dataset?.bookId;
+            var format = cartBtn?.dataset?.format || 'physical';
             if (!bookId) return;
 
             var qty = document.getElementById('quantity')?.value || 1;
@@ -65,7 +67,7 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({ book_id: bookId, quantity: parseInt(qty) }),
+                    body: JSON.stringify({ book_id: bookId, quantity: parseInt(qty), format: format }),
                 });
                 window.location.href = '/checkout'; // Keep redirect for checkout flow
             } catch (err) {

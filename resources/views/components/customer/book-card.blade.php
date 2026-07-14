@@ -25,6 +25,26 @@
                 {{ $availability['label'] }}
             </span>
         @endif
+
+        {{-- Format Badge --}}
+        @php $cardFormats = $book->getAvailableFormats(); @endphp
+        @if(count($cardFormats) > 0)
+            <span class="book-format-badges">
+                @if(in_array('ebook', $cardFormats) && in_array('physical', $cardFormats))
+                    <span class="format-badge format-badge-both">
+                        <i class="fas fa-book-open"></i> Print + eBook
+                    </span>
+                @elseif(in_array('ebook', $cardFormats))
+                    <span class="format-badge format-badge-ebook">
+                        <i class="fas fa-tablet-screen-button"></i> eBook
+                    </span>
+                @else
+                    <span class="format-badge format-badge-physical">
+                        <i class="fas fa-book"></i> Paperback
+                    </span>
+                @endif
+            </span>
+        @endif
         
         @if($availability['status'] === 'low_stock')
             <span class="book-card-badge book-card-badge-low-stock">

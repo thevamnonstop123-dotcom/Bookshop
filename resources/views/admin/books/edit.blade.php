@@ -341,7 +341,7 @@
             aiBulkCreate: '{{ route("admin.ai.bulk-create") }}',
             booksIndex: '{{ route("admin.books.index") }}',
         };
-        window.selectedAuthors = @json(old('author_ids', []));
+        window.selectedAuthors = @json(old('author_ids', $selectedAuthors));
     </script>
     <script src="{{ asset('js/admin/form.js') }}"></script>
     <script src="{{ asset('js/admin/drag-drop-authors.js') }}"></script>

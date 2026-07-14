@@ -9,13 +9,6 @@
 @endpush
 
 @section('content')
-
-    @if (session('success'))
-        <div class="admin-alert admin-alert-success">
-            <i class="fas fa-circle-check"></i> {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Send Promotion Form --}}
     <div class="admin-form-card" style="max-width: 100%; margin-bottom: 28px;">
         <div class="admin-form-card-header">

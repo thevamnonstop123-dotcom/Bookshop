@@ -9,13 +9,6 @@
 @endpush
 
 @section('content')
-
-@if(session('success'))
-    <div class="admin-alert admin-alert-success">
-        <i class="fas fa-circle-check"></i> {{ session('success') }}
-    </div>
-@endif
-
 <div class="admin-table-card">
     <div class="admin-table-header">
         <div class="admin-table-header-left">
