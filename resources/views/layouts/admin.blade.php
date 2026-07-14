@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="{{ asset('css/admin/ai-assistant.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/pagination.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/admin/ai-assistant.css?v=' . time()) }}">
 
     @stack('styles')
 </head>
@@ -35,7 +34,7 @@
 
                 {{-- Topbar --}}
                 @include('components.admin.topbar')
-    <div class="admin-notification-panel" id="adminNotificationPanel"><div class="admin-notification-header"><strong>Notifications</strong><button onclick="markAllAdminNotificationsRead()">Mark all read</button></div><div class="admin-notification-list" id="adminNotificationList"><div class="admin-notification-empty">No notifications</div></div></div>
+                <div class="admin-notification-panel" id="adminNotificationPanel"><div class="admin-notification-header"><strong>Notifications</strong><button onclick="markAllAdminNotificationsRead()">Mark all read</button></div><div class="admin-notification-list" id="adminNotificationList"><div class="admin-notification-empty">No notifications</div></div></div>
 
                 {{-- Content --}}
                 <main class="admin-content">
@@ -48,24 +47,20 @@
     @endauth
 
     {{-- AI Assistant --}}
-    @include('admin.ai-assistant')
+    @auth('staff')
+    @if(auth('staff')->user()?->role?->can_manage_users)
+        @include('admin.ai-assistant')
+    @endif
+@endauth
 
     {{-- Scripts --}}
     <script src="{{ asset('js/ajax.js') }}"></script>
     <script src="{{ asset('js/admin/layout.js') }}"></script>
-    <script src="{{ asset('js/admin/ai-assistant.js') }}"></script>
-    <script src="{{ asset('js/admin/ai-assistant.js?v=' . time()) }}"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const sidebar = document.getElementById("adminSidebar");
-    if (!sidebar) return;
-    const saved = sessionStorage.getItem("adminSidebarScroll");
-    if (saved) sidebar.scrollTop = parseInt(saved, 10);
-    window.addEventListener("beforeunload", function () {
-        sessionStorage.setItem("adminSidebarScroll", sidebar.scrollTop);
-    });
-});
-</script>
+@auth('staff')
+    @if(auth('staff')->user()?->role?->can_manage_users)
+        <script src="{{ asset('js/admin/ai-assistant.js') }}"></script>
+    @endif
+@endauth
     <script src="{{ asset('js/admin/notifications.js') }}"></script>
     @stack('scripts')
 </body>

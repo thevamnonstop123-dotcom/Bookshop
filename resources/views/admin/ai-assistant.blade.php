@@ -1,7 +1,7 @@
 {{-- Floating AI Button with Volumetric 3D styling --}}
 <button class="ai-floating-btn" id="aiFloatingBtn" onclick="toggleAiChat()" aria-label="Open AI Assistant">
     <div class="ai-floating-surface">
-        <i class="fas fa-brain"></i>
+        <i class="fas fa-robot"></i>
     </div>
 </button>
 
