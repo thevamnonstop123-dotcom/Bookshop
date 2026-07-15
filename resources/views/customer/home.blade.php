@@ -343,7 +343,7 @@
     </section>
 
     {{-- TRUST --}}
-    <section class="section trust-section">
+    <section class="section section-surface trust-section">
         <div class="container">
             <div class="section-heading">
                 <span class="section-eyebrow">Why Bookshop</span>
