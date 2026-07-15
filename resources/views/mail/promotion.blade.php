@@ -14,8 +14,9 @@
 
             <div class="email-header">
                 <a href="{{ url('/') }}" class="email-logo">
-                    📚 Book<span class="email-logo-accent">shop</span>
+                    Book<span class="email-logo-accent">shop</span>
                 </a>
+                <div class="email-header-subtitle">Your Premium Online Bookstore</div>
                 @if($badge)
                     <div class="email-badge">{{ $badge }}</div>
                 @endif
@@ -30,26 +31,31 @@
 
                 @if($ctaLink)
                     <div class="email-cta">
-                        <a href="{{ $ctaLink }}" class="email-cta-link">{{ $ctaText }} →</a>
+                        <a href="{{ $ctaLink }}" class="email-cta-link">{{ $ctaText }} &rarr;</a>
                     </div>
                 @endif
 
                 <div class="email-divider"></div>
 
-                <p class="email-footer-text">
-                    🛒 <a href="{{ url('/books') }}">Browse Books</a> · 📦 <a href="{{ url('/orders') }}">Orders</a> · ❤️ <a href="{{ url('/wishlist') }}">Wishlist</a>
-                </p>
+                <table class="email-quick-links" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td><a href="{{ url('/books') }}">Browse Books</a></td>
+                        <td><a href="{{ url('/orders') }}">My Orders</a></td>
+                        <td><a href="{{ url('/wishlist') }}">Wishlist</a></td>
+                    </tr>
+                </table>
+
                 <p class="email-footer-text">
                     You received this email because you are subscribed to Bookshop.
                     @if($unsubscribeLink)
-                        <a href="{{ $unsubscribeLink }}">Unsubscribe</a>
+                        <a href="{{ $unsubscribeLink }}" style="color:#94A3B8;">Unsubscribe</a>
                     @endif
                 </p>
             </div>
 
             <div class="email-footer">
-                <p>&copy; {{ date('Y') }} <a href="{{ url('/') }}">Bookshop</a></p>
-                <p>Educational Books · Programming · Novels · Stationery</p>
+                <p>&copy; {{ date('Y') }} Bookshop. All rights reserved.</p>
+                <p>Educational Books &middot; Programming &middot; Novels &middot; Stationery</p>
             </div>
         </div>
     </div>

@@ -45,7 +45,14 @@
                     <textarea id="promoMessage" name="message"
                               class="admin-form-input admin-form-textarea"
                               rows="6" placeholder="Write your promotion message here..." required></textarea>
-                </div>
+                    <div class="admin-form-description-actions" style="margin-top:8px;">
+                        <button type="button" class="admin-btn admin-btn-ghost admin-btn-sm" onclick="generatePromotionMessage()" id="generatePromoBtn">
+                            <i class="fas fa-wand-magic-sparkles"></i> Generate with AI
+                        </button>
+                        <span class="admin-form-loading" id="aiPromoLoading" style="display:none;">
+                            <i class="fas fa-spinner fa-spin"></i> Generating...
+                        </span>
+                    </div>
             </div>
 
             <div class="admin-form-actions">
@@ -114,5 +121,41 @@
         </div>
 
     </div>
+
+@push('scripts')
+<script>
+function generatePromotionMessage() {
+    const subject = document.getElementById('promoSubject').value;
+    if (!subject || subject.length < 5) {
+        alert('Please enter a subject first (at least 5 characters).');
+        return;
+    }
+    const btn = document.getElementById('generatePromoBtn');
+    const loading = document.getElementById('aiPromoLoading');
+    btn.disabled = true;
+    btn.style.display = 'none';
+    loading.style.display = 'inline-block';
+    fetch('/admin/ai/generate-promotion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ subject: subject, audience: 'all' })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('promoMessage').value = data.message || '';
+    })
+    .catch(err => alert('Failed to generate. Try again.'))
+    .finally(() => {
+        btn.disabled = false;
+        btn.style.display = '';
+        loading.style.display = 'none';
+    });
+}
+</script>
+@endpush
 
 @endsection

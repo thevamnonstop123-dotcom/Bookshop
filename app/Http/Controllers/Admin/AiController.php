@@ -109,4 +109,23 @@ class AiController extends Controller
             'count' => $created,
         ]);
     }
+
+    /**
+     * Generate a promotion message.
+     */
+    public function generatePromotion(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|min:5|max:200',
+            'audience' => 'nullable|string',
+        ]);
+
+        $message = $this->aiService->generatePromotionMessage(
+            $request->subject,
+            $request->audience ?? 'all'
+        );
+
+        return response()->json(['message' => $message]);
+    }
+
 }

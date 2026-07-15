@@ -87,6 +87,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // AI Tools — Super Admin only
         Route::middleware('permission:can_manage_users')->group(function () {
             Route::post('/ai/generate-description', [AiController::class, 'generateDescription'])->name('ai.generate-description');
+            Route::post('/ai/generate-promotion', [AiController::class, 'generatePromotion'])->name('ai.generate-promotion');
             Route::post('/ai/bulk-create', [AiController::class, 'bulkCreate'])->name('ai.bulk-create');
             Route::post('/ai-assistant/chat', [AiAssistantController::class, 'chat'])->name('ai-assistant.chat');
             Route::post('/ai/ask', [AiAssistantController::class, 'chat'])->name('ai.ask');

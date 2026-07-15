@@ -82,4 +82,36 @@ class AiService
 
         return [];
     }
+
+    /**
+     * Generate a promotion email message using Groq API.
+     */
+    public function generatePromotionMessage(string $subject, string $targetAudience = 'all'): string
+    {
+        $apiKey = config('services.groq.key');
+        $prompt = "Write a professional promotional email message for a bookshop with the subject: " . $subject . ". Target audience: " . $targetAudience . ". Keep it under 800 characters, warm and engaging tone. Return ONLY the message text, no labels.";
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $apiKey,
+            ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                'model' => 'llama-3.3-70b-versatile',
+                'messages' => [
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'temperature' => 0.7,
+                'max_tokens' => 500,
+            ]);
+
+            if ($response->successful()) {
+                $text = $response->json()['choices'][0]['message']['content'] ?? '';
+                return trim($text);
+            }
+        } catch (\Exception $e) {
+            return '';
+        }
+
+        return '';
+    }
 }
