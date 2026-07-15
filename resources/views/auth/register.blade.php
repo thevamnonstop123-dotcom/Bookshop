@@ -7,13 +7,9 @@
     <div class="auth-card">
 
         <a href="{{ route('customer.home') }}" class="auth-brand">
-            <div class="auth-brand-icon">
-                <i class="fas fa-book-open"></i>
-            </div>
-            <span class="auth-brand-text">Book<span class="auth-brand-accent">shop</span></span>
-        </a>
-
-        <h1 class="auth-title">Create Account</h1>
+        <div class="auth-brand auth-brand-center">
+            <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="auth-logo-large">
+        </div>
         <p class="auth-subtitle">Join our community of readers</p>
 
         @if ($errors->any())

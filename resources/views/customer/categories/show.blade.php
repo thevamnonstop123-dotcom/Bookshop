@@ -18,7 +18,7 @@
             </span>
             <h1 class="category-hero-name">{{ $category->name }}</h1>
             <p class="category-hero-count">
-                <i class="fas fa-book-open"></i> {{ $category->books_count }} {{ Str::plural('Book', $category->books_count) }}
+                <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo"> {{ $category->books_count }} {{ Str::plural('Book', $category->books_count) }}
             </p>
             @if($category->description)
                 <p class="category-hero-desc">{{ $category->description }}</p>

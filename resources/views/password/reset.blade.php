@@ -6,13 +6,9 @@
 <div class="auth-page-container auth-page-container-single">
     <div class="auth-card">
 
-        <a href="{{ route('customer.home') }}" class="auth-brand">
-            <div class="auth-brand-icon">
-                <i class="fas fa-book-open"></i>
-            </div>
-            <span class="auth-brand-text">Book<span class="auth-brand-accent">shop</span></span>
-        </a>
-
+        <div class="auth-brand auth-brand-center">
+            <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="auth-logo-large">
+        </div>
         <h1 class="auth-title">Reset Password</h1>
         <p class="auth-subtitle">Create a new password for your account</p>
 

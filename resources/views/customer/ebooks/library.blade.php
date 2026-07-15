@@ -52,7 +52,7 @@
                             <p class="library-book-author">{{ $book->authors->first()->name ?? 'Unknown Author' }}</p>
                             <div class="library-book-actions">
                                 <a href="{{ route('customer.ebooks.read', $book) }}" target="_blank" class="library-action-btn library-action-read">
-                                    <i class="fas fa-book-open"></i> Read
+                                    <i class="fas fa-book-reader"></i> Read
                                 </a>
                                 <a href="{{ route('customer.ebooks.download', $book) }}" class="library-action-btn library-action-download" title="Download e-book">
                                     <i class="fas fa-download"></i>

@@ -79,7 +79,8 @@ class ForgotPasswordController extends Controller
         }
 
         $customer = Customer::where('email', $request->email)->first();
-        $customer->update(['password' => bcrypt($request->password)]);
+        $customer->password = $request->password;
+        $customer->save();
         \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
         return redirect()->route('login')->with('status', 'Password reset successfully! Please login.');

@@ -111,7 +111,7 @@
                 <h3>Your wishlist is empty</h3>
                 <p>Start exploring and save books you love!</p>
                 <a href="{{ route('books.index') }}" class="btn btn-primary">
-                    <i class="fas fa-book-open"></i> Browse Books
+                    <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo"> Browse Books
                 </a>
             </div>
         @endif

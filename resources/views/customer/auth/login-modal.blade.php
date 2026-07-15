@@ -7,11 +7,8 @@
         </button>
 
         {{-- Brand --}}
-        <div class="auth-modal-brand">
-            <div class="auth-modal-brand-icon">
-                <i class="fas fa-book-open"></i>
-            </div>
-            <span class="auth-modal-brand-text">Book<span class="auth-modal-brand-accent">shop</span></span>
+        <div class="auth-modal-brand auth-brand-center">
+            <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="auth-logo-large">
         </div>
 
         {{-- Login Form --}}

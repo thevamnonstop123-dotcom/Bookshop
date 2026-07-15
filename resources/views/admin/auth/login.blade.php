@@ -14,12 +14,8 @@
 
             {{-- Brand --}}
             <div class="admin-login-brand">
-                <div class="admin-login-brand-icon">
-                    <i class="fas fa-shield-halved"></i>
-                </div>
-                <span class="admin-login-brand-text">Book<span class="admin-login-brand-accent">shop</span></span>
+                <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="admin-login-logo">
             </div>
-
             <h1 class="admin-login-title">Staff Portal</h1>
             <p class="admin-login-subtitle">Sign in to access the administration panel</p>
 

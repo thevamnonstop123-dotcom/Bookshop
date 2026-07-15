@@ -3,12 +3,11 @@
         <div class="site-footer-grid">
             {{-- Brand --}}
             <div class="site-footer-col site-footer-brand">
-                <a href="{{ route('customer.home') }}" class="site-footer-logo">
-                    <div class="site-footer-logo-icon">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    Book<span>shop</span>
+                <a href="{{ route('customer.home') }}" class="navbar-logo" aria-label="Bookshop Home">
+                    <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="navbar-logo-img">
+                    <span class="navbar-logo-text">Book<span class="navbar-logo-accent">shop</span></span>
                 </a>
+                
                 <p class="site-footer-description">
                     Your premium destination for books and stationery. Curated collections, fast delivery, exceptional service.
                 </p>

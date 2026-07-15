@@ -8,7 +8,7 @@
 
         <a href="{{ route('customer.home') }}" class="auth-brand">
             <div class="auth-brand-icon">
-                <i class="fas fa-book-open"></i>
+                <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo">
             </div>
             <span class="auth-brand-text">Book<span class="auth-brand-accent">shop</span></span>
         </a>

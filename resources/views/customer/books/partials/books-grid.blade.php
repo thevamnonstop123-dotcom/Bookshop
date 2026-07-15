@@ -5,7 +5,7 @@
     @empty
         <div class="empty-state">
             <div class="empty-icon">
-                <i class="fas fa-book-open"></i>
+                <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo">
             </div>
             <h3>No books found</h3>
             <p>Try adjusting your filters or search terms.</p>

@@ -14,14 +14,14 @@
     --color-accent-dark: #d97706;
 
     /* ===== IMPROVED NEUTRALS ===== */
-    --color-bg: #edf2f7;
-    --color-surface: #ffffff;
     --color-surface-alt: #f8fafc;
     --color-text: #0f172a;
     --color-text-secondary: #475569;
     --color-text-muted: #94a3b8;
-    --color-border: #e2e8f0;
-    --color-border-light: #f1f5f9;
+--color-bg: #f5f0eb;
+--color-surface: #ffffff;
+--color-border: #e0dbd4;
+--color-border-light: #f0ece6;
 
     /* Status */
     --color-success: #16a34a;
@@ -372,4 +372,18 @@ h4 {
 }
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-text-muted);
+}
+
+/* Brand Logo */
+.brand-logo {
+    height: 32px;
+    width: auto;
+    display: block;
+}
+
+/* Navbar Logo Image */
+.navbar-logo-img {
+    height: 60px;
+    width: auto;
+    display: block;
 }

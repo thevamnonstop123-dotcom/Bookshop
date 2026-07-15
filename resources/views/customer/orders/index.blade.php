@@ -19,7 +19,7 @@
             </div>
             @if($orders->count() > 0)
                 <a href="{{ route('books.index') }}" class="orders-browse-btn">
-                    <i class="fas fa-book-open"></i> Browse Books
+                    <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo"> Browse Books
                 </a>
             @endif
         </div>
@@ -97,7 +97,7 @@
                     You have not placed any orders yet. Start exploring our collection and your orders will appear here.
                 </p>
                 <a href="{{ route('books.index') }}" class="orders-empty-btn">
-                    <i class="fas fa-book-open"></i> Browse Books
+                    <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo"> Browse Books
                 </a>
             </div>
         @endif

@@ -107,7 +107,7 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon stat-icon-books">
-                        <i class="fas fa-book-open"></i>
+                         <i class="fas fa-book-open"></i>
                     </div>
                     <div class="stat-content">
                         <span class="stat-number">{{ $totalBooks }}+</span>

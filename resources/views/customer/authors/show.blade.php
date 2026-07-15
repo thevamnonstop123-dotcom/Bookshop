@@ -39,7 +39,7 @@
                 <div class="author-hero-meta">
                     {{-- Books count --}}
                     <div class="author-meta-item">
-                        <i class="fas fa-book-open"></i>
+                        <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo">
                         <span><strong>{{ $author->books_count }}</strong> {{ Str::plural('Book', $author->books_count) }}</span>
                     </div>
 

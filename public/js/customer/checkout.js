@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('gpsLng').value = lng;
                 
                 gpsSpinner.style.display = 'none';
-                gpsStatusText.textContent = '✅ Location Found!';
+                gpsStatusText.innerHTML = '<i class="fas fa-check-circle"></i> Location Found!';
                 gpsStatusDesc.textContent = 'Tap to use this address';
                 
                 try {
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         addressInput.value = address;
                     }
                     
-                    addressDisplay.textContent = '📍 ' + address;
+                    addressDisplay.innerHTML = '<i class="fas fa-location-dot"></i> ' + address;
                     updateConfirmAddress('GPS Location', address);
                     
                     // Deselect saved addresses
@@ -303,12 +303,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     gpsResultDesc.textContent = fallback;
                     gpsResultItem.style.display = 'flex';
                     if (addressInput) addressInput.value = fallback;
-                    addressDisplay.textContent = '📍 ' + fallback;
+                    addressDisplay.innerHTML = '<i class="fas fa-location-dot"></i> ' + fallback;
                 }
             },
             function(error) {
                 gpsSpinner.style.display = 'none';
-                gpsStatusText.textContent = 'Use Current Location';
+                gpsStatusText.innerHTML = '<i class="fas fa-exclamation-circle"></i> Use Current Location';
                 gpsStatusDesc.textContent = 'Auto-detect via GPS';
                 
                 let msg = 'Unable to detect location. ';

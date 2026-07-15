@@ -9,7 +9,7 @@
     <div class="admin-sidebar-brand">
         <a href="{{ route('admin.dashboard') }}">
             <div class="admin-sidebar-brand-icon">
-                <i class="fas fa-shield-halved"></i>
+                <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="admin-sidebar-logo">
             </div>
             <span class="admin-sidebar-brand-text">Book<span class="admin-sidebar-brand-accent">shop</span></span>
         </a>

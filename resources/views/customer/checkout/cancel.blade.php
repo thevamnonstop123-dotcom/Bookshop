@@ -1,4 +1,4 @@
-@extends('layouts.checkout')
+@extends('layouts.customer')
 
 @section('title', 'Payment Cancelled')
 
@@ -23,7 +23,7 @@
                             <i class="fas fa-rotate-left"></i> Try Again
                         </a>
                         <a href="{{ route('books.index') }}" class="cancel-btn cancel-btn-ghost">
-                            <i class="fas fa-book-open"></i> Browse Books
+                            <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo"> Browse Books
                         </a>
                     </div>
                 </div>

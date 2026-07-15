@@ -3,7 +3,7 @@
 
         {{-- Logo --}}
         <a href="{{ route('customer.home') }}" class="navbar-logo" aria-label="Bookshop Home">
-            <div class="navbar-logo-icon"><i class="fas fa-book-open"></i></div>
+            <img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="navbar-logo-img">
             <span class="navbar-logo-text">Book<span class="navbar-logo-accent">shop</span></span>
         </a>
 

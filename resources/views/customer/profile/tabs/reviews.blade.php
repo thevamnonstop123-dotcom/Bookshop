@@ -10,7 +10,7 @@
                         <div class="profile-review-card-stars">@for($i=1;$i<=5;$i++)<i class="fas fa-star{{ $i <= $review->rating ? '' : '-empty' }}"></i>@endfor<span class="profile-review-card-date">{{ $review->created_at->format('M d, Y') }}</span></div>
                         @if($review->review)<p class="profile-review-card-text">{{ Str::limit($review->review, 120) }}</p>@endif
                         <div class="profile-review-card-actions">
-                            <a href="{{ route('books.show', $review->book->slug) }}" class="profile-review-card-link"><i class="fas fa-book-open"></i> View Book</a>
+                            <a href="{{ route('books.show', $review->book->slug) }}" class="profile-review-card-link"><img src="{{ asset('mylogo.png') }}" alt="Bookshop" class="brand-logo"> View Book</a>
                             <button class="profile-review-card-link" onclick="editReview({{ $review->id }})"><i class="fas fa-pen"></i> Edit</button>
                             <button class="profile-review-card-link profile-review-card-link-danger" onclick="deleteReview({{ $review->id }})"><i class="fas fa-trash"></i> Delete</button>
                         </div>
